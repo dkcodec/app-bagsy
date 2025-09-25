@@ -1,0 +1,17 @@
+# robots.txt — configure crawling rules for search engines
+
+# Apply to all user agents
+User-agent: *
+Allow: /
+Disallow: /login
+Disallow: /register
+Disallow: /invite
+
+# Optional: uncomment to slow down aggressive crawlers
+# Crawl-delay: 10
+
+# Sitemaps
+Sitemap: https://bagsy.kz/sitemap.xml
+
+# Host directive (used by Yandex and some others) — update domain
+Host: bagsy.kz
