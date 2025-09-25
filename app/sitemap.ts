@@ -5,7 +5,7 @@ const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://bagsy.kz";
 const locales = ["ru", "kz"] as const;
 
 // List only real, indexable paths (exclude bare "/" because it redirects)
-const localizedPaths = ["", "/dashboard"] as const;
+const localizedPaths = ["", "/"] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();

@@ -48,7 +48,7 @@ export function useLogin() {
       // Инвалидируем все запросы для обновления данных
       queryClient.invalidateQueries({ queryKey: authKeys.all });
       // Перенаправляем на дашборд
-      router.push("/dashboard");
+      router.push("/");
     },
     onError: error => {
       console.error("Ошибка входа:", error);
