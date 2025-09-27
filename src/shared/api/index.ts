@@ -10,9 +10,4 @@ export * from "./types";
 export { apiClient, ApiClient, ApiError } from "./client";
 
 // Сервисы
-export {
-  authService,
-  userService,
-  inviteService,
-  appointmentService,
-} from "./services";
+export { userService, inviteService, appointmentService } from "./services";

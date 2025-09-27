@@ -22,18 +22,15 @@ export default function middleware(req: NextRequest) {
 
   // Проверяем только корень дашборда и /login
   if (!isLocaleRoot && !isLoginPath) {
-    return NextResponse.next();
+    // Возвращаем next-intl response для всех остальных путей
+    return intlRes || NextResponse.next();
   }
 
   const accessToken = req.cookies.get("access_token")?.value;
   const refreshToken = req.cookies.get("refresh_token")?.value;
   const isAuthenticated = Boolean(accessToken && refreshToken);
 
-  if (intlRes && isAuthenticated) {
-    return intlRes;
-  }
-  console.log("intlRes 2");
-
+  // Строгие редиректы для auth-зависимых путей
   if (!isAuthenticated && isLocaleRoot) {
     const url = req.nextUrl.clone();
     url.pathname = `/${locale}/login`;
@@ -46,7 +43,8 @@ export default function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  return NextResponse.next();
+  // Возвращаем next-intl response для успешных auth-путей
+  return intlRes || NextResponse.next();
 }
 
 export const config = {
