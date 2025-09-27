@@ -18,6 +18,10 @@
     "signUp": "Тіркелгіні жасау",
     "dontHaveAnAccount": "Тіркелгі жоқ па?",
     "contactUs": "Бізбен байланысыңыз",
+    "byClickingContinue": "Жалғастыру, сіз біздің",
+    "termsOfService": "Пайдалану шарттары",
+    "and": "және",
+    "privacyPolicy": "Құпиялылық саясаты",
     "loginSuccess": "Кіру сәтті",
     "errors": {
       "phoneRequired": "Телефон нөмірін енгізіңіз",
