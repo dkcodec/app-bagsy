@@ -7,12 +7,12 @@
 export interface ApiResponse<T = unknown> {
   data: T;
   message?: string;
-  success: boolean;
+  success?: boolean;
 }
 
 // Тип для ошибки API (базовый интерфейс)
 export interface ApiErrorData {
-  message: string;
+  message?: string;
   status: number;
   code?: string;
 }
@@ -24,11 +24,6 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  user: {
-    phone: string;
-    name: string;
-    role: string;
-  };
   message: string;
 }
 

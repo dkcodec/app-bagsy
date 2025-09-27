@@ -9,7 +9,6 @@ import React, { useState } from "react";
 import { z } from "zod";
 import { decodeJwt } from "../shared/utils/jwt";
 import { formatPhone } from "../shared/utils/formater";
-import { useAcceptInvite } from "../shared/hooks/use-invites";
 
 export default function InviteForm({
   className,
@@ -19,9 +18,7 @@ export default function InviteForm({
   const t = useTranslations("InviteForm");
   const payload = decodeJwt<{ phone: string; iat: number; exp: number }>(token);
   const { phone, iat, exp } = payload;
-  const acceptInviteMutation = useAcceptInvite();
 
-  // Локальное состояние ошибок формы
   const [errors, setErrors] = useState<{
     password?: string;
     confirm?: string;

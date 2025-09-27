@@ -37,7 +37,7 @@ class ApiClient {
         ...options.headers,
       },
       // Включаем cookies для автоматической отправки httpOnly cookies
-      // credentials: "include",
+      credentials: "include",
       ...options,
     };
 
@@ -78,6 +78,48 @@ class ApiClient {
     }
   }
 
+  // Глобальный промис рефреша для дедупликации одновременных 401
+  // ВАЖНО: httpOnly cookie обновятся на бэке, тело ответа нам не нужно
+  private static refreshPromise: Promise<void> | null = null;
+
+  /**
+   * Гарантированно выполнить рефреш один раз для конкурирующих запросов
+   */
+  private static async ensureRefreshed(baseURL: string): Promise<void> {
+    if (!ApiClient.refreshPromise) {
+      ApiClient.refreshPromise = (async () => {
+        await fetch(`${baseURL}v1/auth/refresh`, {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+        }).finally(() => {
+          /* игнорируем тело; cookies обновятся через Set-Cookie */
+        });
+      })().finally(() => {
+        ApiClient.refreshPromise = null;
+      });
+    }
+    return ApiClient.refreshPromise;
+  }
+
+  /**
+   * Обертка: при 401 один раз делаем refresh и повторяем запрос
+   */
+  private async withAutoRefresh<T>(
+    fn: () => Promise<ApiResponse<T>>
+  ): Promise<ApiResponse<T>> {
+    try {
+      return await fn();
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        await ApiClient.ensureRefreshed(this.baseURL);
+        // Один повтор после успешного/доступного рефреша
+        return await fn();
+      }
+      throw error;
+    }
+  }
+
   /**
    * GET запрос
    */
@@ -85,10 +127,12 @@ class ApiClient {
     endpoint: string,
     options?: RequestInit
   ): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, {
-      method: "GET",
-      ...options,
-    });
+    return this.withAutoRefresh(() =>
+      this.request<T>(endpoint, {
+        method: "GET",
+        ...options,
+      })
+    );
   }
 
   /**
@@ -99,11 +143,13 @@ class ApiClient {
     data?: unknown,
     options?: RequestInit
   ): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, {
-      method: "POST",
-      body: data ? JSON.stringify(data) : undefined,
-      ...options,
-    });
+    return this.withAutoRefresh(() =>
+      this.request<T>(endpoint, {
+        method: "POST",
+        body: data ? JSON.stringify(data) : undefined,
+        ...options,
+      })
+    );
   }
 
   /**
@@ -114,11 +160,13 @@ class ApiClient {
     data?: unknown,
     options?: RequestInit
   ): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, {
-      method: "PUT",
-      body: data ? JSON.stringify(data) : undefined,
-      ...options,
-    });
+    return this.withAutoRefresh(() =>
+      this.request<T>(endpoint, {
+        method: "PUT",
+        body: data ? JSON.stringify(data) : undefined,
+        ...options,
+      })
+    );
   }
 
   /**
@@ -129,11 +177,13 @@ class ApiClient {
     data?: unknown,
     options?: RequestInit
   ): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, {
-      method: "PATCH",
-      body: data ? JSON.stringify(data) : undefined,
-      ...options,
-    });
+    return this.withAutoRefresh(() =>
+      this.request<T>(endpoint, {
+        method: "PATCH",
+        body: data ? JSON.stringify(data) : undefined,
+        ...options,
+      })
+    );
   }
 
   /**
@@ -143,10 +193,12 @@ class ApiClient {
     endpoint: string,
     options?: RequestInit
   ): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, {
-      method: "DELETE",
-      ...options,
-    });
+    return this.withAutoRefresh(() =>
+      this.request<T>(endpoint, {
+        method: "DELETE",
+        ...options,
+      })
+    );
   }
 }
 

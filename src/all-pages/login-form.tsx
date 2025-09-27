@@ -4,7 +4,7 @@ import { Button } from "@/src/entities/button";
 import { Card, CardContent } from "@/src/entities/card";
 import { Input } from "@/src/entities/input";
 import { Label } from "@/src/entities/label";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 import { z } from "zod";
@@ -19,8 +19,7 @@ export default function LoginForm({
 }: React.ComponentProps<"div">) {
   const t = useTranslations("LoginForm");
   const loginMutation = useLogin();
-
-  // Состояние для телефона
+  const locale = useLocale();
   const [phone, setPhone] = useState<PhoneInputValue>("");
 
   const loginSchema = z.object({
@@ -28,7 +27,6 @@ export default function LoginForm({
       .string()
       .min(1, t("errors.phoneRequired"))
       .refine(v => {
-        // Проверяем E.164 формат: +7XXXXXXXXXX
         return /^\+[1-9]\d{1,14}$/.test(v);
       }, t("errors.phoneInvalid")),
     password: z.string().min(6, t("errors.passwordMin")),
@@ -44,7 +42,7 @@ export default function LoginForm({
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data = {
-      phone: phone, // Используем состояние телефона напрямую
+      phone,
       password: String(formData.get("password") || ""),
     };
 
@@ -57,11 +55,11 @@ export default function LoginForm({
       });
       return;
     }
-    // Очистим ошибки
+
+    console.log(result);
     setErrors({});
 
     try {
-      // Вызываем мутацию логина
       await loginMutation.mutateAsync({
         ...result.data,
         phone: phone.toString().replace(/^\+/, "").match(/\d/g)?.join("") || "",
@@ -110,8 +108,8 @@ export default function LoginForm({
                 <div className="flex items-center">
                   <Label htmlFor="password">{t("password")}</Label>
                   <Link
-                    href="/"
-                    className="ml-auto text-sm underline-offset-2 hover:underline"
+                    href={`tel:+${process.env.NEXT_PUBLIC_PHONE_NUMBER}`}
+                    className="ml-auto text-sm underline-offset-2 hover:underline hover:text-accent"
                   >
                     {t("forgotPassword")}
                   </Link>
@@ -185,7 +183,10 @@ export default function LoginForm({
               </div> */}
               <div className="text-center text-sm">
                 {t("dontHaveAnAccount")}{" "}
-                <Link href="/contact" className="underline underline-offset-4">
+                <Link
+                  href="/contact"
+                  className="underline underline-offset-4 hover:text-accent"
+                >
                   {t("contactUs")}
                 </Link>
               </div>
@@ -193,9 +194,22 @@ export default function LoginForm({
           </form>
         </CardContent>
       </Card>
-      <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+      <div className="text-muted-foreground text-center text-xs text-balance">
+        {t("byClickingContinue")}{" "}
+        <Link
+          href={process.env.NEXT_PUBLIC_DOMAIN + `${locale}/terms`}
+          className="underline underline-offset-4 hover:text-accent"
+        >
+          {t("termsOfService")}
+        </Link>{" "}
+        {t("and")}{" "}
+        <Link
+          href={process.env.NEXT_PUBLIC_DOMAIN + `${locale}/privacy`}
+          className="underline underline-offset-4 hover:text-accent"
+        >
+          {t("privacyPolicy")}
+        </Link>
+        .
       </div>
     </div>
   );

@@ -18,6 +18,10 @@
     "signUp": "Зарегистрироваться",
     "dontHaveAnAccount": "Нет аккаунта?",
     "contactUs": "Свяжитесь с нами",
+    "byClickingContinue": "Нажимая продолжить, вы соглашаетесь с нашими",
+    "termsOfService": "Условиями использования",
+    "and": "и",
+    "privacyPolicy": "Политикой конфиденциальности",
     "loginSuccess": "Вход выполнен успешно",
     "errors": {
       "phoneRequired": "Введите номер телефона",
