@@ -17,3 +17,6 @@ export * from "./appointment";
 
 // Dashboard features
 export * from "./dashboard";
+
+// Settings features
+export * from "./settings";
