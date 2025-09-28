@@ -1,12 +1,29 @@
 {
   "LocaleLayout": { "title": "Bagsy — управление записями" },
   "Sidebar": {
-    "Sidebar": "Боковое меню",
-    "sidebarDescription": "Отображает боковое меню."
+    "sidebar": "Боковое меню",
+    "sidebarDescription": "Отображает боковое меню.",
+    "Main": {
+      "calendar": "Календарь",
+      "clients": "Клиенты",
+      "services": "Услуги",
+      "employees": "Сотрудники",
+      "analytics": "Аналитика",
+      "settings": "Настройки"
+    }
   },
   "Dashboard": {
     "content": { "calendar": "Календарь" },
     "title": { "welcome": "Добро пожаловать!", "panel": "Панель {name}" }
+  },
+  "Settings": {
+    "theme": "Тема",
+    "language": "Язык",
+    "notifications": "Уведомления",
+    "themeToggle": "Переключить тему на {theme}"
+  },
+  "HeaderTitle": {
+    "settings": "Настройки"
   },
   "LoginForm": {
     "welcomeBack": "Добро пожаловать",

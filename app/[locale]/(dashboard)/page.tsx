@@ -1,20 +1,16 @@
 import { Suspense } from "react";
-import { AppSidebar } from "@/src/widgets/navigation";
-import { SidebarInset, SidebarProvider } from "@/src/entities/sidebar";
 import { DashboardHeader, DashboardContent } from "@/src/features";
+import { useTranslations } from "next-intl";
 
-export default function Page() {
+export default function DashboardPage() {
+  const t = useTranslations("Settings.title");
   return (
-    <SidebarProvider>
-      <AppSidebar />
+    <>
+      <DashboardHeader />
 
-      <SidebarInset>
-        <DashboardHeader />
-
-        <Suspense fallback={<div className="p-4" />}>
-          <DashboardContent />
-        </Suspense>
-      </SidebarInset>
-    </SidebarProvider>
+      <Suspense fallback={<div className="p-4" />}>
+        <DashboardContent />
+      </Suspense>
+    </>
   );
 }

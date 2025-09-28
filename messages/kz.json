@@ -1,12 +1,29 @@
 {
   "LocaleLayout": { "title": "Bagsy — жазбаларды басқару" },
   "Sidebar": {
-    "Sidebar": "Боковое меню",
-    "sidebarDescription": "Боковое меню көрсетеді."
+    "sidebar": "Боковое меню",
+    "sidebarDescription": "Боковое меню көрсетеді.",
+    "Main": {
+      "calendar": "Күнтізбе",
+      "clients": "Клиенттер",
+      "services": "Қызметтер",
+      "employees": "Жұмысшылар",
+      "analytics": "Аналитика",
+      "settings": "Параметрлер"
+    }
   },
   "Dashboard": {
     "content": { "calendar": "Күнтізбе" },
     "title": { "welcome": "Кош келдіңіз!", "panel": "Панель {name}" }
+  },
+  "Settings": {
+    "theme": "Темасы",
+    "language": "Тіл",
+    "notifications": "Білімділік",
+    "themeToggle": "Темасын өзгерту {theme}"
+  },
+  "HeaderTitle": {
+    "settings": "Параметрлер"
   },
   "LoginForm": {
     "welcomeBack": "Кош келдіңіз",

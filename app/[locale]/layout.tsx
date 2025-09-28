@@ -6,6 +6,7 @@ import {
   setRequestLocale,
 } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { ConditionalSidebarLayout } from "@/src/widgets/navigation/conditional-sidebar-layout";
 
 export function generateStaticParams() {
   return routing.locales.map(locale => ({ locale }));
@@ -42,7 +43,7 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
-      {children}
+      <ConditionalSidebarLayout>{children}</ConditionalSidebarLayout>
     </NextIntlClientProvider>
   );
 }
