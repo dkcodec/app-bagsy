@@ -9,23 +9,23 @@ import {
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 
-export function NavMain({
-  main,
+export function NavExtra({
+  extra,
 }: {
-  main: {
+  extra: {
     name: string;
     url: string;
     icon: LucideIcon;
   }[];
 }) {
-  const t = useTranslations("Sidebar.Main");
+  const t = useTranslations("Sidebar.Extra");
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarMenu>
-        {main.map(item => (
+        {extra.map(item => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
-              <Link href={item.url} prefetch>
+              <Link href={item.url}>
                 <item.icon />
                 <span>{t(item.name)}</span>
               </Link>

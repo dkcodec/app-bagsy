@@ -9,23 +9,59 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/entities/select";
+import { useTranslations } from "next-intl";
+import { Info } from "lucide-react";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/src/entities/popover";
+import { useState } from "react";
+import type { TBadgeVariant } from "@/src/shared/types/calendar";
 
-export function ChangeBadgeVariantInput() {
-  const { badgeVariant, setBadgeVariant } = useCalendar();
+interface ChangeBadgeVariantInputProps {
+  onBadgeVariantChange?: (variant: TBadgeVariant) => void;
+  isMobile?: boolean;
+}
+
+export function ChangeBadgeVariantInput({
+  onBadgeVariantChange,
+  isMobile = false,
+}: ChangeBadgeVariantInputProps) {
+  const { badgeVariant } = useCalendar();
+  const t = useTranslations("Dashboard.Settings");
+
+  const [isOpen, setIsOpen] = useState(false);
+  const handleValueChange = (value: TBadgeVariant) => {
+    // Уведомляем родительский компонент об изменении
+    onBadgeVariantChange?.(value);
+  };
 
   return (
     <div className="space-y-2">
-      <p className="text-sm font-semibold">Change badge variant</p>
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger
+          className="flex items-center gap-2 w-fit"
+          onMouseOver={() => setIsOpen(true)}
+          onMouseOut={() => setIsOpen(false)}
+        >
+          <p className="text-sm font-semibold">{t("badgeVariant")}</p>
+          <Info className="size-3" />
+        </PopoverTrigger>
+        <PopoverContent className="flex flex-col gap-2 text-center">
+          <p className="text-sm">{t("badgeVariantTooltip")}</p>
+        </PopoverContent>
+      </Popover>
 
-      <Select value={badgeVariant} onValueChange={setBadgeVariant}>
-        <SelectTrigger className="w-48">
+      <Select value={badgeVariant} onValueChange={handleValueChange}>
+        <SelectTrigger className={isMobile ? "w-full" : "w-48"}>
           <SelectValue />
         </SelectTrigger>
 
         <SelectContent>
-          <SelectItem value="dot">Dot</SelectItem>
-          <SelectItem value="colored">Colored</SelectItem>
-          <SelectItem value="mixed">Mixed</SelectItem>
+          <SelectItem value="dot">{t("dot")}</SelectItem>
+          <SelectItem value="colored">{t("colored")}</SelectItem>
+          <SelectItem value="mixed">{t("mixed")}</SelectItem>
         </SelectContent>
       </Select>
     </div>

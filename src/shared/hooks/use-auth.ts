@@ -44,7 +44,7 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: (credentials: LoginRequest) => authService.login(credentials),
-    onSuccess: data => {
+    onSuccess: () => {
       // Обновляем кэш пользователя
       // queryClient.setQueryData(authKeys.user(), data.user);
       // Инвалидируем все запросы для обновления данных

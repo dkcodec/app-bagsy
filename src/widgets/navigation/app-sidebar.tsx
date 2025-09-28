@@ -5,9 +5,6 @@ import {
   ChartSpline,
   ClipboardList,
   Contact,
-  HelpCircle,
-  Home,
-  Search,
   Settings,
   Users,
 } from "lucide-react";
