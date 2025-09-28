@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { AppSidebar } from "@/src/widgets/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/src/entities/sidebar";
-import { DashboardHeader, DashboardContent } from "@/src/feature";
+import { DashboardHeader, DashboardContent } from "@/src/features";
 
 export default function Page() {
   return (

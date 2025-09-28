@@ -12,6 +12,7 @@ import { PhoneInput, PhoneInputValue } from "../widgets/phone-input";
 import { useLogin } from "@/src/shared/hooks/use-auth";
 import { toast } from "sonner";
 import { Loader } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function LoginForm({
   className,
@@ -21,6 +22,7 @@ export default function LoginForm({
   const loginMutation = useLogin();
   const locale = useLocale();
   const [phone, setPhone] = useState<PhoneInputValue>("");
+  const router = useRouter();
 
   const loginSchema = z.object({
     phone: z
@@ -65,6 +67,7 @@ export default function LoginForm({
         phone: phone.toString().replace(/^\+/, "").match(/\d/g)?.join("") || "",
       });
       toast.success(t("loginSuccess"));
+      router.replace(`/${locale}`);
     } catch (error) {
       console.error("Ошибка входа:", error);
       toast.error(t("errors.loginError"));

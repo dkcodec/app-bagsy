@@ -31,17 +31,17 @@ export default function middleware(req: NextRequest) {
   const isAuthenticated = Boolean(accessToken && refreshToken);
 
   // Строгие редиректы для auth-зависимых путей
-  if (!isAuthenticated && isLocaleRoot) {
-    const url = req.nextUrl.clone();
-    url.pathname = `/${locale}/login`;
-    return NextResponse.redirect(url);
-  }
+  // if (!isAuthenticated && isLocaleRoot) {
+  //   const url = req.nextUrl.clone();
+  //   url.pathname = `/${locale}/login`;
+  //   return NextResponse.redirect(url);
+  // }
 
-  if (isAuthenticated && isLoginPath) {
-    const url = req.nextUrl.clone();
-    url.pathname = `/${locale}`;
-    return NextResponse.redirect(url);
-  }
+  // if (isAuthenticated && isLoginPath) {
+  //   const url = req.nextUrl.clone();
+  //   url.pathname = `/${locale}`;
+  //   return NextResponse.redirect(url);
+  // }
 
   // Возвращаем next-intl response для успешных auth-путей
   return intlRes || NextResponse.next();
