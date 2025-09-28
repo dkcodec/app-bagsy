@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 
-import { useDisclosure } from "@/src/hooks/use-disclosure";
+import { useDisclosure } from "@/src/shared/hooks";
 
 import { Button } from "@/src/entities/button";
 import { SingleCalendar } from "@/src/entities/single-calendar";
