@@ -1,8 +1,8 @@
 import React from "react";
 
-import { InviteForm } from "@/src/all-pages/exports";
+import { InviteForm } from "@/src/features/auth";
 import { getIsMobile } from "@/src/shared/hooks/use-mobile-server";
-import LoginBackground from "@/src/widgets/login-background";
+import LoginBackground from "@/src/widgets/backgrounds";
 import { notFound } from "next/navigation";
 import { decodeJwt, secondsToDate } from "@/src/shared/utils/jwt";
 

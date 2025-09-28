@@ -8,7 +8,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/src/widgets/dropdown-menu";
+} from "../forms/dropdown-menu";
 import { Globe } from "lucide-react";
 
 // Конфигурация языков

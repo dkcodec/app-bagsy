@@ -1,6 +1,6 @@
-import { LoginForm } from "@/src/all-pages/exports";
+import { LoginForm } from "@/src/features/auth";
 import { getIsMobile } from "@/src/shared/hooks/use-mobile-server";
-import LoginBackground from "@/src/widgets/login-background";
+import LoginBackground from "@/src/widgets/backgrounds";
 import React from "react";
 
 export default async function LoginPage() {

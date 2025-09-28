@@ -6,7 +6,7 @@ import { Button } from "@/src/entities/button";
 import { Card, CardContent } from "@/src/entities/card";
 import { Input } from "@/src/entities/input";
 import { Label } from "@/src/entities/label";
-import { PhoneInput, PhoneInputValue } from "@/src/widgets/phone-input";
+import { PhoneInput, PhoneInputValue } from "@/src/widgets/forms";
 import { cn } from "@/src/shared/utils/styles";
 import { useAuth } from "@/src/shared/hooks/use-auth";
 
@@ -88,9 +88,9 @@ export default function EmployeeForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Вычисляем финальный pointId с учетом роли
-  const effectivePointId =
-    currentRole === "manager" ? managerPointId || pointId : pointId;
+  // Вычисляем финальный pointId с учетом роли (пока не используется)
+  // const effectivePointId =
+  //   currentRole === "manager" ? managerPointId || pointId : pointId;
 
   // Валидация и переход на следующий шаг
   const handleNext = () => {

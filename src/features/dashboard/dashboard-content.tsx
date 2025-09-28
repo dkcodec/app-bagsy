@@ -6,11 +6,13 @@ import { format, parseISO, isValid } from "date-fns";
 import { CalendarProvider } from "@/src/features/calendar";
 import { CalendarContainer } from "@/src/widgets";
 import { mockEvents, mockUsers } from "@/src/shared";
-import { ChangeBadgeVariantInput } from "@/src/widgets/calendar-widget/settings/change-badge-variant-input";
+import {
+  ChangeBadgeVariantInput,
+  ChangeWorkingHoursInput,
+  ChangeVisibleHoursInput,
+} from "@/src/features/calendar/settings";
 import { useTranslations } from "next-intl";
-import { Loader, Loader2 } from "lucide-react";
-import { ChangeWorkingHoursInput } from "../widgets/calendar-widget/settings/change-working-hours-input";
-import { ChangeVisibleHoursInput } from "../widgets/calendar-widget/settings/change-visible-hours-input";
+import { Loader } from "lucide-react";
 
 const DashboardContent: React.FC = () => {
   const searchParams = useSearchParams();

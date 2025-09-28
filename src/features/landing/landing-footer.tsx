@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { LandingLogo } from "@/src/widgets/landing-logo";
+import { LandingLogo } from "@/src/widgets/ui";
 import { Separator } from "@/src/entities/separator";
 import {
   Facebook,
@@ -11,7 +11,7 @@ import {
   MapPin,
 } from "lucide-react";
 import Link from "next/link";
-import { formatPhone } from "../shared/utils/formater";
+import { formatPhone } from "@/src/shared/utils/formater";
 
 export async function LandingFooter() {
   const t = await getTranslations("Landing.footer");

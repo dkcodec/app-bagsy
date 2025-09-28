@@ -6,7 +6,7 @@ import {
   endOfDay,
 } from "date-fns";
 
-import { MonthEventBadge } from "../month-view";
+import { MonthEventBadge } from "@/src/widgets/calendar-widget/month-view";
 
 import type { IEvent } from "@/src/shared/types/calendar";
 

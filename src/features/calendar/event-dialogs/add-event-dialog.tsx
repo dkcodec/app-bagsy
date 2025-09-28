@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useDisclosure } from "@/src/shared/hooks";
-import { useCalendar } from "../calendar-context";
+import { useCalendar } from "@/src/features/calendar/calendar-context";
 
 import { Input } from "@/src/entities/input";
 import { Button } from "@/src/entities/button";

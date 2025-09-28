@@ -7,8 +7,8 @@ import { Label } from "@/src/entities/label";
 import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 import { z } from "zod";
-import { decodeJwt } from "../shared/utils/jwt";
-import { formatPhone } from "../shared/utils/formater";
+import { decodeJwt } from "@/src/shared/utils/jwt";
+import { formatPhone } from "@/src/shared/utils/formater";
 
 export default function InviteForm({
   className,
@@ -17,7 +17,7 @@ export default function InviteForm({
 }: React.ComponentProps<"div"> & { token: string }) {
   const t = useTranslations("InviteForm");
   const payload = decodeJwt<{ phone: string; iat: number; exp: number }>(token);
-  const { phone, iat, exp } = payload;
+  const { phone } = payload;
 
   const [errors, setErrors] = useState<{
     password?: string;
