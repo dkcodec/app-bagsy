@@ -17,6 +17,3 @@ export * from "./appointment";
 
 // Dashboard features
 export * from "./dashboard";
-
-// Landing features
-export * from "./landing";

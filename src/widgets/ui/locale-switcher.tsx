@@ -21,7 +21,7 @@ export function LocaleSwitcher() {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
-  const t = useTranslations("Landing.header");
+  const t = useTranslations("LoacleSwitcher");
 
   // Получаем текущий язык
   const currentLocale = locales.find(l => l.code === locale);
