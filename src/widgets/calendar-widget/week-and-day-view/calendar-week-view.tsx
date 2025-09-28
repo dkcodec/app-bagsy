@@ -13,7 +13,7 @@ import { ScrollArea } from "@/src/entities/scroll-area";
 
 import { AddEventDialog } from "@/src/features/calendar/event-dialogs";
 import { EventBlock } from "./event-block";
-import { DroppableTimeBlock } from "../dnd";
+import { DroppableTimeBlock } from "@/src/widgets/calendar-widget/dnd";
 import { CalendarTimeline } from "./calendar-time-line";
 import { WeekViewMultiDayEventsRow } from "./week-view-multi-day-events-row";
 

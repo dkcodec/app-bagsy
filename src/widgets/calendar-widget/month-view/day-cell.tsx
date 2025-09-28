@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { isToday, startOfDay } from "date-fns";
 
 import { EventBullet } from "./event-bullet";
-import { DroppableDayCell } from "../dnd/droppable-day-cell";
+import { DroppableDayCell } from "@/src/widgets/calendar-widget/dnd/droppable-day-cell";
 import { MonthEventBadge } from "./month-event-badge";
 
 import { cn } from "@/src/shared/utils/styles";

@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { AppSidebar } from "@/src/widgets/app-sidebar";
+import { AppSidebar } from "@/src/widgets/navigation";
 import { SidebarInset, SidebarProvider } from "@/src/entities/sidebar";
 import { DashboardHeader, DashboardContent } from "@/src/features";
 

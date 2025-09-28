@@ -3,7 +3,7 @@ import { format, differenceInMinutes, parseISO } from "date-fns";
 
 import { useCalendar } from "@/src/features/calendar";
 
-import { DraggableEvent } from "../dnd";
+import { DraggableEvent } from "@/src/widgets/calendar-widget/dnd";
 import { EventDetailsDialog } from "@/src/features/calendar/dialogs/event-details-dialog";
 
 import { cn } from "@/src/shared/utils/styles";

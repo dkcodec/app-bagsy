@@ -18,7 +18,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/src/widgets/dropdown-menu";
+} from "../forms/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,

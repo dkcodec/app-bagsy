@@ -7,8 +7,8 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { authService } from "../api/services/authService";
-import type { LoginRequest } from "../api/types";
+import { authService } from "@/src/shared/api/services/authService";
+import type { LoginRequest } from "@/src/shared/api/types";
 
 // Ключи для кэширования
 export const authKeys = {

@@ -4,3 +4,4 @@
 
 export * from "./calendar-context";
 export * from "./event-dialogs";
+export * from "./settings";

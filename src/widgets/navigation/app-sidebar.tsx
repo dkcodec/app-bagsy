@@ -14,8 +14,8 @@ import {
   SquareTerminal,
 } from "lucide-react";
 
-import { NavMain } from "@/src/widgets/nav-main";
-import { NavUser } from "@/src/widgets/nav-user";
+import { NavMain } from "./nav-main";
+import { NavUser } from "./nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -23,7 +23,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/src/entities/sidebar";
-import { ThemeLogo } from "@/src/widgets/theme-logo";
+import { ThemeLogo } from "../ui/theme-logo";
 import { NavProjects } from "./nav-projects";
 
 const data = {

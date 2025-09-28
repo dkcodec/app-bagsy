@@ -1,4 +1,4 @@
-import { apiClient } from "../client";
+import { apiClient } from "@/src/shared/api/client";
 import type {
   LoginRequest,
   LoginResponse,

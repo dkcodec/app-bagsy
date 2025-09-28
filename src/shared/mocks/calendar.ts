@@ -1,4 +1,4 @@
-import type { TEventColor, IEvent, IUser } from "../types/calendar";
+import type { TEventColor, IEvent, IUser } from "@/src/shared/types/calendar";
 
 // ================================== //
 

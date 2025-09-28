@@ -8,7 +8,7 @@ import { SingleCalendar } from "@/src/entities/single-calendar";
 
 import { AddEventDialog } from "@/src/features/calendar/event-dialogs";
 import { EventBlock } from "./event-block";
-import { DroppableTimeBlock } from "../dnd";
+import { DroppableTimeBlock } from "@/src/widgets/calendar-widget/dnd";
 import { CalendarTimeline } from "./calendar-time-line";
 import { DayViewMultiDayEventsRow } from "./day-view-multi-day-events-row";
 

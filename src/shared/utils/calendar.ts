@@ -26,12 +26,12 @@ import {
   isWithinInterval,
 } from "date-fns";
 
-import type { ICalendarCell, IEvent } from "../types/calendar";
+import type { ICalendarCell, IEvent } from "@/src/shared/types/calendar";
 import type {
   TCalendarView,
   TVisibleHours,
   TWorkingHours,
-} from "../types/calendar";
+} from "@/src/shared/types/calendar";
 
 // ================ Header helper functions ================ //
 

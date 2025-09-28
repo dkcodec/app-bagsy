@@ -11,7 +11,7 @@ import { Moon, Sun } from "lucide-react";
 export function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
-  const t = useTranslations("Landing.header");
+  const t = useTranslations("LoacleSwitcher");
 
   // Предотвращаем гидратацию
   useEffect(() => {
