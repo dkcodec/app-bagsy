@@ -6,11 +6,7 @@ import { format, parseISO, isValid } from "date-fns";
 import { CalendarProvider } from "@/src/features/calendar";
 import { CalendarContainer } from "@/src/widgets";
 import { mockEvents, mockUsers } from "@/src/shared";
-import {
-  ChangeBadgeVariantInput,
-  ChangeWorkingHoursInput,
-  ChangeVisibleHoursInput,
-} from "@/src/features/calendar/settings";
+import { CalendarSettings } from "@/src/features/calendar/settings";
 import { useTranslations } from "next-intl";
 import { Loader } from "lucide-react";
 
@@ -80,18 +76,13 @@ const DashboardContent: React.FC = () => {
         setSelectedDate(parsedDate);
       }
     }
-  }, [searchParams]);
+  }, [searchParams, isView]);
 
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => setIsMounted(true), []);
 
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-      <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-        <div className="aspect-video rounded-xl bg-muted/50 border border-border" />
-        <div className="aspect-video rounded-xl bg-muted/50 border border-border" />
-        <div className="aspect-video rounded-xl bg-muted/50 border border-border" />
-      </div>
+    <div className="flex flex-1 flex-col gap-4 p-4 pt-1">
       {isMounted ? (
         <CalendarProvider
           events={mockEvents}
@@ -103,15 +94,13 @@ const DashboardContent: React.FC = () => {
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">{t("calendar")}</h2>
               <div className="flex items-center gap-4">
-                <ChangeBadgeVariantInput />
+                <CalendarSettings />
               </div>
             </div>
             <CalendarContainer
               view={calendarView}
               onViewChange={handleViewChange}
             />
-            <ChangeWorkingHoursInput />
-            <ChangeVisibleHoursInput />
           </div>
         </CalendarProvider>
       ) : (

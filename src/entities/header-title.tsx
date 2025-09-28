@@ -1,5 +1,4 @@
 "use client";
-import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
 // HeaderTitle accepts a single props object when used in JSX

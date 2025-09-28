@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   Columns,
   Grid3x3,

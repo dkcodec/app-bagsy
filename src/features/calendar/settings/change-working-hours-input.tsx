@@ -1,34 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Info, Moon } from "lucide-react";
 import { useCalendar } from "@/src/features/calendar/calendar-context";
 
-import { Button } from "@/src/entities/button";
 import { Switch } from "@/src/entities/switch";
 import { TimeInput } from "@/src/entities/time-input";
 
 import type { TimeValue } from "react-aria-components";
-import { TooltipContent } from "@/src/entities/tooltip";
-import { Tooltip, TooltipTrigger } from "@/src/entities/tooltip";
-import { TooltipProvider } from "@/src/entities/tooltip";
+import { useTranslations } from "next-intl";
+import type { TWorkingHours } from "@/src/shared/types/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/src/entities/popover";
 
 const DAYS_OF_WEEK = [
-  { index: 0, name: "Sunday" },
-  { index: 1, name: "Monday" },
-  { index: 2, name: "Tuesday" },
-  { index: 3, name: "Wednesday" },
-  { index: 4, name: "Thursday" },
-  { index: 5, name: "Friday" },
-  { index: 6, name: "Saturday" },
+  { index: 0, name: "Воскресенье" },
+  { index: 1, name: "Понедельник" },
+  { index: 2, name: "Вторник" },
+  { index: 3, name: "Среда" },
+  { index: 4, name: "Четверг" },
+  { index: 5, name: "Пятница" },
+  { index: 6, name: "Суббота" },
 ];
 
-export function ChangeWorkingHoursInput() {
-  const { workingHours, setWorkingHours } = useCalendar();
+interface ChangeWorkingHoursInputProps {
+  onWorkingHoursChange?: (workingHours: TWorkingHours) => void;
+  isMobile?: boolean;
+}
+
+export function ChangeWorkingHoursInput({
+  onWorkingHoursChange,
+  isMobile = false,
+}: ChangeWorkingHoursInputProps) {
+  const { workingHours } = useCalendar();
+  const t = useTranslations("Dashboard.Settings");
 
   const [localWorkingHours, setLocalWorkingHours] = useState({
     ...workingHours,
   });
+  const [isOpen, setIsOpen] = useState(false);
+  // Уведомляем родительский компонент об изменениях
+  useEffect(() => {
+    onWorkingHoursChange?.(localWorkingHours);
+  }, [localWorkingHours, onWorkingHoursChange]);
 
   const handleToggleDay = (dayId: number) => {
     setLocalWorkingHours(prev => ({
@@ -55,49 +72,21 @@ export function ChangeWorkingHoursInput() {
     });
   };
 
-  const handleSave = () => {
-    const updatedWorkingHours = { ...localWorkingHours };
-
-    for (const dayId in updatedWorkingHours) {
-      const day = updatedWorkingHours[parseInt(dayId)];
-      const isDayActive =
-        localWorkingHours[parseInt(dayId)].from > 0 ||
-        localWorkingHours[parseInt(dayId)].to > 0;
-
-      if (isDayActive) {
-        if (day.from === 0 && day.to === 0) {
-          updatedWorkingHours[dayId] = { from: 0, to: 24 };
-        } else if (day.to === 0 && day.from > 0) {
-          updatedWorkingHours[dayId] = { ...day, to: 24 };
-        }
-      } else {
-        updatedWorkingHours[dayId] = { from: 0, to: 0 };
-      }
-    }
-
-    setWorkingHours(updatedWorkingHours);
-  };
-
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-2">
-        <p className="text-sm font-semibold">Change working hours</p>
-
-        <TooltipProvider delayDuration={100}>
-          <Tooltip>
-            <TooltipTrigger>
-              <Info className="size-3" />
-            </TooltipTrigger>
-
-            <TooltipContent className="max-w-80 text-center">
-              <p>
-                This will apply a dashed background to the hour cells that fall
-                outside the working hours — only for week and day views.
-              </p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger
+          className="flex items-center gap-2 w-fit"
+          onMouseOver={() => setIsOpen(true)}
+          onMouseOut={() => setIsOpen(false)}
+        >
+          <p className="text-sm font-semibold">{t("workingHours")}</p>
+          <Info className="size-3" />
+        </PopoverTrigger>
+        <PopoverContent className="flex flex-col gap-2 text-center">
+          <p className="text-sm">{t("workingHoursTooltip")}</p>
+        </PopoverContent>
+      </Popover>
 
       <div className="space-y-4">
         {DAYS_OF_WEEK.map(day => {
@@ -106,19 +95,34 @@ export function ChangeWorkingHoursInput() {
             localWorkingHours[day.index].to > 0;
 
           return (
-            <div key={day.index} className="flex items-center gap-4">
-              <div className="flex w-40 items-center gap-2">
+            <div
+              key={day.index}
+              className={`${
+                isMobile
+                  ? "flex flex-col gap-3 p-3 border rounded-lg"
+                  : "flex items-center gap-4"
+              }`}
+            >
+              <div className={`flex items-center gap-2 w-full`}>
                 <Switch
                   checked={isDayActive}
                   onCheckedChange={() => handleToggleDay(day.index)}
                 />
-                <span className="text-sm font-medium">{day.name}</span>
+                <span
+                  className={`font-medium ${isMobile ? "text-sm" : "text-sm"}`}
+                >
+                  {day.name}
+                </span>
               </div>
 
               {isDayActive ? (
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <span>From</span>
+                <div className={`flex items-center gap-4 `}>
+                  <div
+                    className={`flex items-center gap-2 ${isMobile ? "w-full justify-between" : ""}`}
+                  >
+                    <span className={isMobile ? "text-sm font-medium" : ""}>
+                      {t("from")}
+                    </span>
                     <TimeInput
                       id={`${day.name.toLowerCase()}-from`}
                       hourCycle={12}
@@ -132,11 +136,16 @@ export function ChangeWorkingHoursInput() {
                       onChange={value =>
                         handleTimeChange(day.index, "from", value)
                       }
+                      className={isMobile ? "w-24" : ""}
                     />
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <span>To</span>
+                  <div
+                    className={`flex items-center gap-2 ${isMobile ? "w-full justify-between" : ""}`}
+                  >
+                    <span className={isMobile ? "text-sm font-medium" : ""}>
+                      {t("to")}
+                    </span>
                     <TimeInput
                       id={`${day.name.toLowerCase()}-to`}
                       hourCycle={12}
@@ -150,23 +159,24 @@ export function ChangeWorkingHoursInput() {
                       onChange={value =>
                         handleTimeChange(day.index, "to", value)
                       }
+                      className={isMobile ? "w-24" : ""}
                     />
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center gap-2 text-muted-foreground">
+                <div
+                  className={`flex items-center gap-2 text-muted-foreground ${isMobile ? "w-full" : ""}`}
+                >
                   <Moon className="size-4" />
-                  <span>Closed</span>
+                  <span className={isMobile ? "text-sm" : ""}>
+                    {t("closed")}
+                  </span>
                 </div>
               )}
             </div>
           );
         })}
       </div>
-
-      <Button className="mt-4 w-fit" onClick={handleSave}>
-        Apply
-      </Button>
     </div>
   );
 }
