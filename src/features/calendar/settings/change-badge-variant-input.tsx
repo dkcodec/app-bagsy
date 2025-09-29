@@ -21,14 +21,16 @@ import type { TBadgeVariant } from "@/src/shared/types/calendar";
 
 interface ChangeBadgeVariantInputProps {
   onBadgeVariantChange?: (variant: TBadgeVariant) => void;
+  badgeVariant: TBadgeVariant;
   isMobile?: boolean;
 }
 
 export function ChangeBadgeVariantInput({
   onBadgeVariantChange,
+  badgeVariant,
   isMobile = false,
 }: ChangeBadgeVariantInputProps) {
-  const { badgeVariant } = useCalendar();
+  // const { badgeVariant } = useCalendar();
   const t = useTranslations("Dashboard.Settings");
 
   const [isOpen, setIsOpen] = useState(false);

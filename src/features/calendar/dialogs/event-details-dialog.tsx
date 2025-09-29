@@ -51,7 +51,7 @@ export function EventDetailsDialog({ event, children }: IProps) {
               <div>
                 <p className="text-sm font-medium">Start Date</p>
                 <p className="text-sm text-muted-foreground">
-                  {format(startDate, "MMM d, yyyy h:mm a")}
+                  {format(startDate, "MMM d, yyyy HH:mm")}
                 </p>
               </div>
             </div>
@@ -61,7 +61,7 @@ export function EventDetailsDialog({ event, children }: IProps) {
               <div>
                 <p className="text-sm font-medium">End Date</p>
                 <p className="text-sm text-muted-foreground">
-                  {format(endDate, "MMM d, yyyy h:mm a")}
+                  {format(endDate, "MMM d, yyyy HH:mm")}
                 </p>
               </div>
             </div>

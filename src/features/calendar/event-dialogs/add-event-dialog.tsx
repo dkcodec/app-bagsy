@@ -193,7 +193,7 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
                       <TimeInput
                         value={field.value as TimeValue}
                         onChange={field.onChange}
-                        hourCycle={12}
+                        hourCycle={24}
                         data-invalid={fieldState.invalid}
                       />
                     </FormControl>
@@ -235,7 +235,7 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
                       <TimeInput
                         value={field.value as TimeValue}
                         onChange={field.onChange}
-                        hourCycle={12}
+                        hourCycle={24}
                         data-invalid={fieldState.invalid}
                       />
                     </FormControl>

@@ -40,6 +40,15 @@
       "friday": "Жұма",
       "saturday": "Сенбі",
       "sunday": "Жексенбі"
+    },
+    "Calendar": {
+      "Header": {
+        "events": "жазбалар",
+        "addEvent": "Жазбаны қосу",
+        "all": "Барлығы"
+      },
+      "happeningNow": "Қазір өтеді",
+      "noAppointmentsAtTheMoment": "Қазір қызмет көрсетуді қабылдауға мүмкіндік жоқ"
     }
   },
   "Settings": {

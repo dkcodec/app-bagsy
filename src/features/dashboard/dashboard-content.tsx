@@ -15,9 +15,9 @@ const DashboardContent: React.FC = () => {
   const router = useRouter();
   const t = useTranslations("Dashboard.content");
   // Получаем вид из URL или используем "month" по умолчанию
-  type View = "day" | "week" | "month" | "year" | "agenda";
+  type View = "day" | "week" | "month" | "agenda";
   const isView = (v: string): v is View =>
-    ["day", "week", "month", "year", "agenda"].includes(v as View);
+    ["day", "week", "month", "agenda"].includes(v as View);
 
   const getInitialView = (): View => {
     const viewParam = searchParams.get("view");
@@ -50,12 +50,8 @@ const DashboardContent: React.FC = () => {
     return new Date();
   };
 
-  const [selectedDate, setSelectedDate] = useState<Date>(getInitialDate);
-
   // Обновляем URL при изменении даты
   const handleDateChange = (date: Date) => {
-    setSelectedDate(date);
-
     const params = new URLSearchParams(searchParams.toString());
     params.set("date", format(date, "yyyy-MM-dd"));
 
@@ -68,14 +64,6 @@ const DashboardContent: React.FC = () => {
     if (viewParam && isView(viewParam)) {
       setCalendarView(viewParam);
     }
-
-    const dateParam = searchParams.get("date");
-    if (dateParam) {
-      const parsedDate = parseISO(dateParam);
-      if (isValid(parsedDate)) {
-        setSelectedDate(parsedDate);
-      }
-    }
   }, [searchParams, isView]);
 
   const [isMounted, setIsMounted] = useState(false);
@@ -87,7 +75,7 @@ const DashboardContent: React.FC = () => {
         <CalendarProvider
           events={mockEvents}
           users={mockUsers}
-          initialDate={selectedDate}
+          initialDate={getInitialDate()}
           onDateChange={handleDateChange}
         >
           <div className="flex flex-col gap-4">

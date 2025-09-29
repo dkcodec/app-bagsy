@@ -6,6 +6,7 @@ import {
   isSameDay,
   areIntervalsOverlapping,
 } from "date-fns";
+import { ru, kk } from "date-fns/locale";
 
 import { useCalendar } from "@/src/features/calendar";
 
@@ -26,6 +27,7 @@ import {
 } from "@/src/shared/utils/calendar";
 
 import type { IEvent } from "@/src/shared/types/calendar";
+import { useLocale } from "next-intl";
 
 interface IProps {
   singleDayEvents: IEvent[];
@@ -34,13 +36,14 @@ interface IProps {
 
 export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
   const { selectedDate, workingHours, visibleHours } = useCalendar();
+  const locale = useLocale();
 
   const { hours, earliestEventHour, latestEventHour } = getVisibleHours(
     visibleHours,
     singleDayEvents
   );
 
-  const weekStart = startOfWeek(selectedDate);
+  const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
   return (
@@ -66,7 +69,9 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
                   key={index}
                   className="py-2 text-center text-xs font-medium text-muted-foreground"
                 >
-                  {format(day, "EE")}{" "}
+                  {format(day, "EEEE", {
+                    locale: locale == "ru" ? ru : kk,
+                  }).capitalize()}{" "}
                   <span className="ml-1 font-semibold text-foreground">
                     {format(day, "d")}
                   </span>
@@ -85,7 +90,7 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
                   <div className="absolute -top-3 right-2 flex h-6 items-center">
                     {index !== 0 && (
                       <span className="text-xs text-muted-foreground">
-                        {format(new Date().setHours(hour, 0, 0, 0), "hh a")}
+                        {format(new Date().setHours(hour, 0, 0, 0), "HH:mm")}
                       </span>
                     )}
                   </div>

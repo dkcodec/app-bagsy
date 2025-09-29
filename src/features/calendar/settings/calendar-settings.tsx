@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -28,7 +28,8 @@ import type {
 
 export function CalendarSettings() {
   const t = useTranslations("Dashboard.Settings");
-  const { setBadgeVariant, setWorkingHours, setVisibleHours } = useCalendar();
+  const { badgeVariant, setBadgeVariant, setWorkingHours, setVisibleHours } =
+    useCalendar();
   const isMobile = useIsMobile();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -56,7 +57,17 @@ export function CalendarSettings() {
 
     // Закрываем диалог
     setIsOpen(false);
+    setTempBadgeVariant(null);
+    setTempWorkingHours(null);
+    setTempVisibleHours(null);
   };
+
+  const handleCancel = useCallback(() => {
+    setIsOpen(false);
+    setTempBadgeVariant(null);
+    setTempWorkingHours(null);
+    setTempVisibleHours(null);
+  }, [setTempBadgeVariant, setTempWorkingHours, setTempVisibleHours]);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -89,6 +100,7 @@ export function CalendarSettings() {
           />
           <ChangeBadgeVariantInput
             onBadgeVariantChange={setTempBadgeVariant}
+            badgeVariant={tempBadgeVariant || badgeVariant}
             isMobile={isMobile}
           />
           <ChangeVisibleHoursInput
@@ -101,7 +113,7 @@ export function CalendarSettings() {
         <DialogFooter className={`gap-2 ${isMobile ? "flex-col" : ""}`}>
           <Button
             variant="outline"
-            onClick={() => setIsOpen(false)}
+            onClick={handleCancel}
             className={isMobile ? "w-full" : ""}
           >
             {t("cancel")}

@@ -18,11 +18,6 @@ import {
   eachDayOfInterval,
   startOfDay,
   differenceInDays,
-  endOfYear,
-  startOfYear,
-  subYears,
-  addYears,
-  isSameYear,
   isWithinInterval,
 } from "date-fns";
 
@@ -32,10 +27,11 @@ import type {
   TVisibleHours,
   TWorkingHours,
 } from "@/src/shared/types/calendar";
+import { kk, ru } from "date-fns/locale";
 
 // ================ Header helper functions ================ //
 
-export function rangeText(view: TCalendarView, date: Date) {
+export function rangeText(view: TCalendarView, date: Date, locale: string) {
   const formatString = "MMM d, yyyy";
   let start: Date;
   let end: Date;
@@ -45,25 +41,21 @@ export function rangeText(view: TCalendarView, date: Date) {
       start = startOfMonth(date);
       end = endOfMonth(date);
       break;
-    case "year":
-      start = startOfYear(date);
-      end = endOfYear(date);
-      break;
     case "month":
       start = startOfMonth(date);
       end = endOfMonth(date);
       break;
     case "week":
-      start = startOfWeek(date);
-      end = endOfWeek(date);
+      start = startOfWeek(date, { weekStartsOn: 1 });
+      end = endOfWeek(date, { weekStartsOn: 1 });
       break;
     case "day":
-      return format(date, formatString);
+      return format(date, formatString, { locale: locale == "ru" ? ru : kk });
     default:
       return "Error while formatting ";
   }
 
-  return `${format(start, formatString)} - ${format(end, formatString)}`;
+  return `${format(start, formatString, { locale: locale == "ru" ? ru : kk })} - ${format(end, formatString, { locale: locale == "ru" ? ru : kk })}`;
 }
 
 export function navigateDate(
@@ -73,7 +65,6 @@ export function navigateDate(
 ): Date {
   const operations = {
     agenda: direction === "next" ? addMonths : subMonths,
-    year: direction === "next" ? addYears : subYears,
     month: direction === "next" ? addMonths : subMonths,
     week: direction === "next" ? addWeeks : subWeeks,
     day: direction === "next" ? addDays : subDays,
@@ -89,7 +80,6 @@ export function getEventsCount(
 ): number {
   const compareFns = {
     agenda: isSameMonth,
-    year: isSameYear,
     day: isSameDay,
     week: isSameWeek,
     month: isSameMonth,
@@ -213,8 +203,10 @@ export function getCalendarCells(selectedDate: Date): ICalendarCell[] {
 
   const getDaysInMonth = (year: number, month: number) =>
     new Date(year, month + 1, 0).getDate();
-  const getFirstDayOfMonth = (year: number, month: number) =>
-    new Date(year, month, 1).getDay();
+  const getFirstDayOfMonth = (year: number, month: number) => {
+    const sundayBased = new Date(year, month, 1).getDay();
+    return (sundayBased + 6) % 7;
+  };
 
   const daysInMonth = getDaysInMonth(currentYear, currentMonth);
   const firstDayOfMonth = getFirstDayOfMonth(currentYear, currentMonth);

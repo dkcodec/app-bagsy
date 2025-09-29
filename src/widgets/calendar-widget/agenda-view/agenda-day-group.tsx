@@ -3,6 +3,8 @@ import { differenceInDays, format, parseISO, startOfDay } from "date-fns";
 import { AgendaEventCard } from "./agenda-event-card";
 
 import type { IEvent } from "@/src/shared/types/calendar";
+import { kk, ru } from "date-fns/locale";
+import { useLocale } from "next-intl";
 
 interface IProps {
   date: Date;
@@ -11,6 +13,8 @@ interface IProps {
 }
 
 export function AgendaDayGroup({ date, events, multiDayEvents }: IProps) {
+  const locale = useLocale();
+
   const sortedEvents = [...events].sort(
     (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
   );
@@ -19,7 +23,9 @@ export function AgendaDayGroup({ date, events, multiDayEvents }: IProps) {
     <div className="space-y-4">
       <div className="sticky top-0 flex items-center gap-4 bg-[var(--muted-background)] py-2 px-4">
         <p className="text-sm font-semibold">
-          {format(date, "EEEE, MMMM d, yyyy")}
+          {format(date, "EEEE, d MMMM, yyyy", {
+            locale: locale == "ru" ? ru : kk,
+          }).capitalize()}
         </p>
       </div>
 

@@ -40,6 +40,15 @@
       "friday": "Пятница",
       "saturday": "Суббота",
       "sunday": "Воскресенье"
+    },
+    "Calendar": {
+      "Header": {
+        "events": "записей",
+        "addEvent": "Добавить запись",
+        "all": "Все"
+      },
+      "happeningNow": "Происходит сейчас",
+      "noAppointmentsAtTheMoment": "Нет активной записи сейчас"
     }
   },
   "Settings": {

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { formatDate } from "date-fns";
+import { ru, kk } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { useCalendar } from "@/src/features/calendar";
@@ -14,6 +15,7 @@ import {
 } from "@/src/shared/utils/calendar";
 
 import type { IEvent, TCalendarView } from "@/src/shared/types/calendar";
+import { useLocale, useTranslations } from "next-intl";
 
 interface IProps {
   view: TCalendarView;
@@ -22,8 +24,12 @@ interface IProps {
 
 export function DateNavigator({ view, events }: IProps) {
   const { selectedDate, setSelectedDate } = useCalendar();
+  const locale = useLocale();
+  const t = useTranslations("Dashboard.Calendar.Header");
 
-  const month = formatDate(selectedDate, "MMMM");
+  const month = formatDate(selectedDate, "MMMM", {
+    locale: locale == "ru" ? ru : kk,
+  }).capitalize();
   const year = selectedDate.getFullYear();
 
   const eventCount = useMemo(
@@ -43,7 +49,7 @@ export function DateNavigator({ view, events }: IProps) {
           {month} {year}
         </span>
         <Badge variant="outline" className="px-1.5">
-          {eventCount} events
+          {eventCount} {t("events")}
         </Badge>
       </div>
 
@@ -57,7 +63,7 @@ export function DateNavigator({ view, events }: IProps) {
         </Button>
 
         <p className="text-sm text-muted-foreground">
-          {rangeText(view, selectedDate)}
+          {rangeText(view, selectedDate, locale)}
         </p>
 
         <Button

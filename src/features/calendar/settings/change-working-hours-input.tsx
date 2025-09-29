@@ -125,7 +125,7 @@ export function ChangeWorkingHoursInput({
                     </span>
                     <TimeInput
                       id={`${day.name.toLowerCase()}-from`}
-                      hourCycle={12}
+                      hourCycle={24}
                       granularity="hour"
                       value={
                         {
@@ -148,7 +148,7 @@ export function ChangeWorkingHoursInput({
                     </span>
                     <TimeInput
                       id={`${day.name.toLowerCase()}-to`}
-                      hourCycle={12}
+                      hourCycle={24}
                       granularity="hour"
                       value={
                         {
