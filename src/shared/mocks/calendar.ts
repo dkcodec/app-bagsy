@@ -142,18 +142,18 @@ const mockGenerator = (numberOfEvents: number): IEvent[] => {
 
   const randomUser = USERS_MOCK[Math.floor(Math.random() * USERS_MOCK.length)];
 
-  // Date range: 30 days before and after now
-  const now = new Date();
-  const startRange = new Date(now);
-  startRange.setDate(now.getDate() - 30);
-  const endRange = new Date(now);
-  endRange.setDate(now.getDate() + 30);
+  // Фиксируем дату для предотвращения ререндеров
+  const fixedNow = new Date("2024-12-19T10:00:00Z"); // Фиксированная дата
+  const startRange = new Date(fixedNow);
+  startRange.setDate(fixedNow.getDate() - 30);
+  const endRange = new Date(fixedNow);
+  endRange.setDate(fixedNow.getDate() + 30);
 
-  // Create an event happening now
+  // Create an event happening at fixed time
   const currentEvent = {
     id: currentId++,
-    startDate: new Date(now.getTime() - 30 * 60000).toISOString(),
-    endDate: new Date(now.getTime() + 30 * 60000).toISOString(),
+    startDate: new Date(fixedNow.getTime() - 30 * 60000).toISOString(),
+    endDate: new Date(fixedNow.getTime() + 30 * 60000).toISOString(),
     title: EVENTS[Math.floor(Math.random() * EVENTS.length)],
     color: COLORS[Math.floor(Math.random() * COLORS.length)],
     description:
@@ -162,7 +162,7 @@ const mockGenerator = (numberOfEvents: number): IEvent[] => {
   };
 
   // Only add the current event if it's not on September 20th
-  if (now.getMonth() !== 8 || now.getDate() !== 20) {
+  if (fixedNow.getMonth() !== 8 || fixedNow.getDate() !== 20) {
     // Month is 0-indexed (8 = September)
     result.push(currentEvent);
   }

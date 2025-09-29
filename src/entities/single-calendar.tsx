@@ -54,7 +54,8 @@ function SingleCalendar({
         month: "relative space-y-3", // <-- relative тут
 
         /* заголовок месяца по центру одной строки */
-        month_caption: "flex items-center justify-center h-8 px-8",
+        month_caption:
+          "flex items-center justify-center h-8 px-8 [&_span]:capitalize",
         caption_label: "text-sm font-medium text-center",
 
         /* навигация поверх caption, по бокам */

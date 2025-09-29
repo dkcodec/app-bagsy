@@ -110,7 +110,7 @@ export function EventBlock({ event, className }: IProps) {
 
           {durationInMinutes > 25 && (
             <p>
-              {format(start, "h:mm a")} - {format(end, "h:mm a")}
+              {format(start, "HH:mm")} - {format(end, "HH:mm")}
             </p>
           )}
         </div>

@@ -68,7 +68,7 @@ export function ChangeVisibleHoursInput({
           <p className={isMobile ? "text-sm font-medium" : ""}>С</p>
           <TimeInput
             id="start-time"
-            hourCycle={12}
+            hourCycle={24}
             granularity="hour"
             value={from as TimeValue}
             onChange={setFrom as (value: TimeValue | null) => void}
@@ -82,7 +82,7 @@ export function ChangeVisibleHoursInput({
           <p className={isMobile ? "text-sm font-medium" : ""}>До</p>
           <TimeInput
             id="end-time"
-            hourCycle={12}
+            hourCycle={24}
             granularity="hour"
             value={to as TimeValue}
             onChange={setTo as (value: TimeValue | null) => void}

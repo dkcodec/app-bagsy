@@ -9,10 +9,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/entities/select";
+import { useTranslations } from "next-intl";
 
 export function UserSelect() {
   const { users, selectedUserId, setSelectedUserId } = useCalendar();
-
+  const t = useTranslations("Dashboard.Calendar.Header");
   return (
     <Select value={selectedUserId} onValueChange={setSelectedUserId}>
       <SelectTrigger className="flex-1 md:w-48">
@@ -35,7 +36,7 @@ export function UserSelect() {
                 </Avatar>
               ))}
             </AvatarGroup>
-            All
+            {t("all")}
           </div>
         </SelectItem>
 

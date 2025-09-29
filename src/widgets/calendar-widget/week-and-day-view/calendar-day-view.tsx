@@ -1,5 +1,6 @@
 import { Calendar, Clock, User } from "lucide-react";
-import { parseISO, areIntervalsOverlapping, format } from "date-fns";
+import { parseISO, areIntervalsOverlapping, format, isSameDay } from "date-fns";
+import { ru, kk } from "date-fns/locale";
 
 import { useCalendar } from "@/src/features/calendar";
 
@@ -22,35 +23,56 @@ import {
 } from "@/src/shared/utils/calendar";
 
 import type { IEvent } from "@/src/shared/types/calendar";
+import { useLocale, useTranslations } from "next-intl";
+import { useCallback, useMemo, memo } from "react";
 
 interface IProps {
   singleDayEvents: IEvent[];
   multiDayEvents: IEvent[];
 }
 
-export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
+export const CalendarDayView = memo(function CalendarDayView({
+  singleDayEvents,
+  multiDayEvents,
+}: IProps) {
   const { selectedDate, setSelectedDate, users, visibleHours, workingHours } =
     useCalendar();
+  const t = useTranslations("Dashboard.Calendar");
+  const locale = useLocale();
 
-  console.log(workingHours);
-
-  const { hours, earliestEventHour, latestEventHour } = getVisibleHours(
-    visibleHours,
-    singleDayEvents
+  // Мемоизируем вычисления для предотвращения ререндеров
+  const { hours, earliestEventHour, latestEventHour } = useMemo(
+    () => getVisibleHours(visibleHours, singleDayEvents),
+    [visibleHours, singleDayEvents]
   );
 
-  const currentEvents = getCurrentEvents(singleDayEvents);
+  const currentEvents = useMemo(
+    () => getCurrentEvents(singleDayEvents),
+    [singleDayEvents]
+  );
 
-  const dayEvents = singleDayEvents.filter(event => {
-    const eventDate = parseISO(event.startDate);
-    return (
-      eventDate.getDate() === selectedDate.getDate() &&
-      eventDate.getMonth() === selectedDate.getMonth() &&
-      eventDate.getFullYear() === selectedDate.getFullYear()
-    );
-  });
+  const dayEvents = useMemo(
+    () =>
+      singleDayEvents.filter(event => {
+        const eventDate = parseISO(event.startDate);
+        return (
+          eventDate.getDate() === selectedDate.getDate() &&
+          eventDate.getMonth() === selectedDate.getMonth() &&
+          eventDate.getFullYear() === selectedDate.getFullYear()
+        );
+      }),
+    [singleDayEvents, selectedDate]
+  );
 
-  const groupedEvents = groupEvents(dayEvents);
+  const handleSelectDate = useCallback(
+    (d: Date | undefined) => {
+      if (!d) return;
+      if (!isSameDay(d, selectedDate)) setSelectedDate(d);
+    },
+    [selectedDate, setSelectedDate]
+  );
+
+  const groupedEvents = useMemo(() => groupEvents(dayEvents), [dayEvents]);
 
   return (
     <div className="flex">
@@ -65,7 +87,9 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
           <div className="relative z-20 flex border-b">
             <div className="w-18"></div>
             <span className="flex-1 border-l py-2 text-center text-xs font-medium text-muted-foreground">
-              {format(selectedDate, "EE")}{" "}
+              {format(selectedDate, "EEEE", {
+                locale: locale == "ru" ? ru : kk,
+              }).capitalize()}{" "}
               <span className="font-semibold text-foreground">
                 {format(selectedDate, "d")}
               </span>
@@ -82,7 +106,7 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
                   <div className="absolute -top-3 right-2 flex h-6 items-center">
                     {index !== 0 && (
                       <span className="text-xs text-muted-foreground">
-                        {format(new Date().setHours(hour, 0, 0, 0), "hh a")}
+                        {format(new Date().setHours(hour, 0, 0, 0), "HH:mm")}
                       </span>
                     )}
                   </div>
@@ -228,7 +252,7 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
           className="mx-auto w-fit"
           mode="single"
           selected={selectedDate}
-          onSelect={setSelectedDate}
+          onSelect={handleSelectDate}
         />
 
         <div className="flex-1 space-y-3">
@@ -240,12 +264,12 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
               </span>
 
               <p className="text-sm font-semibold text-foreground">
-                Happening now
+                {t("happeningNow")}
               </p>
             </div>
           ) : (
             <p className="p-4 text-center text-sm italic text-muted-foreground">
-              No appointments or consultations at the moment
+              {t("noAppointmentsAtTheMoment")}
             </p>
           )}
 
@@ -271,7 +295,7 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
                       <div className="flex items-center gap-1.5 text-muted-foreground">
                         <Calendar className="size-3.5" />
                         <span className="text-sm">
-                          {format(new Date(), "MMM d, yyyy")}
+                          {/* {format(new Date(), "MMM d, yyyy")} */}
                         </span>
                       </div>
 
@@ -292,4 +316,4 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
       </div>
     </div>
   );
-}
+});

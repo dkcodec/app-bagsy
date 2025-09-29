@@ -1,13 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
-import { isSameDay, parseISO } from "date-fns";
+import { useMemo, memo } from "react";
+import { isSameDay, parseISO, startOfWeek, endOfWeek } from "date-fns";
 
 import { useCalendar } from "@/src/features/calendar";
 
 import { DndProviderWrapper } from "./dnd";
 import { CalendarHeader } from "./header";
-import { CalendarYearView } from "./year-view";
 import { CalendarMonthView } from "./month-view";
 import { CalendarAgendaView } from "./agenda-view";
 import { CalendarDayView, CalendarWeekView } from "./week-and-day-view";
@@ -19,31 +18,16 @@ interface IProps {
   onViewChange?: (view: TCalendarView) => void;
 }
 
-export function CalendarContainer({ view, onViewChange }: IProps) {
+export const CalendarContainer = memo(function CalendarContainer({
+  view,
+  onViewChange,
+}: IProps) {
   const { selectedDate, selectedUserId, events } = useCalendar();
 
   const filteredEvents = useMemo(() => {
     return events.filter(event => {
       const eventStartDate = parseISO(event.startDate);
       const eventEndDate = parseISO(event.endDate);
-
-      if (view === "year") {
-        const yearStart = new Date(selectedDate.getFullYear(), 0, 1);
-        const yearEnd = new Date(
-          selectedDate.getFullYear(),
-          11,
-          31,
-          23,
-          59,
-          59,
-          999
-        );
-        const isInSelectedYear =
-          eventStartDate <= yearEnd && eventEndDate >= yearStart;
-        const isUserMatch =
-          selectedUserId === "all" || event.user.id === selectedUserId;
-        return isInSelectedYear && isUserMatch;
-      }
 
       if (view === "month" || view === "agenda") {
         const monthStart = new Date(
@@ -68,15 +52,8 @@ export function CalendarContainer({ view, onViewChange }: IProps) {
       }
 
       if (view === "week") {
-        const dayOfWeek = selectedDate.getDay();
-
-        const weekStart = new Date(selectedDate);
-        weekStart.setDate(selectedDate.getDate() - dayOfWeek);
-        weekStart.setHours(0, 0, 0, 0);
-
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 6);
-        weekEnd.setHours(23, 59, 59, 999);
+        const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
+        const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 });
 
         const isInSelectedWeek =
           eventStartDate <= weekEnd && eventEndDate >= weekStart;
@@ -111,26 +88,21 @@ export function CalendarContainer({ view, onViewChange }: IProps) {
     });
   }, [selectedDate, selectedUserId, events, view]);
 
-  const singleDayEvents = filteredEvents.filter(event => {
-    const startDate = parseISO(event.startDate);
-    const endDate = parseISO(event.endDate);
-    return isSameDay(startDate, endDate);
-  });
+  // Мемоизируем singleDayEvents и multiDayEvents для предотвращения ререндеров
+  const singleDayEvents = useMemo(() => {
+    return filteredEvents.filter(event => {
+      const startDate = parseISO(event.startDate);
+      const endDate = parseISO(event.endDate);
+      return isSameDay(startDate, endDate);
+    });
+  }, [filteredEvents]);
 
-  const multiDayEvents = filteredEvents.filter(event => {
-    const startDate = parseISO(event.startDate);
-    const endDate = parseISO(event.endDate);
-    return !isSameDay(startDate, endDate);
-  });
-
-  // For year view, we only care about the start date
-  // by using the same date for both start and end,
-  // we ensure only the start day will show a dot
-  const eventStartDates = useMemo(() => {
-    return filteredEvents.map(event => ({
-      ...event,
-      endDate: event.startDate,
-    }));
+  const multiDayEvents = useMemo(() => {
+    return filteredEvents.filter(event => {
+      const startDate = parseISO(event.startDate);
+      const endDate = parseISO(event.endDate);
+      return !isSameDay(startDate, endDate);
+    });
   }, [filteredEvents]);
 
   return (
@@ -160,7 +132,6 @@ export function CalendarContainer({ view, onViewChange }: IProps) {
             multiDayEvents={multiDayEvents}
           />
         )}
-        {view === "year" && <CalendarYearView allEvents={eventStartDates} />}
         {view === "agenda" && (
           <CalendarAgendaView
             singleDayEvents={singleDayEvents}
@@ -170,4 +141,4 @@ export function CalendarContainer({ view, onViewChange }: IProps) {
       </DndProviderWrapper>
     </div>
   );
-}
+});

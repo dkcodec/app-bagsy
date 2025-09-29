@@ -1,5 +1,8 @@
 "use client";
 
+// Ensure String.prototype.capitalize polyfill is loaded in the client bundle
+import "@/src/shared/polyfills";
+
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { type ThemeProviderProps } from "next-themes";
 

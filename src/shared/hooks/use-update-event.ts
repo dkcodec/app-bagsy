@@ -10,10 +10,12 @@ export function useUpdateEvent() {
   // This is just and example, in a real scenario
   // you would call an API to update the event
   const updateEvent = (event: IEvent) => {
-    const newEvent: IEvent = event;
-
-    newEvent.startDate = new Date(event.startDate).toISOString();
-    newEvent.endDate = new Date(event.endDate).toISOString();
+    // Создаем новый объект вместо мутации существующего
+    const newEvent: IEvent = {
+      ...event,
+      startDate: new Date(event.startDate).toISOString(),
+      endDate: new Date(event.endDate).toISOString(),
+    };
 
     setLocalEvents(prev => {
       const index = prev.findIndex(e => e.id === event.id);

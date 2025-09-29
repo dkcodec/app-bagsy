@@ -15,6 +15,7 @@ import { DateNavigator } from "./date-navigator";
 import { AddEventDialog } from "@/src/features/calendar/event-dialogs";
 
 import type { IEvent, TCalendarView } from "@/src/shared/types/calendar";
+import { useTranslations } from "next-intl";
 
 interface IProps {
   view: TCalendarView;
@@ -23,6 +24,7 @@ interface IProps {
 }
 
 export function CalendarHeader({ view, events, onViewChange }: IProps) {
+  const t = useTranslations("Dashboard.Calendar.Header");
   return (
     <div className="flex flex-col gap-4 border-b p-4 lg:flex-row lg:items-center lg:justify-between">
       <div className="flex items-center gap-3">
@@ -64,16 +66,6 @@ export function CalendarHeader({ view, events, onViewChange }: IProps) {
             </Button>
 
             <Button
-              aria-label="View by year"
-              size="icon"
-              variant={view === "year" ? "default" : "outline"}
-              className="-ml-px rounded-none [&_svg]:size-5"
-              onClick={() => onViewChange?.("year")}
-            >
-              <Grid3x3 strokeWidth={1.8} />
-            </Button>
-
-            <Button
               aria-label="View by agenda"
               size="icon"
               variant={view === "agenda" ? "default" : "outline"}
@@ -90,7 +82,7 @@ export function CalendarHeader({ view, events, onViewChange }: IProps) {
         <AddEventDialog>
           <Button className="w-full sm:w-auto">
             <Plus />
-            Add Event
+            {t("addEvent")}
           </Button>
         </AddEventDialog>
       </div>
