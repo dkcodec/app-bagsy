@@ -17,13 +17,13 @@ import {
 } from "@/src/entities/popover";
 
 const DAYS_OF_WEEK = [
-  { index: 0, name: "Воскресенье" },
-  { index: 1, name: "Понедельник" },
-  { index: 2, name: "Вторник" },
-  { index: 3, name: "Среда" },
-  { index: 4, name: "Четверг" },
-  { index: 5, name: "Пятница" },
-  { index: 6, name: "Суббота" },
+  { index: 0, name: "monday" },
+  { index: 1, name: "tuesday" },
+  { index: 2, name: "wednesday" },
+  { index: 3, name: "thursday" },
+  { index: 4, name: "friday" },
+  { index: 5, name: "saturday" },
+  { index: 6, name: "sunday" },
 ];
 
 interface ChangeWorkingHoursInputProps {
@@ -111,7 +111,7 @@ export function ChangeWorkingHoursInput({
                 <span
                   className={`font-medium ${isMobile ? "text-sm" : "text-sm"}`}
                 >
-                  {day.name}
+                  {t(day.name)}
                 </span>
               </div>
 
