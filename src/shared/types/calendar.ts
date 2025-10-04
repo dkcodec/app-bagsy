@@ -27,7 +27,7 @@ export interface IEvent {
   endDate: string;
   title: string;
   color: TEventColor;
-  description: string;
+  comment: string;
   user: IUser;
 }
 
