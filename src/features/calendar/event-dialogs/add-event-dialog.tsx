@@ -35,11 +35,11 @@ import {
   DialogContent,
   DialogTrigger,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
 } from "@/src/entities/dialog";
 
 import { eventSchema, type TEventFormData } from "@/src/shared/schemas";
+import { useTranslations } from "next-intl";
 
 import type { TimeValue } from "react-aria-components";
 
@@ -51,6 +51,7 @@ interface IProps {
 
 export function AddEventDialog({ children, startDate, startTime }: IProps) {
   const { users } = useCalendar();
+  const t = useTranslations("Dashboard.Calendar.AddEventDialog");
 
   const { isOpen, onClose, onToggle } = useDisclosure();
 
@@ -58,7 +59,7 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
     resolver: zodResolver(eventSchema),
     defaultValues: {
       title: "",
-      description: "",
+      comment: "",
       startDate: typeof startDate !== "undefined" ? startDate : undefined,
       startTime: typeof startTime !== "undefined" ? startTime : undefined,
     },
@@ -81,31 +82,27 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
     <Dialog open={isOpen} onOpenChange={onToggle}>
       <DialogTrigger asChild>{children}</DialogTrigger>
 
-      <DialogContent>
+      <DialogContent className="w-full max-w-4xl">
         <DialogHeader>
-          <DialogTitle>Add New Event</DialogTitle>
-          <DialogDescription>
-            This is just and example of how to use the form. In a real
-            application, you would call the API to create the event
-          </DialogDescription>
+          <DialogTitle>{t("title")}</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
           <form
             id="event-form"
             onSubmit={form.handleSubmit(onSubmit)}
-            className="grid gap-4 py-4"
+            className="grid sm:grid-cols-2 gap-4 py-4 px-1 max-h-[400px] md:max-h-none overflow-y-auto"
           >
             <FormField
               control={form.control}
               name="user"
               render={({ field, fieldState }) => (
                 <FormItem>
-                  <FormLabel>Responsible</FormLabel>
+                  <FormLabel>{t("staff")}</FormLabel>
                   <FormControl>
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger data-invalid={fieldState.invalid}>
-                        <SelectValue placeholder="Select an option" />
+                        <SelectValue placeholder={t("staffDescription")} />
                       </SelectTrigger>
 
                       <SelectContent>
@@ -143,12 +140,12 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
               name="title"
               render={({ field, fieldState }) => (
                 <FormItem>
-                  <FormLabel htmlFor="title">Title</FormLabel>
+                  <FormLabel htmlFor="title">{t("service")}</FormLabel>
 
                   <FormControl>
                     <Input
                       id="title"
-                      placeholder="Enter a title"
+                      placeholder={t("serviceDescription")}
                       data-invalid={fieldState.invalid}
                       {...field}
                     />
@@ -165,14 +162,14 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
                 name="startDate"
                 render={({ field, fieldState }) => (
                   <FormItem className="flex-1">
-                    <FormLabel htmlFor="startDate">Start Date</FormLabel>
+                    <FormLabel htmlFor="startDate">{t("startDate")}</FormLabel>
 
                     <FormControl>
                       <SingleDayPicker
                         id="startDate"
                         value={field.value}
                         onSelect={date => field.onChange(date as Date)}
-                        placeholder="Select a date"
+                        placeholder={t("startDateDescription")}
                         data-invalid={fieldState.invalid}
                       />
                     </FormControl>
@@ -187,7 +184,7 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
                 name="startTime"
                 render={({ field, fieldState }) => (
                   <FormItem className="flex-1">
-                    <FormLabel>Start Time</FormLabel>
+                    <FormLabel>{t("startTime")}</FormLabel>
 
                     <FormControl>
                       <TimeInput
@@ -210,12 +207,12 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
                 name="endDate"
                 render={({ field, fieldState }) => (
                   <FormItem className="flex-1">
-                    <FormLabel>End Date</FormLabel>
+                    <FormLabel>{t("endDate")}</FormLabel>
                     <FormControl>
                       <SingleDayPicker
                         value={field.value}
                         onSelect={date => field.onChange(date as Date)}
-                        placeholder="Select a date"
+                        placeholder={t("endDateDescription")}
                         data-invalid={fieldState.invalid}
                       />
                     </FormControl>
@@ -229,7 +226,9 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
                 name="endTime"
                 render={({ field, fieldState }) => (
                   <FormItem className="flex-1">
-                    <FormLabel>End Time</FormLabel>
+                    <FormLabel className="text-nowrap">
+                      {t("endTime")}
+                    </FormLabel>
 
                     <FormControl>
                       <TimeInput
@@ -251,60 +250,60 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
               name="color"
               render={({ field, fieldState }) => (
                 <FormItem>
-                  <FormLabel>Color</FormLabel>
+                  <FormLabel>{t("Color.title")}</FormLabel>
                   <FormControl>
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger data-invalid={fieldState.invalid}>
-                        <SelectValue placeholder="Select an option" />
+                        <SelectValue placeholder={t("Color.description")} />
                       </SelectTrigger>
 
                       <SelectContent>
                         <SelectItem value="blue">
                           <div className="flex items-center gap-2">
                             <div className="size-3.5 rounded-full bg-blue-600" />
-                            Blue
+                            {t("Color.blue")}
                           </div>
                         </SelectItem>
 
                         <SelectItem value="green">
                           <div className="flex items-center gap-2">
                             <div className="size-3.5 rounded-full bg-green-600" />
-                            Green
+                            {t("Color.green")}
                           </div>
                         </SelectItem>
 
                         <SelectItem value="red">
                           <div className="flex items-center gap-2">
                             <div className="size-3.5 rounded-full bg-red-600" />
-                            Red
+                            {t("Color.red")}
                           </div>
                         </SelectItem>
 
                         <SelectItem value="yellow">
                           <div className="flex items-center gap-2">
                             <div className="size-3.5 rounded-full bg-yellow-600" />
-                            Yellow
+                            {t("Color.yellow")}
                           </div>
                         </SelectItem>
 
                         <SelectItem value="purple">
                           <div className="flex items-center gap-2">
                             <div className="size-3.5 rounded-full bg-purple-600" />
-                            Purple
+                            {t("Color.purple")}
                           </div>
                         </SelectItem>
 
                         <SelectItem value="orange">
                           <div className="flex items-center gap-2">
                             <div className="size-3.5 rounded-full bg-orange-600" />
-                            Orange
+                            {t("Color.orange")}
                           </div>
                         </SelectItem>
 
                         <SelectItem value="gray">
                           <div className="flex items-center gap-2">
                             <div className="size-3.5 rounded-full bg-neutral-600" />
-                            Gray
+                            {t("Color.gray")}
                           </div>
                         </SelectItem>
                       </SelectContent>
@@ -317,14 +316,15 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
 
             <FormField
               control={form.control}
-              name="description"
+              name="comment"
               render={({ field, fieldState }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>{t("comment")}</FormLabel>
 
                   <FormControl>
                     <Textarea
                       {...field}
+                      placeholder={t("commentDescription")}
                       value={field.value}
                       data-invalid={fieldState.invalid}
                     />
@@ -337,15 +337,15 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
           </form>
         </Form>
 
-        <DialogFooter>
+        <DialogFooter className="flex gap-3">
           <DialogClose asChild>
             <Button type="button" variant="outline">
-              Cancel
+              {t("cancel")}
             </Button>
           </DialogClose>
 
           <Button form="event-form" type="submit">
-            Create Event
+            {t("add")}
           </Button>
         </DialogFooter>
       </DialogContent>

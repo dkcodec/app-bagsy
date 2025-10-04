@@ -47,6 +47,34 @@
         "addEvent": "Жазбаны қосу",
         "all": "Барлығы"
       },
+      "AddEventDialog": {
+        "title": "Жазбаны қосу",
+        "staff": "Қызметкер",
+        "staffDescription": "Қызметкерді таңдаңыз",
+        "service": "Қызмет",
+        "serviceDescription": "Қызметті таңдаңыз",
+        "startDate": "Басталу күні",
+        "startDateDescription": "Күнді таңдаңыз",
+        "startTime": "Басталу уақыты",
+        "endDate": "Аяқталу күні",
+        "endDateDescription": "Күнді таңдаңыз",
+        "endTime": "Аяқталу уақыты",
+        "Color": {
+          "title": "Түс",
+          "description": "Түсті таңдаңыз",
+          "blue": "Көк",
+          "green": "Жасыл",
+          "red": "Қызыл",
+          "yellow": "Сары",
+          "purple": "Күлгін",
+          "orange": "Қызғылт сары",
+          "gray": "Сұр"
+        },
+        "comment": "Пікір",
+        "commentDescription": "Қосымша ақпарат",
+        "add": "Жазбаны қосу",
+        "cancel": "Бас тарту"
+      },
       "happeningNow": "Қазір өтеді",
       "noAppointmentsAtTheMoment": "Қазір қызмет көрсетуді қабылдауға мүмкіндік жоқ"
     }

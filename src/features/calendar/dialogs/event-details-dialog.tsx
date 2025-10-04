@@ -69,10 +69,8 @@ export function EventDetailsDialog({ event, children }: IProps) {
             <div className="flex items-start gap-2">
               <Text className="mt-1 size-4 shrink-0" />
               <div>
-                <p className="text-sm font-medium">Description</p>
-                <p className="text-sm text-muted-foreground">
-                  {event.description}
-                </p>
+                <p className="text-sm font-medium">Comment</p>
+                <p className="text-sm text-muted-foreground">{event.comment}</p>
               </div>
             </div>
           </div>
