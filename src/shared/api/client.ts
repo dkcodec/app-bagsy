@@ -37,7 +37,7 @@ class ApiClient {
         ...options.headers,
       },
       // Включаем cookies для автоматической отправки httpOnly cookies
-      credentials: "include",
+      // credentials: "include",
       ...options,
     };
 
@@ -90,7 +90,7 @@ class ApiClient {
       ApiClient.refreshPromise = (async () => {
         await fetch(`${baseURL}v1/auth/refresh`, {
           method: "POST",
-          credentials: "include",
+          // credentials: "include",
           headers: { "Content-Type": "application/json" },
         }).finally(() => {
           /* игнорируем тело; cookies обновятся через Set-Cookie */
