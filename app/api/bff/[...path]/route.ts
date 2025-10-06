@@ -1,18 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-const BACKEND_URL = process.env.BACKEND_URL!; // например, https://api.bagsy.kz
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 
 async function forward(req: NextRequest, path: string[]) {
+  if (!BACKEND_URL) {
+    return NextResponse.json(
+      { message: "Server misconfiguration: API URL missing" },
+      { status: 500 }
+    );
+  }
+
   const url = new URL(req.url);
-  const target = `${BACKEND_URL}/${path.join("/")}${url.search}`;
+  const target = `${BACKEND_URL}${path.join("/")}${url.search}`;
 
   const access = (await cookies()).get("access_token")?.value;
 
   const init: RequestInit = {
     method: req.method,
     headers: {
-      "content-type": req.headers.get("content-type") || "",
+      ...(req.headers.get("content-type")
+        ? { "content-type": req.headers.get("content-type") as string }
+        : {}),
       ...(access ? { Authorization: `Bearer ${access}` } : {}),
     },
     body: ["GET", "HEAD"].includes(req.method)
@@ -21,7 +30,15 @@ async function forward(req: NextRequest, path: string[]) {
     cache: "no-store",
   };
 
-  let r = await fetch(target, init);
+  let r: Response;
+  try {
+    r = await fetch(target, init);
+  } catch (e) {
+    return NextResponse.json(
+      { message: "Upstream unavailable" },
+      { status: 502 }
+    );
+  }
 
   // авто-рефреш: один раз пробуем обновить и повторить запрос
   if (r.status === 401) {
@@ -36,13 +53,20 @@ async function forward(req: NextRequest, path: string[]) {
 
     if (refreshed.ok) {
       const newAccess = (await cookies()).get("access_token")?.value;
-      r = await fetch(target, {
-        ...init,
-        headers: {
-          ...init.headers,
-          ...(newAccess ? { Authorization: `Bearer ${newAccess}` } : {}),
-        },
-      });
+      try {
+        r = await fetch(target, {
+          ...init,
+          headers: {
+            ...init.headers,
+            ...(newAccess ? { Authorization: `Bearer ${newAccess}` } : {}),
+          },
+        });
+      } catch (e) {
+        return NextResponse.json(
+          { message: "Upstream unavailable" },
+          { status: 502 }
+        );
+      }
     }
   }
 
