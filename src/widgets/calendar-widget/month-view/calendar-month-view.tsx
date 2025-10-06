@@ -63,7 +63,7 @@ export const CalendarMonthView = memo(function CalendarMonthView({
       <div className="grid grid-cols-7 overflow-hidden">
         {cells.map(cell => (
           <DayCell
-            key={cell.date.toISOString()}
+            key={cell.date.getTime()}
             cell={cell}
             events={allEvents}
             eventPositions={eventPositions}

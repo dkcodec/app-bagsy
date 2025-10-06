@@ -24,7 +24,7 @@ const DashboardTitle = () => {
           showWelcome ? "opacity-0" : "opacity-100"
         }`}
       >
-        {t("panel", { name: "Менеджер" })}
+        {t("calendar")}
       </h1>
     </div>
   );

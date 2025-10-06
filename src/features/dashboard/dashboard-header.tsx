@@ -2,6 +2,7 @@ import React from "react";
 import { SidebarTrigger } from "@/src/entities/sidebar";
 import { Separator } from "@/src/entities/separator";
 import { DashboardTitle } from "@/src/entities/dashboard-title";
+import { CalendarSettings } from "@/src/features/calendar/settings";
 
 export const DashboardHeader: React.FC = () => {
   return (
@@ -10,6 +11,7 @@ export const DashboardHeader: React.FC = () => {
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-4" />
         <DashboardTitle />
+        <CalendarSettings />
       </div>
     </header>
   );
