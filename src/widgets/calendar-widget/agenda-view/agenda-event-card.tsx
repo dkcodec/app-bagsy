@@ -126,7 +126,7 @@ export function AgendaEventCard({
 
           <div className="flex items-center gap-1">
             <Text className="size-3 shrink-0" />
-            <p className="text-xs text-foreground">{event.description}</p>
+            <p className="text-xs text-foreground">{event.comment}</p>
           </div>
         </div>
       </div>

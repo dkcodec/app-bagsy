@@ -61,7 +61,7 @@ export function EditEventDialog({ children, event }: IProps) {
     defaultValues: {
       user: event.user.id,
       title: event.title,
-      description: event.description,
+      comment: event.comment,
       startDate: parseISO(event.startDate),
       startTime: {
         hour: parseISO(event.startDate).getHours(),
@@ -92,7 +92,7 @@ export function EditEventDialog({ children, event }: IProps) {
       user,
       title: values.title,
       color: values.color,
-      description: values.description,
+      comment: values.comment ?? "",
       startDate: startDateTime.toISOString(),
       endDate: endDateTime.toISOString(),
     });
@@ -338,7 +338,7 @@ export function EditEventDialog({ children, event }: IProps) {
 
             <FormField
               control={form.control}
-              name="description"
+              name="comment"
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormLabel>Description</FormLabel>

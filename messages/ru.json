@@ -14,7 +14,10 @@
   },
   "Dashboard": {
     "content": { "calendar": "Календарь" },
-    "title": { "welcome": "Добро пожаловать!", "panel": "Панель {name}" },
+    "title": {
+      "welcome": "Добро пожаловать!",
+      "calendar": "Календарь"
+    },
     "Settings": {
       "calendarSettings": "Настройки календаря",
       "setYourSettings": "Настройте ваше расписание и вид отображения",
@@ -46,6 +49,34 @@
         "events": "записей",
         "addEvent": "Добавить запись",
         "all": "Все"
+      },
+      "AddEventDialog": {
+        "title": "Добавить запись",
+        "staff": "Работник",
+        "staffDescription": "Выберите работника",
+        "service": "Услуга",
+        "serviceDescription": "Выберите услугу",
+        "startDate": "Дата начала",
+        "startDateDescription": "Выберите дату",
+        "startTime": "Время начала",
+        "endDate": "Дата окончания",
+        "endDateDescription": "Выберите дату",
+        "endTime": "Время окончания",
+        "Color": {
+          "title": "Цвет",
+          "description": "Выберите цвет",
+          "blue": "Синий",
+          "green": "Зелёный",
+          "red": "Красный",
+          "yellow": "Жёлтый",
+          "purple": "Фиолетовый",
+          "orange": "Оранжевый",
+          "gray": "Серый"
+        },
+        "comment": "Комментарий",
+        "commentDescription": "Дополнительная информация",
+        "add": "Добавить запись",
+        "cancel": "Отмена"
       },
       "happeningNow": "Происходит сейчас",
       "noAppointmentsAtTheMoment": "Нет активной записи сейчас"
