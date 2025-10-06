@@ -1,46 +1,19 @@
-import { apiClient } from "@/src/shared/api/client";
-import type {
-  LoginRequest,
-  LoginResponse,
-  RefreshResponse,
-  User,
-} from "../types";
+import { LoginRequest, LoginResponse } from "../types";
+import { ApiError } from "@/src/shared/api";
 
-/**
- * Сервис для работы с авторизацией
- */
 export const authService = {
-  /**
-   * Вход в систему
-   */
   async login(credentials: LoginRequest): Promise<LoginResponse> {
-    const response = await apiClient.post<LoginResponse>(
-      "v1/auth/login",
-      credentials
-    );
-    return response.data;
+    const r = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(credentials),
+    });
+    if (!r.ok) throw new ApiError("Login failed", r.status);
+    return r.json();
   },
 
-  /**
-   * Выход из системы
-   */
   async logout(): Promise<void> {
-    await apiClient.post("v1/auth/logout");
-  },
-
-  /**
-   * Обновление токена
-   */
-  async refresh(): Promise<RefreshResponse> {
-    const response = await apiClient.post<RefreshResponse>("v1/auth/refresh");
-    return response.data;
-  },
-
-  /**
-   * Получение текущего пользователя
-   */
-  async getCurrentUser(): Promise<User> {
-    const response = await apiClient.get<User>("v1/auth/me");
-    return response.data;
+    const r = await fetch("/api/auth/logout", { method: "POST" });
+    if (!r.ok) throw new ApiError("Logout failed", r.status);
   },
 };
