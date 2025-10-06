@@ -9,93 +9,25 @@ import { mockEvents, mockUsers } from "@/src/shared";
 import { CalendarSettings } from "@/src/features/calendar/settings";
 import { useTranslations } from "next-intl";
 import { Loader } from "lucide-react";
+import { TCalendarView } from "@/src/shared/types/calendar";
 
-const DashboardContent: React.FC = () => {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const t = useTranslations("Dashboard.content");
-  // Получаем вид из URL или используем "month" по умолчанию
-  type View = "day" | "week" | "month" | "agenda";
-  const isView = (v: string): v is View =>
-    ["day", "week", "month", "agenda"].includes(v as View);
+interface IProps {
+  calendarView: TCalendarView;
+  handleViewChange: (view: TCalendarView) => void;
+}
 
-  const getInitialView = (): View => {
-    const viewParam = searchParams.get("view");
-    return viewParam && isView(viewParam) ? viewParam : "month";
-  };
-
-  const [calendarView, setCalendarView] = useState<View>(getInitialView);
-
-  // Обновляем URL при изменении вида
-  const handleViewChange = (view: View) => {
-    setCalendarView(view);
-
-    // Создаем новые параметры URL
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("view", view);
-
-    // Обновляем URL без перезагрузки страницы
-    router.push(`?${params.toString()}`, { scroll: false });
-  };
-
-  // Получаем дату из URL или используем текущую дату
-  const getInitialDate = (): Date => {
-    const dateParam = searchParams.get("date");
-    if (dateParam) {
-      const parsedDate = parseISO(dateParam);
-      if (isValid(parsedDate)) {
-        return parsedDate;
-      }
-    }
-    return new Date();
-  };
-
-  // Обновляем URL при изменении даты
-  const handleDateChange = (date: Date) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("date", format(date, "yyyy-MM-dd"));
-
-    router.push(`?${params.toString()}`, { scroll: false });
-  };
-
-  // Синхронизируем состояние с URL при изменении параметров
-  useEffect(() => {
-    const viewParam = searchParams.get("view");
-    if (viewParam && isView(viewParam)) {
-      setCalendarView(viewParam);
-    }
-  }, [searchParams, isView]);
-
-  const [isMounted, setIsMounted] = useState(false);
-  useEffect(() => setIsMounted(true), []);
-
+const DashboardContent: React.FC<IProps> = ({
+  calendarView,
+  handleViewChange,
+}) => {
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-1">
-      {isMounted ? (
-        <CalendarProvider
-          events={mockEvents}
-          users={mockUsers}
-          initialDate={getInitialDate()}
-          onDateChange={handleDateChange}
-        >
-          <div className="flex flex-col gap-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">{t("calendar")}</h2>
-              <div className="flex items-center gap-4">
-                <CalendarSettings />
-              </div>
-            </div>
-            <CalendarContainer
-              view={calendarView}
-              onViewChange={handleViewChange}
-            />
-          </div>
-        </CalendarProvider>
-      ) : (
-        <div className="flex items-center justify-center h-full">
-          <Loader className="h-6 w-6 animate-spin" />
-        </div>
-      )}
+      <div className="flex flex-col gap-4">
+        <CalendarContainer
+          view={calendarView}
+          onViewChange={handleViewChange}
+        />
+      </div>
     </div>
   );
 };

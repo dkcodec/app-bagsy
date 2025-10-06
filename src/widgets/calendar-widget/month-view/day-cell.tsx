@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { isToday, startOfDay } from "date-fns";
+import { isToday, startOfDay, format } from "date-fns";
 
 import { EventBullet } from "./event-bullet";
 import { DroppableDayCell } from "@/src/widgets/calendar-widget/dnd/droppable-day-cell";
@@ -9,6 +9,7 @@ import { cn } from "@/src/shared/utils/styles";
 import { getMonthCellEvents } from "@/src/shared/utils/calendar";
 
 import type { ICalendarCell, IEvent } from "@/src/shared/types/calendar";
+import { useRouter } from "next/navigation";
 
 interface IProps {
   cell: ICalendarCell;
@@ -20,20 +21,28 @@ const MAX_VISIBLE_EVENTS = 3;
 
 export function DayCell({ cell, events, eventPositions }: IProps) {
   const { day, currentMonth, date } = cell;
-
+  const router = useRouter();
   const cellEvents = useMemo(
     () => getMonthCellEvents(date, events, eventPositions),
     [date, events, eventPositions]
   );
   const isSunday = date.getDay() === 0;
+  const isMonday = date.getDay() === 1;
+
+  const handleCellClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const localDateStr = format(date, "yyyy-MM-dd");
+    router.push(`/?date=${localDateStr}&view=day`);
+  };
 
   return (
     <DroppableDayCell cell={cell}>
       <div
         className={cn(
           "flex h-full flex-col gap-1 border-l border-t py-1.5 lg:py-2",
-          isSunday && "border-l-0"
+          isMonday && "border-l-0",
+          isSunday && "border-r"
         )}
+        onClick={e => handleCellClick(e)}
       >
         <span
           className={cn(
@@ -51,6 +60,10 @@ export function DayCell({ cell, events, eventPositions }: IProps) {
             "flex h-6 gap-1 px-2 lg:h-[94px] lg:flex-col lg:gap-2 lg:px-0",
             !currentMonth && "opacity-50"
           )}
+          onClick={e => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
         >
           {[0, 1, 2].map(position => {
             const event = cellEvents.find(e => e.position === position);
@@ -64,7 +77,7 @@ export function DayCell({ cell, events, eventPositions }: IProps) {
                   <>
                     <EventBullet className="lg:hidden" color={event.color} />
                     <MonthEventBadge
-                      className="hidden lg:flex"
+                      className="hidden lg:flex cursor-grab"
                       event={event}
                       cellDate={startOfDay(date)}
                     />

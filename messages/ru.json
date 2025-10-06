@@ -14,7 +14,10 @@
   },
   "Dashboard": {
     "content": { "calendar": "Календарь" },
-    "title": { "welcome": "Добро пожаловать!", "panel": "Панель {name}" },
+    "title": {
+      "welcome": "Добро пожаловать!",
+      "calendar": "Календарь"
+    },
     "Settings": {
       "calendarSettings": "Настройки календаря",
       "setYourSettings": "Настройте ваше расписание и вид отображения",
