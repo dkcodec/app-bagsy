@@ -4,22 +4,22 @@
  */
 
 // API
-export * from "./api";
+export * from "./api/index";
 
 // Хуки
-export * from "./hooks";
+export * from "./hooks/index";
 
 // Провайдеры
-export * from "./providers";
+export * from "./providers/index";
 
 // Схемы
-export * from "./schemas";
+export * from "./schemas/index";
 
 // Типы
-export * from "./types";
+export * from "./types/index";
 
 // Утилиты
-export * from "./utils";
+export * from "./utils/index";
 
 // Mock данные
-export * from "./mocks";
+export * from "./mocks/index";

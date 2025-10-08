@@ -1,4 +1,3 @@
-// middleware.ts (или src/middleware.ts)
 import createMiddleware from "next-intl/middleware";
 import { NextRequest, NextResponse } from "next/server";
 import { routing } from "@/i18n/routing";
@@ -15,9 +14,8 @@ export default function middleware(req: NextRequest) {
   const second = segments[1] ?? "";
   const isLoginPath = second === "login";
 
-  const accessToken = req.cookies.get("access_token")?.value;
   const refreshToken = req.cookies.get("refresh_token")?.value;
-  const isAuthenticated = Boolean(accessToken && refreshToken);
+  const isAuthenticated = Boolean(refreshToken);
 
   if (!isAuthenticated && !isLoginPath) {
     const url = req.nextUrl.clone();
