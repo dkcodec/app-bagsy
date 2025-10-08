@@ -8,7 +8,6 @@ import { Input } from "@/src/entities/input";
 import { Label } from "@/src/entities/label";
 import { PhoneInput, PhoneInputValue } from "@/src/widgets/forms";
 import { cn } from "@/src/shared/utils/styles";
-import { useAuth } from "@/src/shared/hooks/use-auth";
 
 // Типы для пропсов формы работника
 export interface EmployeeFormProps {
@@ -62,7 +61,9 @@ export default function EmployeeForm({
   managerPointId,
   onSubmit,
 }: EmployeeFormProps) {
-  const { user } = useAuth();
+  const user = {
+    role: "worker",
+  };
   // Определяем роль текущего пользователя
   const currentRole = (user?.role as string | undefined) || "worker";
 

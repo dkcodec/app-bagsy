@@ -9,7 +9,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { z } from "zod";
 import { PhoneInput, PhoneInputValue } from "@/src/widgets/forms";
-import { useLogin } from "@/src/shared/hooks/use-auth";
+import { useLogin } from "@/src/shared/hooks";
 import { toast } from "sonner";
 import { Loader } from "lucide-react";
 import { useRouter } from "next/navigation";

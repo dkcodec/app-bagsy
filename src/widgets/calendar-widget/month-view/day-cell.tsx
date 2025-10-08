@@ -29,7 +29,7 @@ export function DayCell({ cell, events, eventPositions }: IProps) {
   const isSunday = date.getDay() === 0;
   const isMonday = date.getDay() === 1;
 
-  const handleCellClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleCellClick = () => {
     const localDateStr = format(date, "yyyy-MM-dd");
     router.push(`/?date=${localDateStr}&view=day`);
   };
@@ -42,7 +42,7 @@ export function DayCell({ cell, events, eventPositions }: IProps) {
           isMonday && "border-l-0",
           isSunday && "border-r"
         )}
-        onClick={e => handleCellClick(e)}
+        onClick={handleCellClick}
       >
         <span
           className={cn(

@@ -14,3 +14,6 @@ export * from "./styles";
 
 // Утилиты для календаря
 export * from "./calendar";
+
+// Утилиты для работы с куки
+export * from "./cookies";

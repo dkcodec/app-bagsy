@@ -1,243 +1,230 @@
 /**
- * API клиент для работы с бэкендом
- * Настроен для работы с httpOnly cookies и обработки ошибок
+ * Легкий HTTP клиент поверх fetch с обработкой JSON и ошибок
+ * Спроектирован для расширения (интерсепторы, токены, ретраи)
  */
 
-import { ApiResponse } from "./types";
+import {
+  getAccessToken,
+  setAuthTokens,
+  clearAuthTokens,
+} from "../utils/cookies";
+import { AuthService } from "../services/auth-service";
 
-// Базовый URL API (можно вынести в переменные окружения)
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
+export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
-/**
- * Класс для работы с API
- * Обрабатывает запросы, ошибки и автоматически добавляет cookies
- */
-class ApiClient {
-  private baseURL: string;
+export interface HttpClientOptions {
+  baseUrl?: string;
+  getAuthToken?: () => string | null | undefined;
+  onUnauthorized?: () => void;
+}
 
-  constructor(baseURL: string = API_BASE_URL) {
-    this.baseURL = baseURL;
+export interface RequestOptions extends RequestInit {
+  query?: Record<string, string | number | boolean | undefined | null>;
+}
+
+export class HttpClient {
+  private readonly baseUrl: string;
+  private readonly getAuthToken?: () => string | null | undefined;
+  private readonly onUnauthorized?: () => void;
+  private isRefreshing = false; // Флаг для предотвращения множественных refresh
+  private refreshPromise: Promise<void> | null = null; // Промис для синхронизации refresh
+
+  constructor(options: HttpClientOptions = {}) {
+    this.baseUrl = options.baseUrl?.replace(/\/$/, "") || "";
+    this.getAuthToken = options.getAuthToken;
+    this.onUnauthorized = options.onUnauthorized;
+  }
+
+  async request<T>(
+    path: string,
+    method: HttpMethod,
+    options: RequestOptions = {}
+  ): Promise<T> {
+    return this.executeRequest<T>(path, method, options);
   }
 
   /**
-   * Базовый метод для выполнения HTTP запросов
-   * Автоматически обрабатывает ошибки и добавляет необходимые заголовки
+   * Выполняет запрос с автоматическим refresh токена при 401 ошибке
    */
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<ApiResponse<T>> {
-    const url = `${this.baseURL}${endpoint}`;
+  private async executeRequest<T>(
+    path: string,
+    method: HttpMethod,
+    options: RequestOptions = {},
+    isRetry = false
+  ): Promise<T> {
+    const url = this.buildUrl(path, options.query);
+    const headers = new Headers({
+      Accept: "application/json",
+      ...(options.body ? { "Content-Type": "application/json" } : {}),
+      ...(options.headers || {}),
+    });
 
-    // Настройки по умолчанию
-    const defaultOptions: RequestInit = {
-      headers: {
-        "Content-Type": "application/json",
-        ...options.headers,
-      },
-      // Включаем cookies для автоматической отправки httpOnly cookies
-      // credentials: "include",
+    // Получаем токен (приоритет: переданный колбэк, затем из cookies)
+    const token = this.getAuthToken?.() || (await getAccessToken());
+    if (token) headers.set("Authorization", `Bearer ${token}`);
+
+    const response = await fetch(url, {
       ...options,
-    };
+      method,
+      headers,
+      body: options.body,
+      cache: options.cache ?? "no-store",
+    });
 
-    try {
-      const response = await fetch(url, defaultOptions);
-
-      // Проверяем статус ответа
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new ApiError(
-          errorData.message ||
-            `HTTP ${response.status}: ${response.statusText}`,
-          response.status,
-          errorData.code
-        );
+    // Если получили 401 и это не повторный запрос - пытаемся refresh токен
+    if (!response.ok && response.status === 401 && !isRetry) {
+      try {
+        await this.refreshTokenIfNeeded();
+        // Повторяем запрос с новым токеном
+        return this.executeRequest<T>(path, method, options, true);
+      } catch (refreshError) {
+        // Если refresh не удался - очищаем токены и вызываем колбэк
+        await clearAuthTokens();
+        this.onUnauthorized?.();
+        throw refreshError;
       }
-
-      // Парсим JSON ответ
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      // Обрабатываем различные типы ошибок
-      if (error instanceof ApiError) {
-        throw error;
-      }
-
-      if (error instanceof TypeError && error.message.includes("fetch")) {
-        throw new ApiError(
-          "Ошибка сети. Проверьте подключение к интернету.",
-          0
-        );
-      }
-
-      throw new ApiError(
-        error instanceof Error ? error.message : "Неизвестная ошибка",
-        0
-      );
     }
-  }
 
-  // Глобальный промис рефреша для дедупликации одновременных 401
-  // ВАЖНО: httpOnly cookie обновятся на бэке, тело ответа нам не нужно
-  private static refreshPromise: Promise<void> | null = null;
-
-  /**
-   * Гарантированно выполнить рефреш один раз для конкурирующих запросов
-   */
-  private static async ensureRefreshed(baseURL: string): Promise<void> {
-    if (!ApiClient.refreshPromise) {
-      ApiClient.refreshPromise = (async () => {
-        await fetch(`${baseURL}v1/auth/refresh`, {
-          method: "POST",
-          // credentials: "include",
-          headers: { "Content-Type": "application/json" },
-        }).finally(() => {
-          /* игнорируем тело; cookies обновятся через Set-Cookie */
-        });
-      })().finally(() => {
-        ApiClient.refreshPromise = null;
-      });
-    }
-    return ApiClient.refreshPromise;
-  }
-
-  /**
-   * Обертка: при 401 один раз делаем refresh и повторяем запрос
-   */
-  private async withAutoRefresh<T>(
-    fn: () => Promise<ApiResponse<T>>
-  ): Promise<ApiResponse<T>> {
-    try {
-      return await fn();
-    } catch (error) {
-      if (error instanceof ApiError && error.status === 401) {
-        await ApiClient.ensureRefreshed(this.baseURL);
-        // Один повтор после успешного/доступного рефреша
-        return await fn();
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        this.onUnauthorized?.();
       }
+      let errorBody: unknown = undefined;
+      try {
+        errorBody = await response.json();
+      } catch {
+        // ignore json parse error
+      }
+      const error = new Error(
+        (errorBody as { message?: string })?.message ||
+          response.statusText ||
+          "Request failed"
+      ) as Error & { status: number; body: unknown };
+      error.status = response.status;
+      error.body = errorBody;
       throw error;
     }
+
+    if (response.status === 204) return undefined as unknown as T;
+
+    const contentType = response.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      return (await response.json()) as T;
+    }
+    // Fallback: text
+    return (await response.text()) as unknown as T;
   }
 
   /**
-   * GET запрос
+   * Обновляет токен если нужно (с защитой от множественных вызовов)
    */
-  async get<T>(
-    endpoint: string,
-    options?: RequestInit
-  ): Promise<ApiResponse<T>> {
-    return this.withAutoRefresh(() =>
-      this.request<T>(endpoint, {
-        method: "GET",
-        ...options,
-      })
-    );
+  private async refreshTokenIfNeeded(): Promise<void> {
+    // Если уже идет refresh - ждем его завершения
+    if (this.isRefreshing && this.refreshPromise) {
+      return this.refreshPromise;
+    }
+
+    // Если не идет refresh - запускаем новый
+    if (!this.isRefreshing) {
+      this.isRefreshing = true;
+      this.refreshPromise = this.performTokenRefresh();
+    }
+
+    return this.refreshPromise!;
   }
 
   /**
-   * POST запрос
+   * Выполняет обновление токена
    */
-  async post<T>(
-    endpoint: string,
-    data?: unknown,
-    options?: RequestInit
-  ): Promise<ApiResponse<T>> {
-    return this.withAutoRefresh(() =>
-      this.request<T>(endpoint, {
-        method: "POST",
-        body: data ? JSON.stringify(data) : undefined,
-        ...options,
-      })
-    );
+  private async performTokenRefresh(): Promise<void> {
+    try {
+      const response = await AuthService.refreshToken();
+      await setAuthTokens(
+        response.data.access_token,
+        response.data.refresh_token
+      );
+    } finally {
+      this.isRefreshing = false;
+      this.refreshPromise = null;
+    }
   }
 
-  /**
-   * PUT запрос
-   */
-  async put<T>(
-    endpoint: string,
-    data?: unknown,
-    options?: RequestInit
-  ): Promise<ApiResponse<T>> {
-    return this.withAutoRefresh(() =>
-      this.request<T>(endpoint, {
-        method: "PUT",
-        body: data ? JSON.stringify(data) : undefined,
-        ...options,
-      })
-    );
+  get<T>(path: string, options?: RequestOptions) {
+    return this.request<T>(path, "GET", options);
+  }
+  post<T>(path: string, body?: unknown, options?: RequestOptions) {
+    const normalizedBody =
+      typeof body === "string"
+        ? body
+        : body != null
+          ? JSON.stringify(body)
+          : undefined;
+    return this.request<T>(path, "POST", {
+      ...(options || {}),
+      body: normalizedBody as BodyInit | null | undefined,
+    });
+  }
+  put<T>(path: string, body?: unknown, options?: RequestOptions) {
+    const normalizedBody =
+      typeof body === "string"
+        ? body
+        : body != null
+          ? JSON.stringify(body)
+          : undefined;
+    return this.request<T>(path, "PUT", {
+      ...(options || {}),
+      body: normalizedBody as BodyInit | null | undefined,
+    });
+  }
+  patch<T>(path: string, body?: unknown, options?: RequestOptions) {
+    const normalizedBody =
+      typeof body === "string"
+        ? body
+        : body != null
+          ? JSON.stringify(body)
+          : undefined;
+    return this.request<T>(path, "PATCH", {
+      ...(options || {}),
+      body: normalizedBody as BodyInit | null | undefined,
+    });
+  }
+  delete<T>(path: string, options?: RequestOptions) {
+    return this.request<T>(path, "DELETE", options);
   }
 
-  /**
-   * PATCH запрос
-   */
-  async patch<T>(
-    endpoint: string,
-    data?: unknown,
-    options?: RequestInit
-  ): Promise<ApiResponse<T>> {
-    return this.withAutoRefresh(() =>
-      this.request<T>(endpoint, {
-        method: "PATCH",
-        body: data ? JSON.stringify(data) : undefined,
-        ...options,
-      })
+  private buildUrl(path: string, query?: RequestOptions["query"]) {
+    const cleanPath = path.startsWith("/") ? path : `/${path}`;
+    const url = new URL(
+      this.baseUrl + cleanPath,
+      typeof window === "undefined"
+        ? "http://localhost"
+        : window.location.origin
     );
-  }
-
-  /**
-   * DELETE запрос
-   */
-  async delete<T>(
-    endpoint: string,
-    options?: RequestInit
-  ): Promise<ApiResponse<T>> {
-    return this.withAutoRefresh(() =>
-      this.request<T>(endpoint, {
-        method: "DELETE",
-        ...options,
-      })
-    );
+    if (query) {
+      Object.entries(query).forEach(([key, value]) => {
+        if (value === undefined || value === null) return;
+        url.searchParams.set(key, String(value));
+      });
+    }
+    return this.baseUrl ? url.toString() : url.pathname + url.search;
   }
 }
 
-// Создаем экземпляр API клиента
-export const apiClient = new ApiClient();
-
-// Экспортируем класс для создания специализированных клиентов
-export { ApiClient };
-
-// Класс для обработки ошибок API
-export class ApiError extends Error {
-  public status: number;
-  public code?: string;
-
-  constructor(message: string, status: number, code?: string) {
-    super(message);
-    this.name = "ApiError";
-    this.status = status;
-    this.code = code;
-  }
-
-  /**
-   * Проверяет, является ли ошибка ошибкой авторизации
-   */
-  isAuthError(): boolean {
-    return this.status === 401 || this.status === 403;
-  }
-
-  /**
-   * Проверяет, является ли ошибка ошибкой сети
-   */
-  isNetworkError(): boolean {
-    return this.status === 0;
-  }
-
-  /**
-   * Проверяет, является ли ошибка ошибкой сервера
-   */
-  isServerError(): boolean {
-    return this.status >= 500;
-  }
-}
+// Единый экземпляр клиента приложения с автоматическим refresh токена
+export const apiClient = new HttpClient({
+  baseUrl: process.env.NEXT_PUBLIC_API_URL,
+  getAuthToken: () => {
+    // Синхронное получение токена для совместимости
+    if (typeof window === "undefined") return null;
+    return document.cookie
+      .split("; ")
+      .find(row => row.startsWith("access_token="))
+      ?.split("=")[1];
+  },
+  onUnauthorized: () => {
+    // Перенаправляем на страницу логина при ошибке авторизации
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+  },
+});
