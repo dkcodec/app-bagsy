@@ -5,7 +5,6 @@
 
 import {
   getAccessToken,
-  getRefreshToken,
   setAuthTokens,
   clearAuthTokens,
 } from "../utils/cookies";
@@ -96,9 +95,11 @@ export class HttpClient {
       } catch {
         // ignore json parse error
       }
-      const error: any = new Error(
-        (errorBody as any)?.message || response.statusText || "Request failed"
-      );
+      const error = new Error(
+        (errorBody as { message?: string })?.message ||
+          response.statusText ||
+          "Request failed"
+      ) as Error & { status: number; body: unknown };
       error.status = response.status;
       error.body = errorBody;
       throw error;

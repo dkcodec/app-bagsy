@@ -1,7 +1,5 @@
 "use client";
 
-import { useCalendar } from "@/src/features/calendar/calendar-context";
-
 import {
   Select,
   SelectContent,

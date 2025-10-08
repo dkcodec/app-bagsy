@@ -1,11 +1,4 @@
-import {
-  Columns,
-  Grid3x3,
-  List,
-  Plus,
-  Grid2x2,
-  CalendarRange,
-} from "lucide-react";
+import { Columns, List, Plus, Grid2x2, CalendarRange } from "lucide-react";
 
 import { Button } from "@/src/entities/button";
 

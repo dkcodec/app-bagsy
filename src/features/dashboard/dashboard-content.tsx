@@ -1,14 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import { format, parseISO, isValid } from "date-fns";
-import { CalendarProvider } from "@/src/features/calendar";
+import React from "react";
 import { CalendarContainer } from "@/src/widgets";
-import { mockEvents, mockUsers } from "@/src/shared";
-import { CalendarSettings } from "@/src/features/calendar/settings";
-import { useTranslations } from "next-intl";
-import { Loader } from "lucide-react";
 import { TCalendarView } from "@/src/shared/types/calendar";
 
 interface IProps {

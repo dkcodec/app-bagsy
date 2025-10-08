@@ -1,21 +1,22 @@
 "use client";
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { format, parseISO, isValid } from "date-fns";
+import { parseISO, isValid, format } from "date-fns";
 import { CalendarProvider } from "@/src/features/calendar";
-import { mockEvents, mockUsers } from "@/src/shared";
 import { DashboardHeader, DashboardContent } from "@/src/features";
-import { useTranslations } from "next-intl";
 import { Loader } from "lucide-react";
+import { mockEvents, mockUsers } from "@/src/shared";
 
 export function DashboardPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const t = useTranslations("Dashboard.content");
   // Получаем вид из URL или используем "month" по умолчанию
   type View = "day" | "week" | "month" | "agenda";
-  const isView = (v: string): v is View =>
-    ["day", "week", "month", "agenda"].includes(v as View);
+  const isView = useCallback(
+    (v: string): v is View =>
+      ["day", "week", "month", "agenda"].includes(v as View),
+    []
+  );
 
   const getInitialView = (): View => {
     const viewParam = searchParams.get("view");
@@ -66,7 +67,7 @@ export function DashboardPage() {
     if (viewParam && isView(viewParam) && viewParam !== calendarView) {
       setCalendarView(viewParam);
     }
-  }, [searchParams, calendarView]);
+  }, [searchParams, calendarView, isView]);
 
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => setIsMounted(true), []);
