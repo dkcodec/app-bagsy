@@ -71,9 +71,15 @@ export class AuthService {
       throw new Error("Refresh token not found");
     }
 
-    return apiClient.post<LoginResponseDto>("v1/auth/refresh", {
-      refresh_token: refreshToken,
-    });
+    return apiClient.post<LoginResponseDto>(
+      "v1/auth/refresh",
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${refreshToken}`,
+        },
+      }
+    );
   }
 
   /**

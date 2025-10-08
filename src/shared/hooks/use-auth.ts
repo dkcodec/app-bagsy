@@ -1,5 +1,5 @@
 "use client";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   AuthService,
   type LoginRequestDto,
@@ -15,11 +15,26 @@ import { useRouter } from "next/navigation";
  * Возвращает статус и метод mutateAsync
  */
 export function useLogin() {
+  const queryClient = useQueryClient();
   return useMutation<LoginResponseDto, unknown, LoginRequestDto>({
     mutationKey: ["auth", "login"],
     mutationFn: (payload: LoginRequestDto) => AuthService.login(payload),
     onSuccess: async data => {
       await setAuthTokens(data.data.access_token, data.data.refresh_token);
+      await queryClient.invalidateQueries({ queryKey: ["me"] });
+    },
+  });
+}
+
+export function useLogout() {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  return useMutation<void, unknown, void>({
+    mutationKey: ["auth", "logout"],
+    mutationFn: () => AuthService.logout(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+      router.refresh();
     },
   });
 }

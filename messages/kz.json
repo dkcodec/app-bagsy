@@ -10,6 +10,10 @@
       "employees": "Жұмысшылар",
       "analytics": "Аналитика",
       "settings": "Параметрлер"
+    },
+    "User": {
+      "name": "Атауы",
+      "phone": "Телефон"
     }
   },
   "Dashboard": {

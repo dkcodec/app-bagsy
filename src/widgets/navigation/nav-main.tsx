@@ -20,19 +20,36 @@ export function NavMain({
 }) {
   const t = useTranslations("Sidebar.Main");
   return (
-    <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarMenu>
-        {main.map(item => (
-          <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild>
-              <Link href={item.url} prefetch>
-                <item.icon />
-                <span>{t(item.name)}</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        ))}
-      </SidebarMenu>
-    </SidebarGroup>
+    <>
+      <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+        <SidebarMenu>
+          {main.map(item => (
+            <SidebarMenuItem key={item.name}>
+              <SidebarMenuButton asChild>
+                <Link href={item.url} prefetch>
+                  <item.icon />
+                  <span>{t(item.name)}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroup>
+
+      {/* Collapsed: quick-access icon-only with tooltips */}
+      <SidebarGroup className="hidden group-data-[collapsible=icon]:block">
+        <SidebarMenu>
+          {main.map(item => (
+            <SidebarMenuItem key={item.name}>
+              <SidebarMenuButton asChild tooltip={t(item.name)}>
+                <Link href={item.url} prefetch aria-label={t(item.name)}>
+                  <item.icon />
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroup>
+    </>
   );
 }
