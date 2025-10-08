@@ -10,6 +10,10 @@
       "employees": "Сотрудники",
       "analytics": "Аналитика",
       "settings": "Настройки"
+    },
+    "User": {
+      "name": "Имя",
+      "phone": "Телефон"
     }
   },
   "Dashboard": {

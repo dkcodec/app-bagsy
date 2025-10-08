@@ -20,13 +20,10 @@ import {
 import { ThemeLogo } from "../ui/theme-logo";
 import { NavMain } from "./nav-main";
 import Link from "next/link";
+import { useCurrentUser } from "@/src/shared/hooks/use-users";
+import { useTranslations } from "next-intl";
 
-const data = {
-  user: {
-    name: "Дмитрий Каиргельдин",
-    phone: "+77010868788",
-    avatar: "/avatars/shadcn.jpg",
-  },
+const navData = {
   navMain: [
     {
       name: "calendar",
@@ -63,6 +60,11 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const t = useTranslations("Sidebar");
+
+  const { data: me } = useCurrentUser();
+  const userData = me?.data;
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="pb-2">
@@ -71,10 +73,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </Link>
       </SidebarHeader>
       <SidebarContent className="flex flex-col">
-        <NavMain main={data.navMain} />
+        <NavMain main={navData.navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser
+          user={{
+            name: userData?.name ?? t("User.name"),
+            phone: userData?.phone ?? t("User.phone"),
+            avatar: "/avatars/shadcn.jpg",
+          }}
+        />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

@@ -21,7 +21,6 @@ export default function InviteForm({
   const payload = decodeJwt<{ phone: string; iat: number; exp: number }>(token);
   const { phone } = payload;
   const registerConfirmMutation = useRegisterConfirm();
-  const router = useRouter();
 
   const [errors, setErrors] = useState<{
     password?: string;
