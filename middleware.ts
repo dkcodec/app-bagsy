@@ -13,11 +13,12 @@ export default function middleware(req: NextRequest) {
   const locale = segments[0] || routing.defaultLocale;
   const second = segments[1] ?? "";
   const isLoginPath = second === "login";
+  const isInvitePath = second === "invite";
 
   const refreshToken = req.cookies.get("refresh_token")?.value;
   const isAuthenticated = Boolean(refreshToken);
 
-  if (!isAuthenticated && !isLoginPath) {
+  if (!isAuthenticated && !isLoginPath && !isInvitePath) {
     const url = req.nextUrl.clone();
     url.pathname = `/${locale}/login`;
     return NextResponse.redirect(url);
