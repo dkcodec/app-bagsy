@@ -16,6 +16,22 @@ export interface LoginResponseDto {
     refresh_token: string;
   };
   message: string;
+  code?: number;
+}
+
+export interface RegisterRequestDto {
+  phone: string;
+  password: string;
+  token: string;
+}
+
+export interface RegisterResponseDto {
+  data: {
+    access_token: string;
+    refresh_token: string;
+  };
+  message: string;
+  code?: number;
 }
 
 /**
@@ -27,6 +43,23 @@ export class AuthService {
    */
   static async login(payload: LoginRequestDto): Promise<LoginResponseDto> {
     return apiClient.post<LoginResponseDto>("v1/auth/login", payload);
+  }
+
+  /**
+   * Регистрация пароля пользователя
+   */
+  static async registerConfirm(
+    payload: RegisterRequestDto
+  ): Promise<RegisterResponseDto> {
+    return apiClient.post<RegisterResponseDto>(
+      "v1/auth/register/confirm",
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${payload.token}`,
+        },
+      }
+    );
   }
 
   /**

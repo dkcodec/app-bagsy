@@ -61,7 +61,9 @@ export class HttpClient {
 
     // Получаем токен (приоритет: переданный колбэк, затем из cookies)
     const token = this.getAuthToken?.() || (await getAccessToken());
-    if (token) headers.set("Authorization", `Bearer ${token}`);
+    if (token && !headers.has("Authorization")) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
 
     const response = await fetch(url, {
       ...options,

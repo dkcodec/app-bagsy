@@ -9,6 +9,8 @@ import React, { useState } from "react";
 import { z } from "zod";
 import { decodeJwt } from "@/src/shared/utils/jwt";
 import { formatPhone } from "@/src/shared/utils/formater";
+import { useRegisterConfirm } from "@/src/shared/hooks/use-auth";
+import { useRouter } from "next/navigation";
 
 export default function InviteForm({
   className,
@@ -18,6 +20,8 @@ export default function InviteForm({
   const t = useTranslations("InviteForm");
   const payload = decodeJwt<{ phone: string; iat: number; exp: number }>(token);
   const { phone } = payload;
+  const registerConfirmMutation = useRegisterConfirm();
+  const router = useRouter();
 
   const [errors, setErrors] = useState<{
     password?: string;
@@ -52,8 +56,11 @@ export default function InviteForm({
       return;
     }
     setErrors({});
-    // TODO: вызвать server action / api c token + паролем
-    // Пример: await finalizeInvite({ token, password: data.password })
+    registerConfirmMutation.mutateAsync({
+      phone,
+      password: data.password,
+      token,
+    });
   };
 
   return (
