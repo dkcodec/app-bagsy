@@ -225,6 +225,7 @@ export const apiClient = new HttpClient({
   },
   onUnauthorized: () => {
     // Перенаправляем на страницу логина при ошибке авторизации
+    console.log("onUnauthorized");
     if (typeof window !== "undefined") {
       window.location.href = "/login";
     }
