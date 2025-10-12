@@ -54,3 +54,17 @@ export function useRegisterConfirm() {
     },
   });
 }
+
+/**
+ * Мутация для обновления токена доступа
+ * Возвращает статус и метод mutateAsync
+ */
+export function useRefreshToken() {
+  return useMutation<LoginResponseDto, unknown, void>({
+    mutationKey: ["auth", "refreshToken"],
+    mutationFn: () => AuthService.refreshToken(),
+    onSuccess: async data => {
+      await setAuthTokens(data.data.access_token, data.data.refresh_token);
+    },
+  });
+}

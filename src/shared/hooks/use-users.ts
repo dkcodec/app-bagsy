@@ -1,8 +1,13 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
-import { UserService } from "../services/user-service";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  UserService,
+  type UpdateProfileRequest,
+  type UserDto,
+} from "../services/user-service";
 import { getAccessToken } from "../utils/cookies";
 import { decodeJwt, type JwtPayload } from "../utils/jwt";
+import { useRefreshToken } from "./use-auth";
 
 interface AccessTokenPayload extends JwtPayload {
   phone?: string;
@@ -13,15 +18,18 @@ interface AccessTokenPayload extends JwtPayload {
  * Получение текущего пользователя по номеру телефона из access_token
  */
 export function useCurrentUser() {
+  const refreshToken = useRefreshToken();
   return useQuery({
     queryKey: ["me"],
     queryFn: async () => {
       const token = await getAccessToken();
-      if (!token) throw new Error("Not authenticated");
-      const payload = decodeJwt<AccessTokenPayload>(token);
+      if (!token) {
+        await refreshToken.mutateAsync();
+      }
+      const payload = decodeJwt<AccessTokenPayload>(token ?? "");
       const phone = payload.phone || payload.sub;
-      if (!phone) throw new Error("Phone is missing in token");
-      return UserService.getUserByPhone(phone);
+      console.log("phone", phone);
+      return UserService.getUserByPhone(phone ?? "");
     },
     staleTime: 30 * 60 * 1000, // 30 минут - пользователь не меняется часто
     gcTime: 60 * 60 * 1000, // 1 час в кеше
@@ -39,5 +47,68 @@ export function useGetUserByPhone(phone: string) {
     queryKey: ["user", phone],
     queryFn: () => UserService.getUserByPhone(phone),
     staleTime: 5 * 60 * 1000,
+  });
+}
+
+/**
+ * Хук для обновления профиля пользователя
+ * Включает оптимистичные обновления и инвалидацию кэша
+ */
+export function useUpdateProfile() {
+  const queryClient = useQueryClient();
+
+  return useMutation<UserDto, unknown, UpdateProfileRequest>({
+    mutationKey: ["me", "update"],
+    mutationFn: async (data: UpdateProfileRequest) => {
+      // Получаем текущие данные пользователя
+      const currentData: { data: UserDto } | undefined =
+        queryClient.getQueryData(["me"]);
+
+      if (!currentData?.data?.phone) {
+        throw new Error("User data not found. Please refresh the page.");
+      }
+
+      return UserService.updateProfileByPhone(currentData.data.phone, data);
+    },
+    onMutate: async newData => {
+      // Отменяем исходящие запросы
+      await queryClient.cancelQueries({ queryKey: ["me"] });
+
+      // Сохраняем предыдущие данные для отката
+      const previousData = queryClient.getQueryData(["me"]);
+
+      // Оптимистично обновляем данные только если они есть
+      if (
+        previousData &&
+        typeof previousData === "object" &&
+        "data" in previousData &&
+        (previousData as { data: UserDto }).data
+      ) {
+        const prevUser = (previousData as { data: UserDto }).data;
+        queryClient.setQueryData(["me"], {
+          ...previousData,
+          data: {
+            ...prevUser,
+            ...newData,
+            updated_at: new Date().toISOString(),
+          },
+        });
+      }
+
+      return { previousData };
+    },
+    onError: (err, newData, context) => {
+      // Откатываем изменения при ошибке
+      if (context && typeof context === "object" && "previousData" in context) {
+        const prevData = (context as { previousData?: unknown }).previousData;
+        if (prevData) {
+          queryClient.setQueryData(["me"], prevData);
+        }
+      }
+    },
+    onSettled: () => {
+      // Инвалидируем кэш для получения актуальных данных
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+    },
   });
 }

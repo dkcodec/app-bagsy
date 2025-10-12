@@ -13,7 +13,9 @@
     },
     "User": {
       "name": "Имя",
-      "phone": "Телефон"
+      "phone": "Телефон",
+      "updateToPro": "Обновить до Pro",
+      "logout": "Выйти"
     }
   },
   "Dashboard": {
@@ -137,5 +139,43 @@
   "LoacleSwitcher": {
     "russian": "Русский",
     "kazakh": "Қазақша"
+  },
+  "Profile": {
+    "title": "Профиль",
+    "description": "Управляйте своим профилем и настройками аккаунта",
+    "ProfileInfo": {
+      "title": "Информация о профиле",
+      "name": "Имя",
+      "surname": "Фамилия",
+      "password": "Пароль",
+      "role": "Роль",
+      "editProfile": "Редактировать / сменить пароль"
+    },
+    "ProfileDisplay": {
+      "title": "Профиль пользователя",
+      "active": "Активен",
+      "role": "Роль",
+      "inactive": "Неактивен",
+      "pointCode": "Код точки",
+      "createdAt": "Дата создания",
+      "updatedAt": "Последнее обновление"
+    },
+    "ProfileForm": {
+      "title": "Редактирование профиля",
+      "name": "Имя",
+      "surname": "Фамилия",
+      "password": "Новый пароль",
+      "confirmPassword": "Подтвердите пароль",
+      "namePlaceholder": "Введите имя",
+      "surnamePlaceholder": "Введите фамилию",
+      "passwordPlaceholder": "Введите новый пароль",
+      "confirmPasswordPlaceholder": "Подтвердите новый пароль",
+      "save": "Сохранить",
+      "saving": "Сохранение...",
+      "cancel": "Отмена",
+      "nameMinError": "Имя должно содержать минимум 2 символа",
+      "surnameMinError": "Фамилия должна содержать минимум 2 символа",
+      "passwordMismatchError": "Пароли не совпадают"
+    }
   }
 }

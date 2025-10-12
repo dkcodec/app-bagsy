@@ -13,3 +13,6 @@ export * from "./use-mobile";
 // Хуки для UI
 export * from "./use-disclosure";
 export * from "./use-update-event";
+
+// Хуки для пользователей
+export * from "./use-users";

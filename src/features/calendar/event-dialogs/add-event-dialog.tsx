@@ -53,6 +53,8 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
   const { users } = useCalendar();
   const t = useTranslations("Dashboard.Calendar.AddEventDialog");
 
+  // const createBagsie = useCreateBagsie();
+
   const { isOpen, onClose, onToggle } = useDisclosure();
 
   const form = useForm<TEventFormData>({
@@ -66,7 +68,7 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
   });
 
   const onSubmit = () => {
-    // TO DO: Create use-add-event hook
+    console.log(form.getValues());
     onClose();
     form.reset();
   };

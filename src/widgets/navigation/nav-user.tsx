@@ -1,12 +1,11 @@
 "use client";
 
-import { ChevronsUpDown, LogOut, Sparkles } from "lucide-react";
+import { ChevronsUpDown, LogOut } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/src/entities/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -19,6 +18,8 @@ import {
   useSidebar,
 } from "@/src/entities/sidebar";
 import { useLogout } from "@/src/shared/hooks/use-auth";
+import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 
 export function NavUser({
   user,
@@ -30,7 +31,10 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
+  const t = useTranslations("Sidebar.User");
+
   const logout = useLogout();
+  const router = useRouter();
 
   return (
     <SidebarMenu>
@@ -61,7 +65,10 @@ export function NavUser({
             sideOffset={4}
           >
             <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+              <div
+                className="flex items-center gap-2 px-1 py-1.5 text-left text-sm cursor-pointer"
+                onClick={() => router.push("/profile")}
+              >
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatar} alt={user.name} />
                   <AvatarFallback className="rounded-lg">
@@ -74,17 +81,20 @@ export function NavUser({
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
+            {/* <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer">
                 <Sparkles />
-                Обновить до Pro
+                {t("updateToPro")}
               </DropdownMenuItem>
-            </DropdownMenuGroup>
+            </DropdownMenuGroup> */}
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => logout.mutate()}>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => logout.mutate()}
+            >
               <LogOut />
-              Выйти
+              {t("logout")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

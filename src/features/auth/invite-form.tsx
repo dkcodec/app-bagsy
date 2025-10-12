@@ -10,7 +10,6 @@ import { z } from "zod";
 import { decodeJwt } from "@/src/shared/utils/jwt";
 import { formatPhone } from "@/src/shared/utils/formater";
 import { useRegisterConfirm } from "@/src/shared/hooks/use-auth";
-import { useRouter } from "next/navigation";
 
 export default function InviteForm({
   className,
