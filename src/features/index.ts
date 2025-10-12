@@ -20,3 +20,6 @@ export * from "./dashboard";
 
 // Settings features
 export * from "./settings";
+
+// Profile features
+export * from "./profile";

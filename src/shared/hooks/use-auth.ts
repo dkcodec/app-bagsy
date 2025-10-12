@@ -60,7 +60,6 @@ export function useRegisterConfirm() {
  * Возвращает статус и метод mutateAsync
  */
 export function useRefreshToken() {
-  const queryClient = useQueryClient();
   return useMutation<LoginResponseDto, unknown, void>({
     mutationKey: ["auth", "refreshToken"],
     mutationFn: () => AuthService.refreshToken(),

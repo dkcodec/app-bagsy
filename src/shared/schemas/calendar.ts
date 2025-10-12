@@ -2,7 +2,12 @@ import { z } from "zod";
 
 export const eventSchema = z.object({
   user: z.string(),
+  // service name selected from a list (for now free text)
   title: z.string().min(1, "Title is required"),
+  // customer info
+  first_name: z.string().min(1, "First name is required"),
+  last_name: z.string().min(1, "Last name is required"),
+  phone: z.string().min(1, "Phone is required"),
   comment: z.string().optional(),
   startDate: z
     .date()

@@ -5,7 +5,7 @@
     "sidebarDescription": "Боковое меню көрсетеді.",
     "Main": {
       "calendar": "Күнтізбе",
-      "clients": "Клиенттер",
+      "clients": "Клиенттері",
       "services": "Қызметтер",
       "employees": "Жұмысшылар",
       "analytics": "Аналитика",
@@ -13,7 +13,9 @@
     },
     "User": {
       "name": "Атауы",
-      "phone": "Телефон"
+      "phone": "Телефон",
+      "updateToPro": "Pro түріне өзгерту",
+      "logout": "Шығу"
     }
   },
   "Dashboard": {
@@ -134,5 +136,43 @@
   "LoacleSwitcher": {
     "russian": "Русский",
     "kazakh": "Қазақша"
+  },
+  "Profile": {
+    "title": "Профиль",
+    "description": "Профиліңізді және аккаунт параметрлерін басқарыңыз",
+    "ProfileInfo": {
+      "title": "Профиль туралы ақпарат",
+      "name": "Аты",
+      "surname": "Тегі",
+      "password": "Құпия сөз",
+      "role": "Рөл",
+      "editProfile": "Өңдеу / құпия сөзді өзгерту"
+    },
+    "ProfileDisplay": {
+      "title": "Пайдаланушы профилі",
+      "active": "Белсенді",
+      "role": "Рөл",
+      "inactive": "Белсенді емес",
+      "pointCode": "Нүкте коды",
+      "createdAt": "Жасалған күні",
+      "updatedAt": "Соңғы жаңарту"
+    },
+    "ProfileForm": {
+      "title": "Профильді өңдеу",
+      "name": "Аты",
+      "surname": "Тегі",
+      "password": "Жаңа құпия сөз",
+      "confirmPassword": "Құпия сөзді растаңыз",
+      "namePlaceholder": "Атыңызды енгізіңіз",
+      "surnamePlaceholder": "Тегіңізді енгізіңіз",
+      "passwordPlaceholder": "Жаңа құпия сөзді енгізіңіз",
+      "confirmPasswordPlaceholder": "Жаңа құпия сөзді растаңыз",
+      "save": "Сақтау",
+      "saving": "Сақталуда...",
+      "cancel": "Болдырмау",
+      "nameMinError": "Аты кемінде 2 таңбадан тұруы керек",
+      "surnameMinError": "Тегі кемінде 2 таңбадан тұруы керек",
+      "passwordMismatchError": "Құпия сөздер сәйкес келмейді"
+    }
   }
 }
