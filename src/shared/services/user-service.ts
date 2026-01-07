@@ -1,35 +1,20 @@
-import { apiClient } from "../api";
-
-export interface UserDto {
-  created_at: string;
-  is_active: boolean;
-  name: string;
-  phone: string;
-  point_code: string;
-  role: string;
-  surname: string;
-  updated_at: string;
-  updated_by: string;
-}
-
-export interface UserResponseDto {
-  data: UserDto;
-  message: string;
-  code?: number;
-}
-
-export interface UpdateProfileRequest {
-  name: string;
-  surname: string;
-  password?: string;
-}
+import { apiClient } from "@/src/shared/api";
+import type { UpdateProfileRequest, IUserDto, UsersListResponseDto, UsersSearchRequest } from "@/src/shared/types/user";
 
 /**
  * Сервис пользователя. Инкапсулирует эндпоинты и маппинг данных
  */
 export class UserService {
-  static async getUserByPhone(phone: string): Promise<UserResponseDto> {
-    return apiClient.get<UserResponseDto>(`v1/users/${phone}`);
+
+  /**
+   * Получение текущего пользователя
+   */
+  static async getMe(): Promise<IUserDto> {
+    return apiClient.get<IUserDto>("v1/users/me")
+  }
+
+  static async getUserByPhone(phone: string): Promise<IUserDto> {
+    return apiClient.get<IUserDto>(`v1/users/${phone}`);
   }
 
   /**
@@ -38,7 +23,16 @@ export class UserService {
   static async updateProfileByPhone(
     phone: string,
     data: UpdateProfileRequest
-  ): Promise<UserDto> {
-    return apiClient.put<UserDto>(`v1/users/${phone}`, data);
+  ): Promise<IUserDto> {
+    return apiClient.put<IUserDto>(`v1/users/${phone}`, data);
+  }
+
+  /**
+   * Получение списка сотрудников с фильтрацией
+   */
+  static async getUsers(
+    filters: UsersSearchRequest = {}
+  ): Promise<UsersListResponseDto> {
+    return apiClient.post<UsersListResponseDto>("v1/users", filters);
   }
 }

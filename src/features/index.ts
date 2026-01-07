@@ -9,9 +9,6 @@ export * from "./calendar";
 // Auth features
 export * from "./auth";
 
-// Employee features
-export * from "./employee";
-
 // Appointment features
 export * from "./appointment";
 

@@ -157,25 +157,36 @@
       "role": "Роль",
       "inactive": "Неактивен",
       "pointCode": "Код точки",
+      "networkCode": "Код сети",
       "createdAt": "Дата создания",
-      "updatedAt": "Последнее обновление"
-    },
-    "ProfileForm": {
-      "title": "Редактирование профиля",
-      "name": "Имя",
-      "surname": "Фамилия",
-      "password": "Новый пароль",
-      "confirmPassword": "Подтвердите пароль",
-      "namePlaceholder": "Введите имя",
-      "surnamePlaceholder": "Введите фамилию",
-      "passwordPlaceholder": "Введите новый пароль",
-      "confirmPasswordPlaceholder": "Подтвердите новый пароль",
-      "save": "Сохранить",
+      "updatedAt": "Последнее обновление",
+      "editProfile": "Редактировать профиль",
       "saving": "Сохранение...",
+      "save": "Сохранить",
       "cancel": "Отмена",
       "nameMinError": "Имя должно содержать минимум 2 символа",
       "surnameMinError": "Фамилия должна содержать минимум 2 символа",
-      "passwordMismatchError": "Пароли не совпадают"
+      "name": "Имя",
+      "surname": "Фамилия"
     }
+  },
+  "Employees": {
+    "title": "Сотрудники",
+    "tableTitle": "Список сотрудников",
+    "addEmployee": "Добавить сотрудника",
+    "searchPlaceholder": "Поиск по имени, телефону, роли...",
+    "networkCode": "Код сети",
+    "pointCode": "Код точки",
+    "role": "Роль",
+    "name": "Имя",
+    "phone": "Телефон",
+    "status": "Статус",
+    "createdAt": "Создан",
+    "actions": "Действия",
+    "active": "Активен",
+    "inactive": "Неактивен",
+    "loading": "Загрузка...",
+    "noEmployees": "Сотрудники не найдены",
+    "errorLoading": "Ошибка загрузки данных"
   }
 }

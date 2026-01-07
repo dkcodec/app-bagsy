@@ -11,11 +11,9 @@ export interface LoginRequestDto {
 }
 
 export interface LoginResponseDto {
-  data: {
-    access_token: string;
-    refresh_token: string;
-  };
-  message: string;
+  access_token: string;
+  refresh_token: string;
+  message?: string;
   code?: number;
 }
 
@@ -75,9 +73,9 @@ export class AuthService {
       "v1/auth/refresh",
       {},
       {
-        headers: {
-          Authorization: `Bearer ${refreshToken}`,
-        },
+        body: JSON.stringify({
+          refresh_token: refreshToken,
+        }),
       }
     );
   }

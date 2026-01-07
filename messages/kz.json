@@ -155,24 +155,34 @@
       "inactive": "Белсенді емес",
       "pointCode": "Нүкте коды",
       "createdAt": "Жасалған күні",
-      "updatedAt": "Соңғы жаңарту"
-    },
-    "ProfileForm": {
-      "title": "Профильді өңдеу",
-      "name": "Аты",
-      "surname": "Тегі",
-      "password": "Жаңа құпия сөз",
-      "confirmPassword": "Құпия сөзді растаңыз",
-      "namePlaceholder": "Атыңызды енгізіңіз",
-      "surnamePlaceholder": "Тегіңізді енгізіңіз",
-      "passwordPlaceholder": "Жаңа құпия сөзді енгізіңіз",
-      "confirmPasswordPlaceholder": "Жаңа құпия сөзді растаңыз",
-      "save": "Сақтау",
+      "updatedAt": "Соңғы жаңарту",
+      "editProfile": "Профильді өңдеу",
       "saving": "Сақталуда...",
+      "save": "Сақтау",
       "cancel": "Болдырмау",
       "nameMinError": "Аты кемінде 2 таңбадан тұруы керек",
       "surnameMinError": "Тегі кемінде 2 таңбадан тұруы керек",
-      "passwordMismatchError": "Құпия сөздер сәйкес келмейді"
+      "name": "Аты",
+      "surname": "Тегі"
     }
+  },
+  "Employees": {
+    "title": "Жұмысшылар",
+    "tableTitle": "Жұмысшылар тізімі",
+    "addEmployee": "Жұмысшы қосу",
+    "searchPlaceholder": "Аты, телефон, рөл бойынша іздеу...",
+    "networkCode": "Желі коды",
+    "pointCode": "Нүкте коды",
+    "role": "Рөл",
+    "name": "Аты",
+    "phone": "Телефон",
+    "status": "Күйі",
+    "createdAt": "Жасалған",
+    "actions": "Әрекеттер",
+    "active": "Белсенді",
+    "inactive": "Белсенді емес",
+    "loading": "Жүктелуде...",
+    "noEmployees": "Жұмысшылар табылмады",
+    "errorLoading": "Деректерді жүктеу қатесі"
   }
 }

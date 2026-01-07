@@ -5,10 +5,11 @@
 
 import {
   getAccessToken,
+  getRefreshToken,
   setAuthTokens,
   clearAuthTokens,
 } from "../utils/cookies";
-import { AuthService } from "../services/auth-service";
+// Avoid using AuthService here to prevent recursive interceptor calls during refresh
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -140,11 +141,33 @@ export class HttpClient {
    */
   private async performTokenRefresh(): Promise<void> {
     try {
-      const response = await AuthService.refreshToken();
-      await setAuthTokens(
-        response.data.access_token,
-        response.data.refresh_token
-      );
+      const refreshToken = await getRefreshToken();
+      if (!refreshToken) {
+        throw new Error("Refresh token not found");
+      }
+
+      const url = this.buildUrl("v1/auth/refresh");
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          refresh_token: refreshToken,
+        }),
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        // Force failure so caller clears tokens and redirects
+        throw new Error(`Refresh failed with status ${response.status}`);
+      }
+
+      const json = (await response.json()) as {
+        access_token: string; refresh_token: string
+      };
+      console.log(json);
+      await setAuthTokens(json.access_token, json.refresh_token);
     } finally {
       this.isRefreshing = false;
       this.refreshPromise = null;
@@ -225,9 +248,21 @@ export const apiClient = new HttpClient({
   },
   onUnauthorized: () => {
     // Перенаправляем на страницу логина при ошибке авторизации
-    console.log("onUnauthorized");
+    // Но не перезагружаем страницу, если уже на странице логина или регистрации
     if (typeof window !== "undefined") {
-      window.location.href = "/login";
+      const path = window.location.pathname;
+      const segments = path.split("/").filter(Boolean);
+      const first = segments[0];
+      const second = segments[1];
+      
+      // Не перезагружаем страницу, если уже на странице логина или регистрации
+      if (second === "login" || second === "invite") {
+        return;
+      }
+      
+      const supported = new Set(["ru", "kz"]);
+      const locale = supported.has(first) ? first : "ru";
+      window.location.href = `/${locale}/login`;
     }
   },
 });

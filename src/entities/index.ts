@@ -33,3 +33,4 @@ export * from "./tabs";
 export * from "./textarea";
 export * from "./time-input";
 export * from "./tooltip";
+export * from "./data-table";
