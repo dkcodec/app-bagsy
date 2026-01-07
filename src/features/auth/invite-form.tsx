@@ -25,12 +25,16 @@ export default function InviteForm({
     password?: string;
     confirm?: string;
     form?: string;
+    name?: string;
+    surname?: string;
   }>({});
 
   const schema = z
     .object({
       password: z.string().min(6, t("errors.passwordMin")),
       confirm: z.string().min(6, t("errors.passwordMin")),
+      name: z.string().min(2, t("errors.nameRequired")),
+      surname: z.string().min(2, t("errors.surnameRequired")),
     })
     .refine(data => data.password === data.confirm, {
       message: t("errors.passwordsMustMatch"),
@@ -43,6 +47,8 @@ export default function InviteForm({
     const data = {
       password: String(formData.get("password") || ""),
       confirm: String(formData.get("confirm") || ""),
+      name: String(formData.get("name") || ""),
+      surname: String(formData.get("surname") || ""),
     };
     const result = schema.safeParse(data);
     if (!result.success) {
@@ -50,6 +56,8 @@ export default function InviteForm({
       setErrors({
         password: fieldErrors.password?.[0],
         confirm: fieldErrors.confirm?.[0],
+        name: fieldErrors.name?.[0],
+        surname: fieldErrors.surname?.[0],
       });
       return;
     }
@@ -58,6 +66,8 @@ export default function InviteForm({
       phone,
       password: data.password,
       token,
+      name: data.name,
+      surname: data.surname,
     });
   };
 
@@ -74,7 +84,45 @@ export default function InviteForm({
                 </p>
               </div>
 
-              <input type="hidden" name="token" value={token} />
+              <div className="grid gap-3 grid-cols-1 md:grid-cols-2">
+                <div className="grid gap-3">
+                  <Label htmlFor="name">{t("name")}</Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    required
+                    name="name"
+                    className="border-background"
+                    aria-invalid={Boolean(errors.name)}
+                    aria-describedby={errors.name ? "name-error" : undefined}
+                  />
+                  {errors.name ? (
+                    <p id="name-error" className="text-destructive text-xs">
+                      {errors.name}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="grid gap-3">
+                  <Label htmlFor="surname">{t("surname")}</Label>
+                  <Input
+                    id="surname"
+                    type="text"
+                    required
+                    name="surname"
+                    className="border-background"
+                    aria-invalid={Boolean(errors.surname)}
+                    aria-describedby={
+                      errors.surname ? "surname-error" : undefined
+                    }
+                  />
+                  {errors.surname ? (
+                    <p id="surname-error" className="text-destructive text-xs">
+                      {errors.surname}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
 
               <div className="grid gap-3">
                 <Label htmlFor="password">{t("password")}</Label>

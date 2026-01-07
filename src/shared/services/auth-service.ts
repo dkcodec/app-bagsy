@@ -21,14 +21,14 @@ export interface RegisterRequestDto {
   phone: string;
   password: string;
   token: string;
+  name: string;
+  surname: string;
 }
 
 export interface RegisterResponseDto {
-  data: {
-    access_token: string;
-    refresh_token: string;
-  };
-  message: string;
+  access_token: string;
+  refresh_token: string;
+  message?: string;
   code?: number;
 }
 
@@ -50,13 +50,8 @@ export class AuthService {
     payload: RegisterRequestDto
   ): Promise<RegisterResponseDto> {
     return apiClient.post<RegisterResponseDto>(
-      "v1/auth/register/confirm",
-      payload,
-      {
-        headers: {
-          Authorization: `Bearer ${payload.token}`,
-        },
-      }
+      "v1/auth/staff/register/confirm",
+      payload
     );
   }
 
