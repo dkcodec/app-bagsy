@@ -3,8 +3,6 @@
 import { useCurrentUser } from "@/src/shared/hooks";
 import { ProfileHeader } from "@/src/features/profile/profile-header";
 import { ProfileDisplay } from "@/src/features/profile/profile-display";
-import { ProfileForm } from "@/src/features/profile/profile-form";
-import { Alert, AlertDescription } from "@/src/entities";
 
 /**
  * Страница профиля пользователя

@@ -154,6 +154,7 @@
       "role": "Рөл",
       "inactive": "Белсенді емес",
       "pointCode": "Нүкте коды",
+      "networkCode": "Желі коды",
       "createdAt": "Жасалған күні",
       "updatedAt": "Соңғы жаңарту",
       "editProfile": "Профильді өңдеу",
