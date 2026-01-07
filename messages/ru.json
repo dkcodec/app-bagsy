@@ -167,7 +167,9 @@
       "nameMinError": "Имя должно содержать минимум 2 символа",
       "surnameMinError": "Фамилия должна содержать минимум 2 символа",
       "name": "Имя",
-      "surname": "Фамилия"
+      "surname": "Фамилия",
+      "profileUpdatedSuccessfully": "Профиль успешно обновлен",
+      "errorUpdatingProfile": "Ошибка при обновлении профиля"
     }
   },
   "Employees": {

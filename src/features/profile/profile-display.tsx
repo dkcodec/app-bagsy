@@ -20,6 +20,7 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { useUpdateProfile } from "@/src/shared/hooks";
 import { Loader } from "lucide-react";
+import { toast } from "sonner";
 
 interface ProfileDisplayProps {
   user?: IUserDto;
@@ -86,7 +87,9 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
       await updateProfile.mutateAsync(updateData);
       reset();
       setIsEditing(false);
+      toast.success(t("profileUpdatedSuccessfully"));
     } catch (error) {
+      toast.error(t("errorUpdatingProfile"));
       console.error("Ошибка при обновлении профиля:", error);
     }
   };

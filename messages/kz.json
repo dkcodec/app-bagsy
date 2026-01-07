@@ -164,7 +164,9 @@
       "nameMinError": "Аты кемінде 2 таңбадан тұруы керек",
       "surnameMinError": "Тегі кемінде 2 таңбадан тұруы керек",
       "name": "Аты",
-      "surname": "Тегі"
+      "surname": "Тегі",
+      "profileUpdatedSuccessfully": "Профиль сәтті жаңартылды",
+      "errorUpdatingProfile": "Профиль жаңарту қатесі"
     }
   },
   "Employees": {
