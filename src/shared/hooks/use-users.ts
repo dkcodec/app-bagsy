@@ -1,8 +1,6 @@
 "use client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  UserService,
-} from "../services/user-service";
+import { UserService } from "../services/user-service";
 import type { UpdateProfileRequest, IUserDto } from "../types/user";
 
 /**
@@ -40,7 +38,8 @@ export function useUpdateProfile() {
 
   return useMutation<IUserDto, unknown, UpdateProfileRequest>({
     mutationKey: ["me", "update"],
-    mutationFn: async (data: UpdateProfileRequest) => UserService.updateMe(data),
+    mutationFn: async (data: UpdateProfileRequest) =>
+      UserService.updateMe(data),
     onMutate: async newData => {
       // Отменяем исходящие запросы
       await queryClient.cancelQueries({ queryKey: ["me"] });

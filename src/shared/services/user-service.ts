@@ -1,16 +1,20 @@
 import { apiClient } from "@/src/shared/api";
-import type { UpdateProfileRequest, IUserDto, UsersListResponseDto, UsersSearchRequest } from "@/src/shared/types/user";
+import type {
+  UpdateProfileRequest,
+  IUserDto,
+  UsersListResponseDto,
+  UsersSearchRequest,
+} from "@/src/shared/types/user";
 
 /**
  * Сервис пользователя. Инкапсулирует эндпоинты и маппинг данных
  */
 export class UserService {
-
   /**
    * Получение текущего пользователя
    */
   static async getMe(): Promise<IUserDto> {
-    return apiClient.get<IUserDto>("v1/users/me")
+    return apiClient.get<IUserDto>("v1/users/me");
   }
 
   /**

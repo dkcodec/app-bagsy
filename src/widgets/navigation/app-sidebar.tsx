@@ -62,7 +62,7 @@ const navData = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const t = useTranslations("Sidebar");
 
-  const {data: userData} = useCurrentUser();
+  const { data: userData } = useCurrentUser();
 
   return (
     <Sidebar collapsible="icon" {...props}>

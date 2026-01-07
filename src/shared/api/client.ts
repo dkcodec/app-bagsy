@@ -164,7 +164,8 @@ export class HttpClient {
       }
 
       const json = (await response.json()) as {
-        access_token: string; refresh_token: string
+        access_token: string;
+        refresh_token: string;
       };
       console.log(json);
       await setAuthTokens(json.access_token, json.refresh_token);
@@ -254,12 +255,12 @@ export const apiClient = new HttpClient({
       const segments = path.split("/").filter(Boolean);
       const first = segments[0];
       const second = segments[1];
-      
+
       // Не перезагружаем страницу, если уже на странице логина или регистрации
       if (second === "login" || second === "invite") {
         return;
       }
-      
+
       const supported = new Set(["ru", "kz"]);
       const locale = supported.has(first) ? first : "ru";
       window.location.href = `/${locale}/login`;

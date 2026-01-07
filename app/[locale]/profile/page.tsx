@@ -17,7 +17,7 @@ export default function ProfilePage() {
 
       <div className="grid gap-6 lg:grid-cols-1 px-4 w-full">
         {/* Отображение информации о профиле */}
-        <ProfileDisplay user={userData} isLoading={isLoading}/>
+        <ProfileDisplay user={userData} isLoading={isLoading} />
       </div>
     </>
   );
