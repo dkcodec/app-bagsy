@@ -1,11 +1,11 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { UserDto } from "@/src/shared/services/user-service";
+import { IUserDto } from "@/src/shared/types/user";
 import { Separator, SidebarTrigger } from "@/src/entities";
 
 interface ProfileHeaderProps {
-  user?: UserDto;
+  user?: IUserDto;
 }
 
 /**

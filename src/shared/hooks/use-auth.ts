@@ -20,7 +20,7 @@ export function useLogin() {
     mutationKey: ["auth", "login"],
     mutationFn: (payload: LoginRequestDto) => AuthService.login(payload),
     onSuccess: async data => {
-      await setAuthTokens(data.data.access_token, data.data.refresh_token);
+      await setAuthTokens(data.access_token, data.refresh_token);
       await queryClient.invalidateQueries({ queryKey: ["me"] });
     },
   });
@@ -64,7 +64,7 @@ export function useRefreshToken() {
     mutationKey: ["auth", "refreshToken"],
     mutationFn: () => AuthService.refreshToken(),
     onSuccess: async data => {
-      await setAuthTokens(data.data.access_token, data.data.refresh_token);
+      await setAuthTokens(data.access_token, data.refresh_token);
     },
   });
 }

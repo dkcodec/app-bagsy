@@ -2,35 +2,16 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   UserService,
-  type UpdateProfileRequest,
-  type UserDto,
 } from "../services/user-service";
-import { getAccessToken } from "../utils/cookies";
-import { decodeJwt, type JwtPayload } from "../utils/jwt";
-import { useRefreshToken } from "./use-auth";
-
-interface AccessTokenPayload extends JwtPayload {
-  phone?: string;
-  sub?: string;
-}
+import type { UpdateProfileRequest, IUserDto } from "../types/user";
 
 /**
- * Получение текущего пользователя по номеру телефона из access_token
+ * Получение текущего пользователя
  */
 export function useCurrentUser() {
-  const refreshToken = useRefreshToken();
   return useQuery({
     queryKey: ["me"],
-    queryFn: async () => {
-      const token = await getAccessToken();
-      if (!token) {
-        await refreshToken.mutateAsync();
-      }
-      const payload = decodeJwt<AccessTokenPayload>(token ?? "");
-      const phone = payload.phone || payload.sub;
-      console.log("phone", phone);
-      return UserService.getUserByPhone(phone ?? "");
-    },
+    queryFn: () => UserService.getMe(),
     staleTime: 30 * 60 * 1000, // 30 минут - пользователь не меняется часто
     gcTime: 60 * 60 * 1000, // 1 час в кеше
     retry: 1,
@@ -57,11 +38,11 @@ export function useGetUserByPhone(phone: string) {
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
 
-  return useMutation<UserDto, unknown, UpdateProfileRequest>({
+  return useMutation<IUserDto, unknown, UpdateProfileRequest>({
     mutationKey: ["me", "update"],
     mutationFn: async (data: UpdateProfileRequest) => {
       // Получаем текущие данные пользователя
-      const currentData: { data: UserDto } | undefined =
+      const currentData: { data: IUserDto } | undefined =
         queryClient.getQueryData(["me"]);
 
       if (!currentData?.data?.phone) {
@@ -82,9 +63,9 @@ export function useUpdateProfile() {
         previousData &&
         typeof previousData === "object" &&
         "data" in previousData &&
-        (previousData as { data: UserDto }).data
+        (previousData as { data: IUserDto }).data
       ) {
-        const prevUser = (previousData as { data: UserDto }).data;
+        const prevUser = (previousData as { data: IUserDto }).data;
         queryClient.setQueryData(["me"], {
           ...previousData,
           data: {
