@@ -37,7 +37,6 @@ export interface ISchedule {
 export interface UpdateProfileRequest {
     name: string;
     surname: string;
-    password?: string;
 }
 
 export interface UsersListResponseDto extends UserResponse{
