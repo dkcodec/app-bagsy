@@ -40,17 +40,7 @@ export function useUpdateProfile() {
 
   return useMutation<IUserDto, unknown, UpdateProfileRequest>({
     mutationKey: ["me", "update"],
-    mutationFn: async (data: UpdateProfileRequest) => {
-      // Получаем текущие данные пользователя
-      const currentData: { data: IUserDto } | undefined =
-        queryClient.getQueryData(["me"]);
-
-      if (!currentData?.data?.phone) {
-        throw new Error("User data not found. Please refresh the page.");
-      }
-
-      return UserService.updateProfileByPhone(currentData.data.phone, data);
-    },
+    mutationFn: async (data: UpdateProfileRequest) => UserService.updateMe(data),
     onMutate: async newData => {
       // Отменяем исходящие запросы
       await queryClient.cancelQueries({ queryKey: ["me"] });

@@ -13,6 +13,13 @@ export class UserService {
     return apiClient.get<IUserDto>("v1/users/me")
   }
 
+  /**
+   * Обновление профиля пользователя
+   */
+  static async updateMe(data: UpdateProfileRequest): Promise<IUserDto> {
+    return apiClient.put<IUserDto>("v1/users/me", data);
+  }
+
   static async getUserByPhone(phone: string): Promise<IUserDto> {
     return apiClient.get<IUserDto>(`v1/users/${phone}`);
   }

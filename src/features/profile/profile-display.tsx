@@ -16,9 +16,10 @@ import {
 import { IUserDto } from "@/src/shared/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { useUpdateProfile } from "@/src/shared/hooks";
+import { Loader } from "lucide-react";
 
 interface ProfileDisplayProps {
   user?: IUserDto;
@@ -61,10 +62,18 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      name: user?.name || "",
-      surname: user?.surname || "",
+      name: user?.name ?? "",
+      surname: user?.surname ?? "",
     },
   });
+
+  useEffect(() => {
+    if (user)
+      reset({
+        name: user.name,
+        surname: user.surname,
+      });
+  }, [user]); 
 
   const onSubmit = async (data: ProfileFormData) => {
     try {
@@ -113,20 +122,27 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
               ) : isEditing ? (
                 // Инлайн-редактирование имени и фамилии
                 <div className="flex gap-2">
-                  <Input
-                    id="name"
-                    className="w-full bg-transparent outline-none border-b border-muted-foreground/40 focus:border-primary transition-colors"
-                    {...register("name")}
-                    placeholder={user?.name ?? t("name")}
-                    disabled={isSubmitting}
-                  />
-                  <Input
-                    id="surname"
-                    className="w-full bg-transparent outline-none border-b border-muted-foreground/40 focus:border-primary transition-colors"
-                    {...register("surname")}
-                    placeholder={user?.surname ?? t("surname")}
-                    disabled={isSubmitting}
-                  />
+                  <div className="">
+                    <Input
+                      id="name"
+                      className="w-full bg-transparent outline-none border-b border-muted-foreground/40 focus:border-primary transition-colors"
+                      {...register("name")}
+                      placeholder={user?.name ?? t("name")}
+                      disabled={isSubmitting}
+                    />
+                    {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}
+                  </div>
+
+                  <div className="">
+                    <Input
+                      id="surname"
+                      className="w-full bg-transparent outline-none border-b border-muted-foreground/40 focus:border-primary transition-colors"
+                      {...register("surname")}
+                      placeholder={user?.surname ?? t("surname")}
+                      disabled={isSubmitting}
+                    />
+                    {errors.surname && <p className="text-destructive text-sm">{errors.surname.message}</p>}
+                  </div>
                 </div>
               ) : (
                 `${user?.name ?? ""} ${user?.surname ?? ""}`.trim()
@@ -212,7 +228,7 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
             disabled={isSubmitting}
             className="flex-1"
           >
-            {isEditing ? (isSubmitting ? t("saving") : t("save")) : t("editProfile")}
+            {isEditing ? (isSubmitting ? <Loader className="animate-loader" /> : t("save")) : t("editProfile")}
           </Button>
 
           {/* Кнопка отмены редактирования */}
