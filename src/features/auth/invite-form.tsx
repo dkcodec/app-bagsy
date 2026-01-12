@@ -72,7 +72,6 @@ export default function InviteForm({
     }
 
     passwordChangeMutation.mutateAsync({
-      phone,
       password: data.password,
       token,
     });
