@@ -42,8 +42,8 @@ const navData = {
       icon: ClipboardList,
     },
     {
-      name: "employees",
-      url: "/employees",
+      name: "staff",
+      url: "/staff",
       icon: Users,
     },
     {

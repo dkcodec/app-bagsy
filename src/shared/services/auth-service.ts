@@ -50,7 +50,7 @@ export class AuthService {
     payload: RegisterRequestDto
   ): Promise<RegisterResponseDto> {
     return apiClient.post<RegisterResponseDto>(
-      "v1/auth/register/confirm",
+      "v1/auth/staff/register/confirm",
       payload,
       {
         headers: {
