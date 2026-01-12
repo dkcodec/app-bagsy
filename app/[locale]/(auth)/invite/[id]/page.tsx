@@ -1,26 +1,28 @@
-import React from "react";
-
 import { InviteForm } from "@/src/features/auth";
 import { getIsMobile } from "@/src/shared/hooks/use-mobile-server";
 import LoginBackground from "@/src/widgets/backgrounds";
 import { notFound } from "next/navigation";
-import { decodeJwt, secondsToDate } from "@/src/shared/utils/jwt";
+import { AuthService } from "@/src/shared/services/auth-service";
 
+/**
+ * Страница приглашения сотрудника
+ * Токен передается в URL как динамический сегмент [id]
+ * Пример: ru/invite/xit1ettpbs
+ */
 export default async function InvitePage({
-  searchParams,
+  params,
 }: {
-  searchParams: Promise<{ token?: string }>;
+  params: Promise<{ id: string; locale: string }>;
 }) {
+  const { id: token } = await params;
   const isMobile = await getIsMobile();
-  const params = await searchParams;
-  const token = params?.token || "";
 
+  // Проверяем валидность токена через API
+  let tokenData;
   try {
-    if (!token) notFound();
-    const { exp } = decodeJwt<{ exp?: number }>(token);
-    const expDate = secondsToDate(exp);
-    if (!expDate || expDate < new Date()) notFound();
-  } catch {
+    tokenData = await AuthService.verifyAuthToken(token);
+  } catch (error) {
+    // Если токен невалиден (401) или произошла ошибка - показываем not-found
     notFound();
   }
 
@@ -31,7 +33,11 @@ export default async function InvitePage({
 
       <div className="relative z-10 flex flex-col items-center">
         <div className="w-full max-w-md">
-          <InviteForm token={token} />
+          <InviteForm
+            token={token}
+            phone={tokenData.phone}
+            purpose={tokenData.purpose}
+          />
         </div>
       </div>
     </div>

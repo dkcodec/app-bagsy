@@ -7,34 +7,37 @@ import { Label } from "@/src/entities/label";
 import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 import { z } from "zod";
-import { decodeJwt } from "@/src/shared/utils/jwt";
 import { formatPhone } from "@/src/shared/utils/formater";
-import { useRegisterConfirm } from "@/src/shared/hooks/use-auth";
+import {
+  usePasswordChange,
+  useRegisterConfirm,
+} from "@/src/shared/hooks/use-auth";
+import { VerifyAuthTokenPurpose } from "@/src/shared/services/auth-service";
 
 export default function InviteForm({
   className,
   token,
-  ...props
-}: React.ComponentProps<"div"> & { token: string }) {
+  phone,
+  purpose,
+}: React.ComponentProps<"div"> & {
+  token: string;
+  phone: string;
+  purpose: VerifyAuthTokenPurpose;
+}) {
   const t = useTranslations("InviteForm");
-  const payload = decodeJwt<{ phone: string; iat: number; exp: number }>(token);
-  const { phone } = payload;
   const registerConfirmMutation = useRegisterConfirm();
+  const passwordChangeMutation = usePasswordChange();
 
   const [errors, setErrors] = useState<{
     password?: string;
     confirm?: string;
     form?: string;
-    name?: string;
-    surname?: string;
   }>({});
 
   const schema = z
     .object({
       password: z.string().min(6, t("errors.passwordMin")),
       confirm: z.string().min(6, t("errors.passwordMin")),
-      name: z.string().min(2, t("errors.nameRequired")),
-      surname: z.string().min(2, t("errors.surnameRequired")),
     })
     .refine(data => data.password === data.confirm, {
       message: t("errors.passwordsMustMatch"),
@@ -47,8 +50,6 @@ export default function InviteForm({
     const data = {
       password: String(formData.get("password") || ""),
       confirm: String(formData.get("confirm") || ""),
-      name: String(formData.get("name") || ""),
-      surname: String(formData.get("surname") || ""),
     };
     const result = schema.safeParse(data);
     if (!result.success) {
@@ -56,23 +57,28 @@ export default function InviteForm({
       setErrors({
         password: fieldErrors.password?.[0],
         confirm: fieldErrors.confirm?.[0],
-        name: fieldErrors.name?.[0],
-        surname: fieldErrors.surname?.[0],
       });
       return;
     }
     setErrors({});
-    registerConfirmMutation.mutateAsync({
-      phone,
+
+    if (purpose === "register") {
+      registerConfirmMutation.mutateAsync({
+        phone,
+        password: data.password,
+        token,
+      });
+      return;
+    }
+
+    passwordChangeMutation.mutateAsync({
       password: data.password,
       token,
-      name: data.name,
-      surname: data.surname,
     });
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn("flex flex-col gap-6", className)}>
       <Card className="overflow-hidden p-0 dark:bg-white/10 bg-black/10 backdrop-blur-sm">
         <CardContent className="grid p-0 md:grid-cols-1">
           <form className="p-6 md:p-8" onSubmit={handleSubmit}>
@@ -82,46 +88,6 @@ export default function InviteForm({
                 <p className="text-muted-foreground text-balance">
                   {t("description", { phone: formatPhone(phone) })}
                 </p>
-              </div>
-
-              <div className="grid gap-3 grid-cols-1 md:grid-cols-2">
-                <div className="grid gap-3">
-                  <Label htmlFor="name">{t("name")}</Label>
-                  <Input
-                    id="name"
-                    type="text"
-                    required
-                    name="name"
-                    className="border-background"
-                    aria-invalid={Boolean(errors.name)}
-                    aria-describedby={errors.name ? "name-error" : undefined}
-                  />
-                  {errors.name ? (
-                    <p id="name-error" className="text-destructive text-xs">
-                      {errors.name}
-                    </p>
-                  ) : null}
-                </div>
-
-                <div className="grid gap-3">
-                  <Label htmlFor="surname">{t("surname")}</Label>
-                  <Input
-                    id="surname"
-                    type="text"
-                    required
-                    name="surname"
-                    className="border-background"
-                    aria-invalid={Boolean(errors.surname)}
-                    aria-describedby={
-                      errors.surname ? "surname-error" : undefined
-                    }
-                  />
-                  {errors.surname ? (
-                    <p id="surname-error" className="text-destructive text-xs">
-                      {errors.surname}
-                    </p>
-                  ) : null}
-                </div>
               </div>
 
               <div className="grid gap-3">
