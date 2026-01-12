@@ -16,6 +16,7 @@ import { GetStaffParams } from "@/src/shared/services/staff-service";
 import { EUserRole } from "@/src/shared/types/user";
 import { useCurrentUser } from "@/src/shared/hooks/use-users";
 import { useTranslations } from "next-intl";
+import { DEFAULT_STAFF_FILTERS } from "./constants";
 
 /**
  * Интерфейс для фильтров сотрудников
@@ -69,7 +70,13 @@ export function StaffFilters({ filters, onFiltersChange }: StaffFiltersProps) {
 
   // Очистка всех фильтров
   const handleClearFilters = () => {
-    onFiltersChange({});
+    onFiltersChange({
+      ...DEFAULT_STAFF_FILTERS,
+      point_code: undefined,
+      network_code: undefined,
+      role: undefined,
+      phone: undefined,
+    });
     setLocalPointCode("");
     setLocalNetworkCode("");
     setLocalPhone("");

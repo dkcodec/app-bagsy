@@ -21,6 +21,7 @@ import { ErrorMessage } from "./components/error-message";
 import { Pagination, type PaginationInfo } from "./components/pagination";
 import { StaffTableHeader } from "./components/table-header";
 import { StaffTableRow } from "./components/table-row";
+import { DEFAULT_STAFF_FILTERS } from "./constants";
 
 /**
  * Компонент таблицы сотрудников с фильтрацией, сортировкой и пагинацией
@@ -29,12 +30,7 @@ export function StaffContent() {
   const t = useTranslations("Staff");
 
   // Состояние фильтров
-  const [filters, setFilters] = useState<GetStaffParams>({
-    limit: 5,
-    offset: 0,
-    order_by: "created_at",
-    sort_order: "asc",
-  });
+  const [filters, setFilters] = useState<GetStaffParams>(DEFAULT_STAFF_FILTERS);
 
   // Получение данных
   const { data, isLoading, error } = useGetStaff(filters);
@@ -62,8 +58,8 @@ export function StaffContent() {
 
   // Вычисление информации о пагинации
   const paginationInfo = useMemo<PaginationInfo>(() => {
-    const limit = filters.limit || 10;
-    const offset = filters.offset || 0;
+    const limit = filters.limit || DEFAULT_STAFF_FILTERS.limit!;
+    const offset = filters.offset || DEFAULT_STAFF_FILTERS.offset!;
     const total = data?.count || 0;
     const currentPage = Math.floor(offset / limit) + 1;
     const totalPages = Math.ceil(total / limit);
