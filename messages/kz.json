@@ -7,7 +7,7 @@
       "calendar": "Күнтізбе",
       "clients": "Клиенттері",
       "services": "Қызметтер",
-      "employees": "Жұмысшылар",
+      "staff": "Жұмысшылар",
       "analytics": "Аналитика",
       "settings": "Параметрлер"
     },
@@ -169,23 +169,58 @@
       "errorUpdatingProfile": "Профиль жаңарту қатесі"
     }
   },
-  "Employees": {
+  "Staff": {
     "title": "Жұмысшылар",
-    "tableTitle": "Жұмысшылар тізімі",
-    "addEmployee": "Жұмысшы қосу",
+    "tableTitle": "Жұмысшылар",
+    "addStaff": "Жұмысшы қосу",
     "searchPlaceholder": "Аты, телефон, рөл бойынша іздеу...",
     "networkCode": "Желі коды",
     "pointCode": "Нүкте коды",
     "role": "Рөл",
     "name": "Аты",
+    "surname": "Тегі",
     "phone": "Телефон",
     "status": "Күйі",
-    "createdAt": "Жасалған",
+    "createdAt": "Жасалған күні",
     "actions": "Әрекеттер",
     "active": "Белсенді",
     "inactive": "Белсенді емес",
     "loading": "Жүктелуде...",
-    "noEmployees": "Жұмысшылар табылмады",
-    "errorLoading": "Деректерді жүктеу қатесі"
+    "noStaff": "Жұмысшылар табылмады",
+    "errorLoading": "Деректерді жүктеу қатесі",
+    "noData": "Көрсету үшін деректер жоқ",
+    "accessDenied": "Қол жетімсіз",
+    "accessDeniedDescription": "Жұмысшылар тізімін көруге құқығыңыз жоқ",
+    "errorLoadingData": "Деректерді жүктеу қатесі",
+    "unknownError": "Белгісіз қате",
+    "filters": {
+      "pointCode": "Нүкте коды",
+      "pointCodePlaceholder": "Нүкте кодын енгізіңіз",
+      "networkCode": "Желі коды",
+      "networkCodePlaceholder": "Желі кодын енгізіңіз",
+      "role": "Рөл",
+      "rolePlaceholder": "Рөлді таңдаңыз",
+      "allRoles": "Барлық рөлдер",
+      "phone": "Телефон",
+      "phonePlaceholder": "Телефон енгізіңіз",
+      "add": "Қосу",
+      "clear": "Тазалау",
+      "phones": "Телефондар"
+    },
+    "roles": {
+      "staff": "Қызметкер",
+      "manager": "Менеджер",
+      "net_manager": "Желі менеджері",
+      "self_owner": "Иесі",
+      "admin": "Әкімші",
+      "worker": "Жұмысшы"
+    },
+    "pagination": {
+      "showing": "Көрсетілген",
+      "of": "ішінен",
+      "page": "Бет",
+      "back": "Артқа",
+      "forward": "Алға"
+    }
   }
 }

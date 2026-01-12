@@ -1,8 +1,9 @@
 export enum EUserRole {
   ADMIN = "admin",
   NET_MANAGER = "net_manager",
+  SELF_OWNER = "self_owner",
   MANAGER = "manager",
-  WORKER = "worker",
+  STAFF = "staff",
 }
 
 export interface UserResponse {
@@ -40,7 +41,7 @@ export interface UpdateProfileRequest {
 
 export interface UsersListResponseDto extends UserResponse {
   users: IUserDto[];
-  count: number;
+  total: number;
 }
 
 export interface UsersSearchRequest {

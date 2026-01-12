@@ -7,7 +7,7 @@
       "calendar": "Календарь",
       "clients": "Клиенты",
       "services": "Услуги",
-      "employees": "Сотрудники",
+      "staff": "Сотрудники",
       "analytics": "Аналитика",
       "settings": "Настройки"
     },
@@ -176,23 +176,58 @@
       "errorUpdatingProfile": "Ошибка при обновлении профиля"
     }
   },
-  "Employees": {
+  "Staff": {
     "title": "Сотрудники",
-    "tableTitle": "Список сотрудников",
-    "addEmployee": "Добавить сотрудника",
+    "tableTitle": "Сотрудники",
+    "addStaff": "Добавить сотрудника",
     "searchPlaceholder": "Поиск по имени, телефону, роли...",
     "networkCode": "Код сети",
     "pointCode": "Код точки",
     "role": "Роль",
     "name": "Имя",
+    "surname": "Фамилия",
     "phone": "Телефон",
     "status": "Статус",
-    "createdAt": "Создан",
+    "createdAt": "Дата создания",
     "actions": "Действия",
     "active": "Активен",
     "inactive": "Неактивен",
     "loading": "Загрузка...",
-    "noEmployees": "Сотрудники не найдены",
-    "errorLoading": "Ошибка загрузки данных"
+    "noStaff": "Сотрудники не найдены",
+    "errorLoading": "Ошибка загрузки данных",
+    "noData": "Нет данных для отображения",
+    "accessDenied": "Доступ запрещен",
+    "accessDeniedDescription": "У вас нет прав для просмотра списка сотрудников",
+    "errorLoadingData": "Ошибка загрузки данных",
+    "unknownError": "Неизвестная ошибка",
+    "filters": {
+      "pointCode": "Код точки",
+      "pointCodePlaceholder": "Введите код точки",
+      "networkCode": "Код сети",
+      "networkCodePlaceholder": "Введите код сети",
+      "role": "Роль",
+      "rolePlaceholder": "Выберите роль",
+      "allRoles": "Все роли",
+      "phone": "Телефон",
+      "phonePlaceholder": "Введите телефон",
+      "add": "Добавить",
+      "clear": "Очистить",
+      "phones": "Телефоны"
+    },
+    "roles": {
+      "staff": "Сотрудник",
+      "manager": "Менеджер",
+      "net_manager": "Сетевой менеджер",
+      "self_owner": "Владелец",
+      "admin": "Администратор",
+      "worker": "Работник"
+    },
+    "pagination": {
+      "showing": "Показано",
+      "of": "из",
+      "page": "Страница",
+      "back": "Назад",
+      "forward": "Вперед"
+    }
   }
 }
