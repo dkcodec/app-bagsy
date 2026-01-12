@@ -40,6 +40,7 @@ export interface VerifyAuthTokenResponseDto {
 }
 
 export interface PasswordChangeRequestDto {
+  phone: string;
   password: string;
   token: string;
 }
