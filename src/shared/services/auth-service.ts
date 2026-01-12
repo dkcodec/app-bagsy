@@ -5,6 +5,8 @@ import {
   clearAuthTokens,
 } from "../utils/cookies";
 
+export type VerifyAuthTokenPurpose = "register" | "password_change";
+
 export interface LoginRequestDto {
   phone: string;
   password: string;
@@ -24,14 +26,28 @@ export interface RegisterRequestDto {
 }
 
 export interface RegisterResponseDto {
-  data: {
-    access_token: string;
-    refresh_token: string;
-  };
-  message: string;
+  access_token: string;
+  refresh_token: string;
+  message?: string;
   code?: number;
 }
 
+export interface VerifyAuthTokenResponseDto {
+  network_code: string;
+  phone: string;
+  point_code: string;
+  purpose: VerifyAuthTokenPurpose;
+}
+
+export interface PasswordChangeRequestDto {
+  password: string;
+  token: string;
+}
+
+export interface PasswordChangeResponseDto {
+  message?: string;
+  code?: number;
+}
 /**
  * Сервис авторизации. Инкапсулирует эндпоинты и маппинг данных
  */
@@ -51,12 +67,7 @@ export class AuthService {
   ): Promise<RegisterResponseDto> {
     return apiClient.post<RegisterResponseDto>(
       "v1/auth/staff/register/confirm",
-      payload,
-      {
-        headers: {
-          Authorization: `Bearer ${payload.token}`,
-        },
-      }
+      payload
     );
   }
 
@@ -77,6 +88,29 @@ export class AuthService {
           refresh_token: refreshToken,
         }),
       }
+    );
+  }
+
+  /**
+   * Проверка валидности токена авторизации
+   */
+  static async verifyAuthToken(
+    token: string
+  ): Promise<VerifyAuthTokenResponseDto> {
+    return apiClient.get<VerifyAuthTokenResponseDto>(
+      `v1/auth/verify-auth-token/${token}`
+    );
+  }
+
+  /**
+   * Изменение пароля пользователя
+   */
+  static async passwordChange(
+    payload: PasswordChangeRequestDto
+  ): Promise<PasswordChangeResponseDto> {
+    return apiClient.post<PasswordChangeResponseDto>(
+      "v1/auth/password/change",
+      payload
     );
   }
 

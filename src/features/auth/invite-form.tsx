@@ -7,19 +7,26 @@ import { Label } from "@/src/entities/label";
 import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 import { z } from "zod";
-import { decodeJwt } from "@/src/shared/utils/jwt";
 import { formatPhone } from "@/src/shared/utils/formater";
-import { useRegisterConfirm } from "@/src/shared/hooks/use-auth";
+import {
+  usePasswordChange,
+  useRegisterConfirm,
+} from "@/src/shared/hooks/use-auth";
+import { VerifyAuthTokenPurpose } from "@/src/shared/services/auth-service";
 
 export default function InviteForm({
   className,
   token,
-  ...props
-}: React.ComponentProps<"div"> & { token: string }) {
+  phone,
+  purpose,
+}: React.ComponentProps<"div"> & {
+  token: string;
+  phone: string;
+  purpose: VerifyAuthTokenPurpose;
+}) {
   const t = useTranslations("InviteForm");
-  const payload = decodeJwt<{ phone: string; iat: number; exp: number }>(token);
-  const { phone } = payload;
   const registerConfirmMutation = useRegisterConfirm();
+  const passwordChangeMutation = usePasswordChange();
 
   const [errors, setErrors] = useState<{
     password?: string;
@@ -54,15 +61,24 @@ export default function InviteForm({
       return;
     }
     setErrors({});
-    registerConfirmMutation.mutateAsync({
-      phone,
+
+    if (purpose === "register") {
+      registerConfirmMutation.mutateAsync({
+        phone,
+        password: data.password,
+        token,
+      });
+      return;
+    }
+
+    passwordChangeMutation.mutateAsync({
       password: data.password,
       token,
     });
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn("flex flex-col gap-6", className)}>
       <Card className="overflow-hidden p-0 dark:bg-white/10 bg-black/10 backdrop-blur-sm">
         <CardContent className="grid p-0 md:grid-cols-1">
           <form className="p-6 md:p-8" onSubmit={handleSubmit}>
@@ -73,8 +89,6 @@ export default function InviteForm({
                   {t("description", { phone: formatPhone(phone) })}
                 </p>
               </div>
-
-              <input type="hidden" name="token" value={token} />
 
               <div className="grid gap-3">
                 <Label htmlFor="password">{t("password")}</Label>

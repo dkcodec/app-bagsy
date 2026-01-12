@@ -6,6 +6,8 @@ import {
   type LoginResponseDto,
   type RegisterRequestDto,
   type RegisterResponseDto,
+  type PasswordChangeRequestDto,
+  type PasswordChangeResponseDto,
 } from "../services";
 import { setAuthTokens } from "../utils/cookies";
 import { useRouter } from "next/navigation";
@@ -66,5 +68,17 @@ export function useRefreshToken() {
     onSuccess: async data => {
       await setAuthTokens(data.access_token, data.refresh_token);
     },
+  });
+}
+
+export function usePasswordChange() {
+  return useMutation<
+    PasswordChangeResponseDto,
+    unknown,
+    PasswordChangeRequestDto
+  >({
+    mutationKey: ["auth", "passwordChange"],
+    mutationFn: (payload: PasswordChangeRequestDto) =>
+      AuthService.passwordChange(payload),
   });
 }
