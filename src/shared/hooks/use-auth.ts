@@ -72,6 +72,8 @@ export function useRefreshToken() {
 }
 
 export function usePasswordChange() {
+  const router = useRouter();
+  const logoutMutation = useLogout();
   return useMutation<
     PasswordChangeResponseDto,
     unknown,
@@ -80,5 +82,9 @@ export function usePasswordChange() {
     mutationKey: ["auth", "passwordChange"],
     mutationFn: (payload: PasswordChangeRequestDto) =>
       AuthService.passwordChange(payload),
+    onSuccess: async () => {
+      await logoutMutation.mutateAsync();
+      router.push("/login");
+    },
   });
 }
