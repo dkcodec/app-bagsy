@@ -41,7 +41,7 @@ export interface UpdateProfileRequest {
 
 export interface UsersListResponseDto extends UserResponse {
   users: IUserDto[];
-  count: number;
+  total: number;
 }
 
 export interface UsersSearchRequest {
