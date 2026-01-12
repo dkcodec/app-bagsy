@@ -126,8 +126,6 @@
     "password": "Пароль",
     "confirmPassword": "Повторите пароль",
     "setPassword": "Установить пароль",
-    "name": "Имя",
-    "surname": "Фамилия",
     "errors": {
       "passwordMin": "Минимум 6 символов",
       "passwordsMustMatch": "Пароли должны совпадать",
