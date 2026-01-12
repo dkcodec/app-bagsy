@@ -1,6 +1,6 @@
 import { IUserDto } from "./user";
 
 export interface IStaffDto {
-  count: number;
+  total: number;
   users: IUserDto[];
 }

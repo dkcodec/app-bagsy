@@ -60,7 +60,7 @@ export function StaffContent() {
   const paginationInfo = useMemo<PaginationInfo>(() => {
     const limit = filters.limit || DEFAULT_STAFF_FILTERS.limit!;
     const offset = filters.offset || DEFAULT_STAFF_FILTERS.offset!;
-    const total = data?.count || 0;
+    const total = data?.total || 0;
     const currentPage = Math.floor(offset / limit) + 1;
     const totalPages = Math.ceil(total / limit);
     const hasNext = offset + limit < total;
@@ -75,7 +75,7 @@ export function StaffContent() {
       limit,
       offset,
     };
-  }, [data?.count, filters.limit, filters.offset]);
+  }, [data?.total, filters.limit, filters.offset]);
 
   // Определение колонок таблицы
   const tableColumns = [
@@ -143,7 +143,7 @@ export function StaffContent() {
               </div>
 
               {/* Пагинация */}
-              {data && data.count > 0 && (
+              {data && data.total > 0 && (
                 <Pagination
                   paginationInfo={paginationInfo}
                   onPageChange={handlePageChange}
