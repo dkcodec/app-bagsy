@@ -20,7 +20,17 @@ export interface HttpClientOptions {
 }
 
 export interface RequestOptions extends RequestInit {
-  query?: Record<string, string | number | boolean | undefined | null>;
+  query?: Record<
+    string,
+    | string
+    | number
+    | boolean
+    | string[]
+    | number[]
+    | boolean[]
+    | undefined
+    | null
+  >;
 }
 
 export class HttpClient {
@@ -89,9 +99,12 @@ export class HttpClient {
     }
 
     if (!response.ok) {
-      if (response.status === 401 || response.status === 403) {
+      // 401 - ошибка авторизации (не авторизован или токен истек) - редиректим на логин
+      if (response.status === 401) {
         this.onUnauthorized?.();
       }
+      // 403 - ошибка доступа (авторизован, но нет прав) - не редиректим, просто выбрасываем ошибку
+
       let errorBody: unknown = undefined;
       try {
         errorBody = await response.json();
@@ -229,7 +242,14 @@ export class HttpClient {
     if (query) {
       Object.entries(query).forEach(([key, value]) => {
         if (value === undefined || value === null) return;
-        url.searchParams.set(key, String(value));
+        // Поддержка массивов в query параметрах
+        if (Array.isArray(value)) {
+          value.forEach(item => {
+            url.searchParams.append(key, String(item));
+          });
+        } else {
+          url.searchParams.set(key, String(value));
+        }
       });
     }
     return this.baseUrl ? url.toString() : url.pathname + url.search;
