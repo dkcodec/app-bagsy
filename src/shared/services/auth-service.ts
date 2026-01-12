@@ -109,7 +109,7 @@ export class AuthService {
     payload: PasswordChangeRequestDto
   ): Promise<PasswordChangeResponseDto> {
     return apiClient.post<PasswordChangeResponseDto>(
-      "v1/auth/password/change",
+      "v1/auth/password/change/confirm",
       payload
     );
   }
