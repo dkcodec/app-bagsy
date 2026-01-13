@@ -14,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
   Skeleton,
+  Button,
 } from "@/src/entities";
 import { StaffFilters } from "./staff-filters";
 import { useTranslations } from "next-intl";
@@ -22,6 +23,9 @@ import { Pagination, type PaginationInfo } from "./components/pagination";
 import { StaffTableHeader } from "./components/table-header";
 import { StaffTableRow } from "./components/table-row";
 import { DEFAULT_STAFF_FILTERS } from "./constants";
+import { Plus } from "lucide-react";
+import { AddStaffDialog } from "./add-staff-dialog";
+import { useDisclosure } from "@/src/shared/hooks";
 
 /**
  * Компонент таблицы сотрудников с фильтрацией, сортировкой и пагинацией
@@ -31,6 +35,9 @@ export function StaffContent() {
 
   // Состояние фильтров
   const [filters, setFilters] = useState<GetStaffParams>(DEFAULT_STAFF_FILTERS);
+
+  // Управление диалогом добавления сотрудника
+  const addStaffDialog = useDisclosure();
 
   // Получение данных
   const { data, isLoading, error } = useGetStaff(filters);
@@ -89,6 +96,11 @@ export function StaffContent() {
     { field: "created_at" as const, labelKey: "createdAt", sortable: true },
   ];
 
+  // Открытие диалога добавления сотрудника
+  const handleAddStaff = () => {
+    addStaffDialog.onOpen();
+  };
+
   return (
     <div className="flex flex-col md:p-4">
       {/* Фильтры */}
@@ -96,8 +108,13 @@ export function StaffContent() {
 
       {/* Таблица */}
       <Card className="border-none">
-        <CardHeader>
+        <CardHeader className="flex flex-row justify-between items-center px-6 py-2">
           <CardTitle>{t("tableTitle")}</CardTitle>
+
+          <Button onClick={handleAddStaff}>
+            <Plus />
+            {t("addStaff")}
+          </Button>
         </CardHeader>
         <CardContent>
           {/* Ошибка загрузки */}
@@ -153,6 +170,18 @@ export function StaffContent() {
           )}
         </CardContent>
       </Card>
+
+      {/* Диалог добавления сотрудника */}
+      <AddStaffDialog
+        open={addStaffDialog.isOpen}
+        onOpenChange={open => {
+          if (open) {
+            addStaffDialog.onOpen();
+          } else {
+            addStaffDialog.onClose();
+          }
+        }}
+      />
     </div>
   );
 }

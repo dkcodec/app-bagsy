@@ -16,3 +16,6 @@ export * from "./use-update-event";
 
 // Хуки для пользователей
 export * from "./use-users";
+
+// Хуки для debounce
+export * from "./use-debounce";
