@@ -48,6 +48,15 @@ export interface PasswordChangeResponseDto {
   message?: string;
   code?: number;
 }
+
+export interface PasswordChangeRequestRequestDto {
+  phone: string;
+}
+
+export interface PasswordChangeRequestResponseDto {
+  message?: string;
+  code?: number;
+}
 /**
  * Сервис авторизации. Инкапсулирует эндпоинты и маппинг данных
  */
@@ -110,6 +119,16 @@ export class AuthService {
   ): Promise<PasswordChangeResponseDto> {
     return apiClient.post<PasswordChangeResponseDto>(
       "v1/auth/password/change/confirm",
+      payload
+    );
+  }
+
+  /**
+   * Запрос на изменение пароля
+   */
+  static async passwordChangeRequest(payload: PasswordChangeRequestRequestDto): Promise<PasswordChangeRequestResponseDto> {
+    return apiClient.post<PasswordChangeRequestResponseDto>(
+      "v1/auth/password/change",
       payload
     );
   }

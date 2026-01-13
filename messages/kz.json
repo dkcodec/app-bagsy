@@ -94,6 +94,16 @@
   "HeaderTitle": {
     "settings": "Параметрлер"
   },
+  "Auth": {
+    "PasswordChange": {
+      "passwordChangeSuccess": "Құпия сөз сәтті орнатылды",
+      "passwordChangeError": "Құпия сөзді орнату қатесі"
+    },
+    "PasswordChangeRequest": {
+      "passwordChangeRequestSuccess": "Құпия сөзді өзгерту сұранымы жіберілді",
+      "passwordChangeRequestError": "Құпия сөзді өзгерту сұранымы қатесі"
+    }
+  },
   "LoginForm": {
     "welcomeBack": "Кош келдіңіз",
     "loginToYourAccount": "Bagsy тіркелгіңізге кіріңіз",

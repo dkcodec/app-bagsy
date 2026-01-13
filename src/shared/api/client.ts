@@ -180,7 +180,6 @@ export class HttpClient {
         access_token: string;
         refresh_token: string;
       };
-      console.log(json);
       await setAuthTokens(json.access_token, json.refresh_token);
     } finally {
       this.isRefreshing = false;
