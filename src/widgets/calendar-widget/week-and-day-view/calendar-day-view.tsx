@@ -124,8 +124,6 @@ export const CalendarDayView = memo(function CalendarDayView({
                     workingHours
                   );
 
-                  console.log(isDisabled);
-
                   return (
                     <div
                       key={hour}

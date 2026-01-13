@@ -8,9 +8,13 @@ import {
   type RegisterResponseDto,
   type PasswordChangeRequestDto,
   type PasswordChangeResponseDto,
+  PasswordChangeRequestRequestDto,
+  PasswordChangeRequestResponseDto,
 } from "../services";
-import { setAuthTokens } from "../utils/cookies";
+import { setAuthTokens, clearAuthTokens } from "../utils/cookies";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 /**
  * Мутация для логина пользователя
@@ -71,9 +75,29 @@ export function useRefreshToken() {
   });
 }
 
+export function usePasswordChangeRequest() {
+  const t = useTranslations("Auth.PasswordChangeRequest");
+  return useMutation<
+    PasswordChangeRequestResponseDto,
+    unknown,
+    PasswordChangeRequestRequestDto
+  >({
+    mutationKey: ["auth", "passwordChangeRequest"],
+    mutationFn: (payload: PasswordChangeRequestRequestDto) =>
+      AuthService.passwordChangeRequest(payload),
+    onSuccess: () => {
+      toast.success(t("passwordChangeRequestSuccess"));
+    },
+    onError: () => {
+      toast.error(t("passwordChangeRequestError"));
+    },
+  });
+}
+
 export function usePasswordChange() {
+  const t = useTranslations("Auth.PasswordChange");
   const router = useRouter();
-  const logoutMutation = useLogout();
+  const queryClient = useQueryClient();
   return useMutation<
     PasswordChangeResponseDto,
     unknown,
@@ -83,8 +107,13 @@ export function usePasswordChange() {
     mutationFn: (payload: PasswordChangeRequestDto) =>
       AuthService.passwordChange(payload),
     onSuccess: async () => {
-      await logoutMutation.mutateAsync();
-      router.push("/login");
+      await clearAuthTokens();
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+      toast.success(t("passwordChangeSuccess"));
+      router.push("/");
+    },
+    onError: () => {
+      toast.error(t("passwordChangeError"));
     },
   });
 }

@@ -97,6 +97,16 @@
   "HeaderTitle": {
     "settings": "Настройки"
   },
+  "Auth": {
+    "PasswordChange": {
+      "passwordChangeSuccess": "Пароль успешно установлен",
+      "passwordChangeError": "Ошибка при установке пароля"
+    },
+    "PasswordChangeRequest": {
+      "passwordChangeRequestSuccess": "Запрос на изменение пароля отправлен",
+      "passwordChangeRequestError": "Ошибка при отправке запроса на изменение пароля"
+    }
+  },
   "LoginForm": {
     "welcomeBack": "Добро пожаловать",
     "loginToYourAccount": "Войдите в свой аккаунт Bagsy",
@@ -171,7 +181,8 @@
       "name": "Имя",
       "surname": "Фамилия",
       "profileUpdatedSuccessfully": "Профиль успешно обновлен",
-      "errorUpdatingProfile": "Ошибка при обновлении профиля"
+      "errorUpdatingProfile": "Ошибка при обновлении профиля",
+      "changePassword": "Сменить пароль"
     }
   },
   "Staff": {

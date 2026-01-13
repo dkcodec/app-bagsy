@@ -18,7 +18,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import { useUpdateProfile } from "@/src/shared/hooks";
+import { usePasswordChangeRequest, useUpdateProfile } from "@/src/shared/hooks";
 import { Loader } from "lucide-react";
 import { toast } from "sonner";
 
@@ -36,6 +36,7 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
   const updateProfile = useUpdateProfile();
   const [isEditing, setIsEditing] = useState(false);
 
+  const passwordChangeRequestMutation = usePasswordChangeRequest();
   // Генерируем инициалы для аватара
   const initials = user
     ? `${user.name.charAt(0)}${user.surname.charAt(0)}`.toUpperCase()
@@ -274,6 +275,24 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
             )}
           </div>
         </form>
+
+        <Button
+          variant="outline"
+          className="w-full"
+          disabled={!user?.phone || passwordChangeRequestMutation.isPending}
+          onClick={() => {
+            if (!user?.phone) return;
+            passwordChangeRequestMutation.mutate({
+              phone: user?.phone,
+            });
+          }}
+        >
+          {passwordChangeRequestMutation.isPending ? (
+            <Loader className="animate-loader" />
+          ) : (
+            t("changePassword")
+          )}
+        </Button>
       </CardContent>
     </Card>
   );
