@@ -126,7 +126,9 @@ export class AuthService {
   /**
    * Запрос на изменение пароля
    */
-  static async passwordChangeRequest(payload: PasswordChangeRequestRequestDto): Promise<PasswordChangeRequestResponseDto> {
+  static async passwordChangeRequest(
+    payload: PasswordChangeRequestRequestDto
+  ): Promise<PasswordChangeRequestResponseDto> {
     return apiClient.post<PasswordChangeRequestResponseDto>(
       "v1/auth/password/change",
       payload

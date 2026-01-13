@@ -77,9 +77,14 @@ export function useRefreshToken() {
 
 export function usePasswordChangeRequest() {
   const t = useTranslations("Auth.PasswordChangeRequest");
-  return useMutation<PasswordChangeRequestResponseDto, unknown, PasswordChangeRequestRequestDto>({
+  return useMutation<
+    PasswordChangeRequestResponseDto,
+    unknown,
+    PasswordChangeRequestRequestDto
+  >({
     mutationKey: ["auth", "passwordChangeRequest"],
-    mutationFn: (payload: PasswordChangeRequestRequestDto) => AuthService.passwordChangeRequest(payload),
+    mutationFn: (payload: PasswordChangeRequestRequestDto) =>
+      AuthService.passwordChangeRequest(payload),
     onSuccess: () => {
       toast.success(t("passwordChangeRequestSuccess"));
     },

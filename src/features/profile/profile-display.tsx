@@ -276,8 +276,9 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
           </div>
         </form>
 
-        <Button variant="outline" 
-          className="w-full" 
+        <Button
+          variant="outline"
+          className="w-full"
           disabled={!user?.phone || passwordChangeRequestMutation.isPending}
           onClick={() => {
             if (!user?.phone) return;
@@ -288,7 +289,9 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
         >
           {passwordChangeRequestMutation.isPending ? (
             <Loader className="animate-loader" />
-          ) : t("changePassword")}
+          ) : (
+            t("changePassword")
+          )}
         </Button>
       </CardContent>
     </Card>
