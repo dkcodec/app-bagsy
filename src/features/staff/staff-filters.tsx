@@ -9,12 +9,11 @@ import {
   SelectTrigger,
   SelectValue,
   Button,
-  Badge,
 } from "@/src/entities";
-import { X } from "lucide-react";
 import { GetStaffParams } from "@/src/shared/services/staff-service";
 import { EUserRole } from "@/src/shared/types/user";
 import { useCurrentUser } from "@/src/shared/hooks/use-users";
+import { useDebounceCallback } from "@/src/shared/hooks/use-debounce";
 import { useTranslations } from "next-intl";
 import { DEFAULT_STAFF_FILTERS } from "./constants";
 
@@ -40,7 +39,15 @@ export function StaffFilters({ filters, onFiltersChange }: StaffFiltersProps) {
   const [localNetworkCode, setLocalNetworkCode] = useState(
     filters.network_code || ""
   );
-  const [localPhone, setLocalPhone] = useState("");
+  const [localPhone, setLocalPhone] = useState(filters.phone || "");
+
+  // Проверка наличия активных фильтров
+  const hasActiveFilters = Boolean(
+    filters.point_code ||
+      filters.network_code ||
+      (filters.role && filters.role.length > 0) ||
+      (filters.phone && filters.phone.trim())
+  );
 
   // Обработка изменения фильтров
   const handleFilterChange = (key: keyof GetStaffParams, value: any) => {
@@ -49,23 +56,6 @@ export function StaffFilters({ filters, onFiltersChange }: StaffFiltersProps) {
       [key]: value,
       offset: 0, // Сбрасываем пагинацию при изменении фильтров
     });
-  };
-
-  // Добавление телефона в фильтр
-  const handleAddPhone = () => {
-    if (localPhone.trim()) {
-      const phones = filters.phone || [];
-      if (!phones.includes(localPhone.trim())) {
-        handleFilterChange("phone", [...phones, localPhone.trim()]);
-        setLocalPhone("");
-      }
-    }
-  };
-
-  // Удаление телефона из фильтра
-  const handleRemovePhone = (phoneToRemove: string) => {
-    const phones = (filters.phone || []).filter(p => p !== phoneToRemove);
-    handleFilterChange("phone", phones.length > 0 ? phones : undefined);
   };
 
   // Очистка всех фильтров
@@ -82,12 +72,24 @@ export function StaffFilters({ filters, onFiltersChange }: StaffFiltersProps) {
     setLocalPhone("");
   };
 
-  // Проверка наличия активных фильтров
-  const hasActiveFilters = Boolean(
-    filters.point_code ||
-      filters.network_code ||
-      (filters.role && filters.role.length > 0) ||
-      (filters.phone && filters.phone.length > 0)
+  // Debounce для кода точки (применяется через 500мс после остановки ввода)
+  useDebounceCallback(
+    localPointCode,
+    debouncedPointCode => {
+      const pointCodeValue = debouncedPointCode.trim();
+      handleFilterChange("point_code", pointCodeValue || undefined);
+    },
+    500
+  );
+
+  // Debounce для телефона (применяется через 500мс после остановки ввода)
+  useDebounceCallback(
+    localPhone,
+    debouncedPhone => {
+      const phoneValue = debouncedPhone.trim();
+      handleFilterChange("phone", phoneValue || undefined);
+    },
+    500
   );
 
   return (
@@ -102,14 +104,6 @@ export function StaffFilters({ filters, onFiltersChange }: StaffFiltersProps) {
             placeholder={t("pointCodePlaceholder")}
             value={localPointCode}
             onChange={e => setLocalPointCode(e.target.value)}
-            onBlur={() =>
-              handleFilterChange("point_code", localPointCode || undefined)
-            }
-            onKeyDown={e => {
-              if (e.key === "Enter") {
-                handleFilterChange("point_code", localPointCode || undefined);
-              }
-            }}
           />
         </div>
 
@@ -123,20 +117,6 @@ export function StaffFilters({ filters, onFiltersChange }: StaffFiltersProps) {
               placeholder={t("networkCodePlaceholder")}
               value={localNetworkCode}
               onChange={e => setLocalNetworkCode(e.target.value)}
-              onBlur={() =>
-                handleFilterChange(
-                  "network_code",
-                  localNetworkCode || undefined
-                )
-              }
-              onKeyDown={e => {
-                if (e.key === "Enter") {
-                  handleFilterChange(
-                    "network_code",
-                    localNetworkCode || undefined
-                  );
-                }
-              }}
             />
           </div>
         )}
@@ -172,26 +152,11 @@ export function StaffFilters({ filters, onFiltersChange }: StaffFiltersProps) {
         {/* Фильтр по телефону */}
         <div className="flex-1 min-w-[150px]">
           <label className="text-sm font-medium mb-1 block">{t("phone")}</label>
-          <div className="flex gap-2">
-            <Input
-              placeholder={t("phonePlaceholder")}
-              value={localPhone}
-              onChange={e => setLocalPhone(e.target.value)}
-              onKeyDown={e => {
-                if (e.key === "Enter") {
-                  handleAddPhone();
-                }
-              }}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleAddPhone}
-              disabled={!localPhone.trim()}
-            >
-              {t("add")}
-            </Button>
-          </div>
+          <Input
+            placeholder={t("phonePlaceholder")}
+            value={localPhone}
+            onChange={e => setLocalPhone(e.target.value)}
+          />
         </div>
 
         {/* Кнопка очистки фильтров */}
@@ -206,25 +171,6 @@ export function StaffFilters({ filters, onFiltersChange }: StaffFiltersProps) {
           </Button>
         )}
       </div>
-
-      {/* Отображение активных фильтров телефонов */}
-      {filters.phone && filters.phone.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          <span className="text-sm font-medium">{t("phones")}:</span>
-          {filters.phone.map(phone => (
-            <Badge key={phone} variant="secondary" className="gap-1">
-              {phone}
-              <button
-                type="button"
-                onClick={() => handleRemovePhone(phone)}
-                className="ml-1 hover:text-destructive"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

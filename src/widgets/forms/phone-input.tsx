@@ -91,6 +91,7 @@ export interface PhoneInputProps
   onChange?: (value: PhoneInputValue) => void;
   defaultCountryCode?: Country["code"];
   countries?: ReadonlyArray<Country>;
+  classNameInput?: string;
 }
 
 export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
@@ -103,6 +104,7 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
       countries = COUNTRIES,
       placeholder = "Enter phone number",
       disabled,
+      classNameInput,
       ...props
     },
     ref
@@ -190,8 +192,9 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
           type="button"
           variant="outline"
           className={cn(
-            "rounded-e-none rounded-s-md border-r-0 px-3 text-sm bg-transparent border-black",
-            "h-9"
+            "rounded-e-none rounded-s-md border-r-0 px-3 text-sm bg-transparen",
+            "h-9",
+            classNameInput
           )}
           onClick={() => setOpen(s => !s)}
           disabled={disabled}
@@ -208,7 +211,7 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           disabled={disabled}
-          className="rounded-s-none border-black"
+          className={cn("rounded-s-none", classNameInput)}
           inputMode="tel"
           {...props}
         />

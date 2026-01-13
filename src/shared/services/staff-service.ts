@@ -9,7 +9,7 @@ export interface GetStaffParams {
   point_code?: string;
   network_code?: string;
   role?: TUserRole[];
-  phone?: string[];
+  phone?: string;
   limit?: number;
   offset?: number;
   order_by?:
@@ -21,6 +21,24 @@ export interface GetStaffParams {
     | "created_at"
     | "updated_at";
   sort_order?: "asc" | "desc";
+}
+
+/**
+ * Параметры запроса для регистрации сотрудника
+ */
+export interface RegisterStaffRequest {
+  name: string;
+  surname: string;
+  phone: string;
+  role: "manager" | "staff" | "net_manager";
+  point_code: string;
+}
+
+/**
+ * Ответ на регистрацию сотрудника
+ */
+export interface RegisterStaffResponse {
+  message: string;
 }
 
 /**
@@ -36,13 +54,29 @@ export class StaffService {
         ...(params?.point_code && { point_code: params.point_code }),
         ...(params?.network_code && { network_code: params.network_code }),
         ...(params?.role && params.role.length > 0 && { role: params.role }),
-        ...(params?.phone &&
-          params.phone.length > 0 && { phone: params.phone }),
+        ...(params?.phone && params.phone.trim() && { phone: params.phone }),
         ...(params?.limit && { limit: params.limit }),
         ...(params?.offset !== undefined && { offset: params.offset }),
         ...(params?.order_by && { order_by: params.order_by }),
         ...(params?.sort_order && { sort_order: params.sort_order }),
       },
+    });
+  }
+
+  /**
+   * Регистрация нового сотрудника (двухэтапный процесс)
+   * Создает неактивного пользователя и отправляет ссылку для завершения регистрации
+   */
+  static async registerStaff(
+    data: RegisterStaffRequest
+  ): Promise<RegisterStaffResponse> {
+    // Нормализуем телефон: убираем + и оставляем только цифры
+    const normalizedPhone =
+      data.phone.replace(/^\+/, "").match(/\d/g)?.join("") || "";
+
+    return apiClient.post<RegisterStaffResponse>("v1/auth/staff/register", {
+      ...data,
+      phone: normalizedPhone,
     });
   }
 }

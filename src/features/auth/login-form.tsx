@@ -97,6 +97,7 @@ export default function LoginForm({
                   required
                   value={phone}
                   onChange={setPhone}
+                  classNameInput="border-black"
                   defaultCountryCode="KZ"
                   aria-invalid={Boolean(errors.phone)}
                   aria-describedby={errors.phone ? "phone-error" : undefined}

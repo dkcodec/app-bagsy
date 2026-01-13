@@ -22,8 +22,19 @@ import { NavMain } from "./nav-main";
 import Link from "next/link";
 import { useCurrentUser } from "@/src/shared/hooks/use-users";
 import { useTranslations } from "next-intl";
+import type { TUserRole } from "@/src/shared/types/user";
+import { EUserRole } from "@/src/shared/types/user";
+import type { LucideIcon } from "lucide-react";
 
-const navData = {
+type NavItem = {
+  name: string;
+  url: string;
+  icon: LucideIcon;
+  isActive?: boolean;
+  allowedRoles?: TUserRole[];
+};
+
+const navData: { navMain: NavItem[] } = {
   navMain: [
     {
       name: "calendar",
@@ -40,11 +51,23 @@ const navData = {
       name: "services",
       url: "/services",
       icon: ClipboardList,
+      allowedRoles: [
+        EUserRole.ADMIN,
+        EUserRole.NET_MANAGER,
+        EUserRole.SELF_OWNER,
+        EUserRole.MANAGER,
+      ],
     },
     {
       name: "staff",
       url: "/staff",
       icon: Users,
+      allowedRoles: [
+        EUserRole.ADMIN,
+        EUserRole.NET_MANAGER,
+        EUserRole.SELF_OWNER,
+        EUserRole.MANAGER,
+      ],
     },
     {
       name: "analytics",
@@ -61,8 +84,21 @@ const navData = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const t = useTranslations("Sidebar");
-
   const { data: userData } = useCurrentUser();
+
+  // Фильтрация навигации по ролям пользователя
+  const filteredNav = React.useMemo(() => {
+    if (!userData?.role) return navData.navMain;
+
+    return navData.navMain
+      .filter(item => {
+        // Если allowedRoles не указано, пункт доступен всем
+        if (!item.allowedRoles) return true;
+        // Проверяем, есть ли роль пользователя в списке разрешенных
+        return item.allowedRoles.includes(userData.role);
+      })
+      .map(({ allowedRoles, ...item }) => item); // Удаляем allowedRoles перед передачей в NavMain
+  }, [userData?.role]);
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -72,7 +108,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </Link>
       </SidebarHeader>
       <SidebarContent className="flex flex-col">
-        <NavMain main={navData.navMain} />
+        <NavMain main={filteredNav} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser
