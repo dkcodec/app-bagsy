@@ -92,6 +92,16 @@ export function StaffFilters({ filters, onFiltersChange }: StaffFiltersProps) {
     500
   );
 
+  // Debounce для кода сети (применяется через 500мс после остановки ввода)
+  useDebounceCallback(
+    localNetworkCode,
+    debouncedNetworkCode => {
+      const networkCodeValue = debouncedNetworkCode.trim();
+      handleFilterChange("network_code", networkCodeValue || undefined);
+    },
+    500
+  );
+
   return (
     <div className="flex flex-col gap-4 p-4">
       <div className="flex flex-wrap items-end gap-4">
