@@ -24,7 +24,7 @@ export * from "./select";
 export * from "./separator";
 export * from "./sheet";
 export * from "./sidebar";
-export * from "./single-calendar";
+export * from "./calendar";
 export * from "./single-day-picker";
 export * from "./skeleton";
 export * from "./switch";

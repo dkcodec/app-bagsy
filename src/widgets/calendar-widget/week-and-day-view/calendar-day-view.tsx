@@ -5,7 +5,7 @@ import { ru, kk } from "date-fns/locale";
 import { useCalendar } from "@/src/features/calendar";
 
 import { ScrollArea } from "@/src/entities/scroll-area";
-import { SingleCalendar } from "@/src/entities/single-calendar";
+import { SingleCalendar } from "@/src/entities/calendar";
 
 import { AddEventDialog } from "@/src/features/calendar/event-dialogs";
 import { EventBlock } from "./event-block";
