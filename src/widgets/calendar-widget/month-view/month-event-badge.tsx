@@ -12,7 +12,7 @@ import type { IEvent } from "@/src/shared/types/calendar";
 import type { VariantProps } from "class-variance-authority";
 
 const eventBadgeVariants = cva(
-  "mx-1 flex size-auto h-6.5 select-none items-center justify-between gap-1.5 truncate whitespace-nowrap rounded-md border px-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+  "mx-1 flex size-auto h-6.5 select-none items-center justify-between gap-1.5 truncate whitespace-nowrap rounded-md border px-2 text-xs focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring",
   {
     variants: {
       color: {
@@ -47,9 +47,9 @@ const eventBadgeVariants = cva(
       },
       multiDayPosition: {
         first:
-          "relative z-10 mr-0 w-[calc(100%_-_3px)] rounded-r-none border-r-0 [&>span]:mr-2.5",
+          "relative z-10 mr-0 w-[calc(100%-3px)] rounded-r-none border-r-0 [&>span]:mr-2.5",
         middle:
-          "relative z-10 mx-0 w-[calc(100%_+_1px)] rounded-none border-x-0",
+          "relative z-10 mx-0 w-[calc(100%+1px)] rounded-none border-x-0",
         last: "ml-0 rounded-l-none border-l-0",
         none: "",
       },

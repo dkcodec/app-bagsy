@@ -41,7 +41,7 @@ export function CalendarTimeline({
       style={{ top: `${getCurrentTimePosition()}%` }}
     >
       <div className="absolute left-0 top-0 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary"></div>
-      <div className="absolute -left-18 flex w-16 -translate-y-1/2 justify-end bg-[var(--muted-background)] pr-1 text-xs font-medium text-primary">
+      <div className="absolute -left-18 flex w-16 -translate-y-1/2 justify-end bg-(--muted-background) pr-1 text-xs font-medium text-primary">
         {formatCurrentTime()}
       </div>
     </div>

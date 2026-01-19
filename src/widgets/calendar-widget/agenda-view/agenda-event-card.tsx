@@ -12,7 +12,7 @@ import type { IEvent } from "@/src/shared/types/calendar";
 import type { VariantProps } from "class-variance-authority";
 
 const agendaEventCardVariants = cva(
-  "flex select-none items-center justify-between gap-3 rounded-md border p-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+  "flex select-none items-center justify-between gap-3 rounded-md border p-3 text-sm focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring",
   {
     variants: {
       color: {

@@ -106,7 +106,7 @@ export const CalendarContainer = memo(function CalendarContainer({
   }, [filteredEvents]);
 
   return (
-    <div className="overflow-hidden rounded-xl border bg-[var(--muted-background)]">
+    <div className="overflow-hidden rounded-xl border bg-(--muted-background)">
       <CalendarHeader
         view={view}
         events={filteredEvents}

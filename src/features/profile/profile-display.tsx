@@ -127,7 +127,7 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
                     <div className="">
                       <Input
                         id="name"
-                        className="w-full bg-transparent outline-none border-b border-muted-foreground/40 focus:border-primary transition-colors"
+                        className="w-full bg-transparent outline-hidden border-b border-muted-foreground/40 focus:border-primary transition-colors"
                         {...register("name")}
                         placeholder={user?.name ?? t("name")}
                         disabled={isSubmitting}
@@ -142,7 +142,7 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
                     <div className="">
                       <Input
                         id="surname"
-                        className="w-full bg-transparent outline-none border-b border-muted-foreground/40 focus:border-primary transition-colors"
+                        className="w-full bg-transparent outline-hidden border-b border-muted-foreground/40 focus:border-primary transition-colors"
                         {...register("surname")}
                         placeholder={user?.surname ?? t("surname")}
                         disabled={isSubmitting}
