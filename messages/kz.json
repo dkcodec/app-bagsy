@@ -176,7 +176,8 @@
       "name": "Аты",
       "surname": "Тегі",
       "profileUpdatedSuccessfully": "Профиль сәтті жаңартылды",
-      "errorUpdatingProfile": "Профиль жаңарту қатесі"
+      "errorUpdatingProfile": "Профиль жаңарту қатесі",
+      "changePassword": "Құпия сөзді өзгерту"
     }
   },
   "Staff": {
