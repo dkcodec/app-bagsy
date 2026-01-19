@@ -48,8 +48,7 @@ const eventBadgeVariants = cva(
       multiDayPosition: {
         first:
           "relative z-10 mr-0 w-[calc(100%-3px)] rounded-r-none border-r-0 [&>span]:mr-2.5",
-        middle:
-          "relative z-10 mx-0 w-[calc(100%+1px)] rounded-none border-x-0",
+        middle: "relative z-10 mx-0 w-[calc(100%+1px)] rounded-none border-x-0",
         last: "ml-0 rounded-l-none border-l-0",
         none: "",
       },
