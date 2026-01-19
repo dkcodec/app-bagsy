@@ -60,11 +60,7 @@ function SingleDayPicker({
       </PopoverTrigger>
 
       <PopoverContent align="center" className="w-fit p-0">
-        <Calendar
-          mode="single"
-          selected={value}
-          onSelect={handleSelect}
-        />
+        <Calendar mode="single" selected={value} onSelect={handleSelect} />
       </PopoverContent>
     </Popover>
   );
