@@ -52,14 +52,14 @@ interface IProps {
 export function EditEventDialog({ children, event }: IProps) {
   const { isOpen, onClose, onToggle } = useDisclosure();
 
-  const { users } = useCalendar();
+  const { masters } = useCalendar();
 
   const { updateEvent } = useUpdateEvent();
 
   const form = useForm<TEventFormData>({
     resolver: zodResolver(eventSchema),
     defaultValues: {
-      user: event.user.id,
+      user: event.masterPhone,
       title: event.title,
       comment: event.comment,
       startDate: parseISO(event.startDate),
@@ -77,9 +77,9 @@ export function EditEventDialog({ children, event }: IProps) {
   });
 
   const onSubmit = (values: TEventFormData) => {
-    const user = users.find(user => user.id === values.user);
+    const master = masters.find(master => master.phone === values.user);
 
-    if (!user) throw new Error("User not found");
+    if (!master) throw new Error("Master not found");
 
     const startDateTime = new Date(values.startDate);
     startDateTime.setHours(values.startTime.hour, values.startTime.minute);
@@ -89,7 +89,7 @@ export function EditEventDialog({ children, event }: IProps) {
 
     updateEvent({
       ...event,
-      user,
+      masterPhone: master.phone,
       title: values.title,
       color: values.color,
       comment: values.comment ?? "",
@@ -132,24 +132,26 @@ export function EditEventDialog({ children, event }: IProps) {
                       </SelectTrigger>
 
                       <SelectContent>
-                        {users.map(user => (
+                        {masters.map(master => (
                           <SelectItem
-                            key={user.id}
-                            value={user.id}
+                            key={master.phone}
+                            value={master.phone}
                             className="flex-1"
                           >
                             <div className="flex items-center gap-2">
-                              <Avatar key={user.id} className="size-6">
+                              <Avatar key={master.phone} className="size-6">
                                 <AvatarImage
-                                  src={user.picturePath ?? undefined}
-                                  alt={user.name}
+                                  src={undefined}
+                                  alt={`${master.name} ${master.surname}`}
                                 />
                                 <AvatarFallback className="text-xxs">
-                                  {user.name[0]}
+                                  {`${master.name[0]}${master.surname[0]}`}
                                 </AvatarFallback>
                               </Avatar>
 
-                              <p className="truncate">{user.name}</p>
+                              <p className="truncate">
+                                {master.name} {master.surname}
+                              </p>
                             </div>
                           </SelectItem>
                         ))}

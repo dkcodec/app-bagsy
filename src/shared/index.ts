@@ -20,6 +20,3 @@ export * from "./types/index";
 
 // Утилиты
 export * from "./utils/index";
-
-// Mock данные
-export * from "./mocks/index";

@@ -63,10 +63,11 @@ export function AgendaEventCard({
   eventCurrentDay,
   eventTotalDays,
 }: IProps) {
-  const { badgeVariant } = useCalendar();
+  const { badgeVariant, masters } = useCalendar();
 
   const startDate = parseISO(event.startDate);
   const endDate = parseISO(event.endDate);
+  const master = masters.find(master => master.phone === event.masterPhone);
 
   const color = (
     badgeVariant === "dot" ? `${event.color}-dot` : event.color
@@ -114,7 +115,9 @@ export function AgendaEventCard({
 
           <div className="mt-1 flex items-center gap-1">
             <User className="size-3 shrink-0" />
-            <p className="text-xs text-foreground">{event.user.name}</p>
+            <p className="text-xs text-foreground">
+              {`${master?.name} ${master?.surname}` || event.masterPhone}
+            </p>
           </div>
 
           <div className="flex items-center gap-1">

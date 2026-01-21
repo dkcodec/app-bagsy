@@ -22,7 +22,7 @@ export const CalendarContainer = memo(function CalendarContainer({
   view,
   onViewChange,
 }: IProps) {
-  const { selectedDate, selectedUserId, events } = useCalendar();
+  const { selectedDate, selectedMasterPhone, events } = useCalendar();
 
   const filteredEvents = useMemo(() => {
     return events.filter(event => {
@@ -46,9 +46,10 @@ export const CalendarContainer = memo(function CalendarContainer({
         );
         const isInSelectedMonth =
           eventStartDate <= monthEnd && eventEndDate >= monthStart;
-        const isUserMatch =
-          selectedUserId === "all" || event.user.id === selectedUserId;
-        return isInSelectedMonth && isUserMatch;
+        const isMasterMatch =
+          selectedMasterPhone === "all" ||
+          event.masterPhone === selectedMasterPhone;
+        return isInSelectedMonth && isMasterMatch;
       }
 
       if (view === "week") {
@@ -57,9 +58,10 @@ export const CalendarContainer = memo(function CalendarContainer({
 
         const isInSelectedWeek =
           eventStartDate <= weekEnd && eventEndDate >= weekStart;
-        const isUserMatch =
-          selectedUserId === "all" || event.user.id === selectedUserId;
-        return isInSelectedWeek && isUserMatch;
+        const isMasterMatch =
+          selectedMasterPhone === "all" ||
+          event.masterPhone === selectedMasterPhone;
+        return isInSelectedWeek && isMasterMatch;
       }
 
       if (view === "day") {
@@ -81,12 +83,13 @@ export const CalendarContainer = memo(function CalendarContainer({
         );
         const isInSelectedDay =
           eventStartDate <= dayEnd && eventEndDate >= dayStart;
-        const isUserMatch =
-          selectedUserId === "all" || event.user.id === selectedUserId;
-        return isInSelectedDay && isUserMatch;
+        const isMasterMatch =
+          selectedMasterPhone === "all" ||
+          event.masterPhone === selectedMasterPhone;
+        return isInSelectedDay && isMasterMatch;
       }
     });
-  }, [selectedDate, selectedUserId, events, view]);
+  }, [selectedDate, selectedMasterPhone, events, view]);
 
   // Мемоизируем singleDayEvents и multiDayEvents для предотвращения ререндеров
   const singleDayEvents = useMemo(() => {

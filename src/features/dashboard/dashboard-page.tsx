@@ -5,7 +5,8 @@ import { parseISO, isValid, format } from "date-fns";
 import { CalendarProvider } from "@/src/features/calendar";
 import { DashboardHeader, DashboardContent } from "@/src/features";
 import { Loader } from "lucide-react";
-import { mockEvents, mockUsers } from "@/src/shared";
+import { useCalendar as useCalendarApi } from "@/src/shared/hooks/use-calendar";
+import { toast } from "sonner";
 
 export function DashboardPage() {
   const searchParams = useSearchParams();
@@ -20,7 +21,7 @@ export function DashboardPage() {
 
   const getInitialView = (): View => {
     const viewParam = searchParams.get("view");
-    return viewParam && isView(viewParam) ? viewParam : "month";
+    return viewParam && isView(viewParam) ? viewParam : "day";
   };
 
   const [calendarView, setCalendarView] = useState<View>(getInitialView);
@@ -72,14 +73,89 @@ export function DashboardPage() {
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => setIsMounted(true), []);
 
+  // Получаем начальную дату
+  const [selectedDate, setSelectedDate] = useState<Date>(() =>
+    getInitialDate()
+  );
+
+  // Состояние для masterPhone (будет обновляться через CalendarProvider при изменении selectedMasterPhone)
+  const [masterPhone, setMasterPhone] = useState<string | undefined>(undefined);
+
+  // Обертка для setMasterPhone, которая обновляет состояние только если значение изменилось
+  const handleMasterPhoneChange = React.useCallback(
+    (newMasterPhone: string | undefined) => {
+      setMasterPhone(prev => {
+        if (prev !== newMasterPhone) {
+          return newMasterPhone;
+        }
+        return prev;
+      });
+    },
+    []
+  );
+
+  // Обновляем selectedDate при изменении даты в URL (только если дата действительно изменилась)
+  useEffect(() => {
+    const dateParam = searchParams.get("date");
+    let newDate: Date;
+
+    if (dateParam) {
+      const parsedDate = parseISO(dateParam);
+      if (isValid(parsedDate)) {
+        newDate = parsedDate;
+      } else {
+        return; // Не обновляем, если дата невалидна
+      }
+    } else {
+      // Если дата не указана в URL, не обновляем состояние (оставляем текущее значение)
+      return;
+    }
+
+    // Обновляем только если дата действительно изменилась
+    setSelectedDate(prevDate => {
+      if (format(newDate, "yyyy-MM-dd") !== format(prevDate, "yyyy-MM-dd")) {
+        return newDate;
+      }
+      return prevDate;
+    });
+  }, [searchParams]);
+
+  // Загружаем данные календаря через API
+  // TODO: Добавить поддержку выбора точки для SelfOwner/NetManager
+  const { events, masters, isLoading, isError, error } = useCalendarApi({
+    selectedDate,
+    view: calendarView,
+    masterPhone,
+  });
+
+  // Обработка ошибок загрузки
+  useEffect(() => {
+    if (isError && error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Ошибка загрузки данных календаря";
+      toast.error(errorMessage);
+    }
+  }, [isError, error]);
+
   return (
     <>
       {isMounted ? (
         <CalendarProvider
-          events={mockEvents}
-          users={mockUsers}
-          initialDate={getInitialDate()}
-          onDateChange={handleDateChange}
+          events={events}
+          masters={masters}
+          initialDate={selectedDate}
+          onDateChange={date => {
+            // Проверяем, изменилась ли дата перед обновлением
+            if (
+              format(date, "yyyy-MM-dd") !== format(selectedDate, "yyyy-MM-dd")
+            ) {
+              handleDateChange(date);
+              setSelectedDate(date);
+            }
+          }}
+          onMasterPhoneChange={handleMasterPhoneChange}
         >
           <DashboardHeader />
 

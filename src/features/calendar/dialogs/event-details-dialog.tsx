@@ -5,6 +5,7 @@ import { Calendar, Clock, Text, User } from "lucide-react";
 
 import { Button } from "@/src/entities/button";
 import { EditEventDialog } from "./edit-event-dialog";
+import { useCalendar } from "@/src/features/calendar";
 import {
   Dialog,
   DialogContent,
@@ -22,8 +23,10 @@ interface IProps {
 }
 
 export function EventDetailsDialog({ event, children }: IProps) {
+  const { masters } = useCalendar();
   const startDate = parseISO(event.startDate);
   const endDate = parseISO(event.endDate);
+  const master = masters.find(m => m.phone === event.masterPhone) ?? null;
 
   return (
     <>
@@ -41,7 +44,7 @@ export function EventDetailsDialog({ event, children }: IProps) {
               <div>
                 <p className="text-sm font-medium">Responsible</p>
                 <p className="text-sm text-muted-foreground">
-                  {event.user.name}
+                  {`${master?.name} ${master?.surname}` || event.masterPhone}
                 </p>
               </div>
             </div>
@@ -66,13 +69,17 @@ export function EventDetailsDialog({ event, children }: IProps) {
               </div>
             </div>
 
-            <div className="flex items-start gap-2">
-              <Text className="mt-1 size-4 shrink-0" />
-              <div>
-                <p className="text-sm font-medium">Comment</p>
-                <p className="text-sm text-muted-foreground">{event.comment}</p>
+            {event.comment && (
+              <div className="flex items-start gap-2">
+                <Text className="mt-1 size-4 shrink-0" />
+                <div>
+                  <p className="text-sm font-medium">Comment</p>
+                  <p className="text-sm text-muted-foreground">
+                    {event.comment}
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <DialogFooter>
