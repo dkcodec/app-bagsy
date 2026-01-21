@@ -15,13 +15,12 @@ export type TBadgeVariant = "dot" | "colored" | "mixed";
 export type TWorkingHours = { [key: number]: { from: number; to: number } };
 export type TVisibleHours = { from: number; to: number };
 
-
 export interface IEvent {
   id: number;
   clientPhone: string;
   startDate: string;
   endDate: string;
-  title: string;  
+  title: string;
   masterPhone: string;
   pointCode: string;
   price: number;

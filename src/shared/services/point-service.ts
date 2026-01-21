@@ -14,4 +14,3 @@ export class PointService {
     return apiClient.get<IPointDto>(`v1/points/${encodeURIComponent(code)}`);
   }
 }
-

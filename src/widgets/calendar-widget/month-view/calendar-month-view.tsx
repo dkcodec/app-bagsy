@@ -17,13 +17,13 @@ interface IProps {
 }
 
 const WEEK_DAYS = [
-  {mobile: "mon", desktop: "monday"},
-  {mobile: "tue", desktop: "tuesday"},
-  {mobile: "wed", desktop: "wednesday"},
-  {mobile: "thu", desktop: "thursday"},
-  {mobile: "fri", desktop: "friday"},
-  {mobile: "sat", desktop: "saturday"},
-  {mobile: "sun", desktop: "sunday"},
+  { mobile: "mon", desktop: "monday" },
+  { mobile: "tue", desktop: "tuesday" },
+  { mobile: "wed", desktop: "wednesday" },
+  { mobile: "thu", desktop: "thursday" },
+  { mobile: "fri", desktop: "friday" },
+  { mobile: "sat", desktop: "saturday" },
+  { mobile: "sun", desktop: "sunday" },
 ];
 
 export const CalendarMonthView = memo(function CalendarMonthView({
@@ -52,7 +52,10 @@ export const CalendarMonthView = memo(function CalendarMonthView({
     <div>
       <div className="grid grid-cols-7">
         {WEEK_DAYS.map(day => (
-          <div key={day.mobile} className="flex items-center justify-center py-2 border-r last:border-r-0">
+          <div
+            key={day.mobile}
+            className="flex items-center justify-center py-2 border-r last:border-r-0"
+          >
             <span className="text-xs font-medium text-muted-foreground">
               {isMobile ? t(day.mobile) : t(day.desktop)}
             </span>

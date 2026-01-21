@@ -26,8 +26,7 @@ export function EventDetailsDialog({ event, children }: IProps) {
   const { masters } = useCalendar();
   const startDate = parseISO(event.startDate);
   const endDate = parseISO(event.endDate);
-  const master =
-    masters.find(m => m.phone === event.masterPhone) ?? null;
+  const master = masters.find(m => m.phone === event.masterPhone) ?? null;
 
   return (
     <>
@@ -45,8 +44,7 @@ export function EventDetailsDialog({ event, children }: IProps) {
               <div>
                 <p className="text-sm font-medium">Responsible</p>
                 <p className="text-sm text-muted-foreground">
-                  {`${master?.name} ${master?.surname}` ||
-                    event.masterPhone}
+                  {`${master?.name} ${master?.surname}` || event.masterPhone}
                 </p>
               </div>
             </div>
@@ -76,7 +74,9 @@ export function EventDetailsDialog({ event, children }: IProps) {
                 <Text className="mt-1 size-4 shrink-0" />
                 <div>
                   <p className="text-sm font-medium">Comment</p>
-                  <p className="text-sm text-muted-foreground">{event.comment}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {event.comment}
+                  </p>
                 </div>
               </div>
             )}

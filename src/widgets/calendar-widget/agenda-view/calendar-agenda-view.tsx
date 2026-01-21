@@ -93,9 +93,7 @@ export function CalendarAgendaView({
           {!hasAnyEvents && (
             <div className="flex flex-col items-center justify-center gap-2 py-20 text-muted-foreground">
               <CalendarX2 className="size-10" />
-              <p className="text-sm md:text-base">
-                {t("noEvents")}
-              </p>
+              <p className="text-sm md:text-base">{t("noEvents")}</p>
             </div>
           )}
         </div>

@@ -1,9 +1,6 @@
 import { differenceInDays, parseISO } from "date-fns";
 import { apiClient } from "../api";
-import type {
-  GetCalendarParams,
-  CalendarApiResponse,
-} from "../types/calendar";
+import type { GetCalendarParams, CalendarApiResponse } from "../types/calendar";
 
 /**
  * Максимальный промежуток между временными рамками (дни)

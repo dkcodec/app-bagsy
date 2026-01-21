@@ -35,13 +35,8 @@ export const CalendarDayView = memo(function CalendarDayView({
   singleDayEvents,
   multiDayEvents,
 }: IProps) {
-  const {
-    selectedDate,
-    setSelectedDate,
-    masters,
-    visibleHours,
-    workingHours,
-  } = useCalendar();
+  const { selectedDate, setSelectedDate, masters, visibleHours, workingHours } =
+    useCalendar();
   const t = useTranslations("Dashboard.Calendar");
   const locale = useLocale();
 
@@ -293,7 +288,9 @@ export const CalendarDayView = memo(function CalendarDayView({
                       {master && (
                         <div className="flex items-center gap-1.5 text-muted-foreground">
                           <User className="size-3.5" />
-                          <span className="text-sm">{master.name} {master.surname}</span>
+                          <span className="text-sm">
+                            {master.name} {master.surname}
+                          </span>
                         </div>
                       )}
 

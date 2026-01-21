@@ -36,11 +36,24 @@ function clampHour(hour: number) {
 
 function emptyWorkingHours(): TWorkingHours {
   // JS Date.getDay(): 0..6 (вс..сб)
-  return { 0: { from: 0, to: 0 }, 1: { from: 0, to: 0 }, 2: { from: 0, to: 0 }, 3: { from: 0, to: 0 }, 4: { from: 0, to: 0 }, 5: { from: 0, to: 0 }, 6: { from: 0, to: 0 } };
+  return {
+    0: { from: 0, to: 0 },
+    1: { from: 0, to: 0 },
+    2: { from: 0, to: 0 },
+    3: { from: 0, to: 0 },
+    4: { from: 0, to: 0 },
+    5: { from: 0, to: 0 },
+    6: { from: 0, to: 0 },
+  };
 }
 
 function mapPointScheduleToWorkingHours(
-  schedule: Array<{ all_day: boolean; open: string; close: string; week_day: number }>
+  schedule: Array<{
+    all_day: boolean;
+    open: string;
+    close: string;
+    week_day: number;
+  }>
 ): TWorkingHours {
   // API: week_day 0..6 (пн..вс). JS: 0..6 (вс..сб)
   const result = emptyWorkingHours();
@@ -66,7 +79,9 @@ function deriveVisibleHoursFromWorkingHours(
   workingHours: TWorkingHours
 ): TVisibleHours | null {
   // Если рабочие часы не заданы — не трогаем visibleHours
-  const active = Object.values(workingHours ?? {}).filter(v => v && v.to > v.from);
+  const active = Object.values(workingHours ?? {}).filter(
+    v => v && v.to > v.from
+  );
   if (!active.length) return null;
 
   const minFrom = Math.min(...active.map(v => v.from));

@@ -125,7 +125,9 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
                                 </AvatarFallback>
                               </Avatar>
 
-                              <p className="truncate">{master.name} {master.surname}</p>
+                              <p className="truncate">
+                                {master.name} {master.surname}
+                              </p>
                             </div>
                           </SelectItem>
                         ))}

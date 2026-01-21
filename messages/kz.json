@@ -20,7 +20,11 @@
   },
   "Dashboard": {
     "content": { "calendar": "Күнтізбе" },
-    "title": { "calendar": "Күнтізбе", "welcome": "Кош келдіңіз!", "panel": "Панель {name}" },
+    "title": {
+      "calendar": "Күнтізбе",
+      "welcome": "Кош келдіңіз!",
+      "panel": "Панель {name}"
+    },
     "Settings": {
       "calendarSettings": "Күнтізбе параметрлері",
       "setYourSettings": "Күнтізбе параметрлерін орнату",

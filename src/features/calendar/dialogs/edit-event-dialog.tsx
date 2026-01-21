@@ -149,7 +149,9 @@ export function EditEventDialog({ children, event }: IProps) {
                                 </AvatarFallback>
                               </Avatar>
 
-                              <p className="truncate">{master.name} {master.surname}</p>
+                              <p className="truncate">
+                                {master.name} {master.surname}
+                              </p>
                             </div>
                           </SelectItem>
                         ))}

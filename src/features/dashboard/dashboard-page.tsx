@@ -74,26 +74,31 @@ export function DashboardPage() {
   useEffect(() => setIsMounted(true), []);
 
   // Получаем начальную дату
-  const [selectedDate, setSelectedDate] = useState<Date>(() => getInitialDate());
+  const [selectedDate, setSelectedDate] = useState<Date>(() =>
+    getInitialDate()
+  );
 
   // Состояние для masterPhone (будет обновляться через CalendarProvider при изменении selectedMasterPhone)
   const [masterPhone, setMasterPhone] = useState<string | undefined>(undefined);
-  
+
   // Обертка для setMasterPhone, которая обновляет состояние только если значение изменилось
-  const handleMasterPhoneChange = React.useCallback((newMasterPhone: string | undefined) => {
-    setMasterPhone(prev => {
-      if (prev !== newMasterPhone) {
-        return newMasterPhone;
-      }
-      return prev;
-    });
-  }, []);
+  const handleMasterPhoneChange = React.useCallback(
+    (newMasterPhone: string | undefined) => {
+      setMasterPhone(prev => {
+        if (prev !== newMasterPhone) {
+          return newMasterPhone;
+        }
+        return prev;
+      });
+    },
+    []
+  );
 
   // Обновляем selectedDate при изменении даты в URL (только если дата действительно изменилась)
   useEffect(() => {
     const dateParam = searchParams.get("date");
     let newDate: Date;
-    
+
     if (dateParam) {
       const parsedDate = parseISO(dateParam);
       if (isValid(parsedDate)) {
@@ -141,9 +146,11 @@ export function DashboardPage() {
           events={events}
           masters={masters}
           initialDate={selectedDate}
-          onDateChange={(date) => {
+          onDateChange={date => {
             // Проверяем, изменилась ли дата перед обновлением
-            if (format(date, "yyyy-MM-dd") !== format(selectedDate, "yyyy-MM-dd")) {
+            if (
+              format(date, "yyyy-MM-dd") !== format(selectedDate, "yyyy-MM-dd")
+            ) {
               handleDateChange(date);
               setSelectedDate(date);
             }

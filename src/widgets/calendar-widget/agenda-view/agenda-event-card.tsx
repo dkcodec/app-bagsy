@@ -116,8 +116,7 @@ export function AgendaEventCard({
           <div className="mt-1 flex items-center gap-1">
             <User className="size-3 shrink-0" />
             <p className="text-xs text-foreground">
-              {`${master?.name} ${master?.surname}` ||
-                event.masterPhone}
+              {`${master?.name} ${master?.surname}` || event.masterPhone}
             </p>
           </div>
 

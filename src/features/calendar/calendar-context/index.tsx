@@ -95,7 +95,7 @@ export function CalendarProvider({
       prevMastersLengthRef.current = masters.length;
       prevMastersPhonesRef.current = currentMastersPhones;
     }
-    
+
     // Обновляем events только если массив действительно изменился
     const currentEventsIds = events.map(e => e.id).join(",");
     if (
@@ -106,7 +106,7 @@ export function CalendarProvider({
       prevEventsLengthRef.current = events.length;
       prevEventsIdsRef.current = currentEventsIds;
     }
-    
+
     if (initialDate) setSelectedDate(initialDate);
   }, [masters, events, initialDate]);
 
@@ -121,32 +121,32 @@ export function CalendarProvider({
   const prevMasterPhoneRef = useRef<string | undefined>(
     selectedMasterPhone !== "all" ? selectedMasterPhone : undefined
   );
-  
+
   useEffect(() => {
     if (prevSelectedMasterPhoneRef.current !== selectedMasterPhone) {
       const masterPhone =
         selectedMasterPhone !== "all" ? selectedMasterPhone : undefined;
-      
+
       // Вызываем колбэк только если masterPhone действительно изменился
       if (prevMasterPhoneRef.current !== masterPhone) {
         onMasterPhoneChangeRef.current?.(masterPhone);
         prevMasterPhoneRef.current = masterPhone;
       }
-      
+
       prevSelectedMasterPhoneRef.current = selectedMasterPhone;
     }
   }, [selectedMasterPhone]);
 
   const didInitRef = useRef(false);
   const prevSelectedDateRef = useRef<Date | null>(null);
-  
+
   useEffect(() => {
     if (!didInitRef.current) {
       didInitRef.current = true;
       prevSelectedDateRef.current = selectedDateValue;
       return;
     }
-    
+
     // Вызываем onDateChange только если дата действительно изменилась
     if (
       selectedDateValue &&
