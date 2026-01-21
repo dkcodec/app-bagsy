@@ -8,11 +8,13 @@ import {
 
 /**
  * Хук для получения списка сотрудников с фильтрацией, сортировкой и пагинацией
+ * Запрос выполняется только если params определен
  */
 export function useGetStaff(params?: GetStaffParams) {
   return useQuery({
     queryKey: ["staff", params],
     queryFn: () => StaffService.getStaff(params),
+    enabled: !!params, // Запрос выполняется только если params определен
     staleTime: 30 * 1000, // 30 секунд
   });
 }

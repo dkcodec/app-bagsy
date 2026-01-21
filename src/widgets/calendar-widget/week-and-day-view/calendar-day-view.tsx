@@ -35,8 +35,13 @@ export const CalendarDayView = memo(function CalendarDayView({
   singleDayEvents,
   multiDayEvents,
 }: IProps) {
-  const { selectedDate, setSelectedDate, users, visibleHours, workingHours } =
-    useCalendar();
+  const {
+    selectedDate,
+    setSelectedDate,
+    masters,
+    visibleHours,
+    workingHours,
+  } = useCalendar();
   const t = useTranslations("Dashboard.Calendar");
   const locale = useLocale();
 
@@ -97,7 +102,7 @@ export const CalendarDayView = memo(function CalendarDayView({
           </div>
         </div>
 
-        <ScrollArea className="h-[800px]" type="always">
+        <ScrollArea type="always">
           <div className="flex">
             {/* Hours column */}
             <div className="relative w-18">
@@ -195,7 +200,7 @@ export const CalendarDayView = memo(function CalendarDayView({
                 })}
 
                 {groupedEvents.map((group, groupIndex) =>
-                  group.map(event => {
+                  group.map((event, eventIndex) => {
                     let style = getEventBlockStyle(
                       event,
                       selectedDate,
@@ -225,7 +230,7 @@ export const CalendarDayView = memo(function CalendarDayView({
 
                     return (
                       <div
-                        key={event.id}
+                        key={`${groupIndex}-${event.id}-${eventIndex}`}
                         className="absolute p-1"
                         style={style}
                       >
@@ -275,7 +280,9 @@ export const CalendarDayView = memo(function CalendarDayView({
             <ScrollArea className="h-[422px] px-4" type="always">
               <div className="space-y-6 pb-4">
                 {currentEvents.map(event => {
-                  const user = users.find(user => user.id === event.user.id);
+                  const master = masters.find(
+                    master => master.phone === event.masterPhone
+                  );
 
                   return (
                     <div key={event.id} className="space-y-1.5">
@@ -283,10 +290,10 @@ export const CalendarDayView = memo(function CalendarDayView({
                         {event.title}
                       </p>
 
-                      {user && (
+                      {master && (
                         <div className="flex items-center gap-1.5 text-muted-foreground">
                           <User className="size-3.5" />
-                          <span className="text-sm">{user.name}</span>
+                          <span className="text-sm">{master.name} {master.surname}</span>
                         </div>
                       )}
 

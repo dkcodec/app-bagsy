@@ -28,6 +28,7 @@ import {
 
 import type { IEvent } from "@/src/shared/types/calendar";
 import { useLocale } from "next-intl";
+import { useIsMobile } from "@/src/shared/hooks/use-mobile";
 
 interface IProps {
   singleDayEvents: IEvent[];
@@ -37,6 +38,7 @@ interface IProps {
 export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
   const { selectedDate, workingHours, visibleHours } = useCalendar();
   const locale = useLocale();
+  const isMobile = useIsMobile();
 
   const { hours, earliestEventHour, latestEventHour } = getVisibleHours(
     visibleHours,
@@ -47,13 +49,8 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
   return (
-    <>
-      <div className="flex flex-col items-center justify-center border-b py-4 text-sm text-muted-foreground sm:hidden">
-        <p>Weekly view is not available on smaller devices.</p>
-        <p>Please switch to daily or monthly view.</p>
-      </div>
-
-      <div className="hidden flex-col sm:flex">
+    
+      <div className="flex flex-col">
         <div>
           <WeekViewMultiDayEventsRow
             selectedDate={selectedDate}
@@ -61,17 +58,17 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
           />
 
           {/* Week header */}
-          <div className="relative z-20 flex border-b">
-            <div className="w-18"></div>
+          <div className="relative flex border-b">
+            <div className="w-12 sm:w-18"></div>
             <div className="grid flex-1 grid-cols-7 divide-x border-l">
               {weekDays.map((day, index) => (
                 <span
-                  key={index}
+                  key={day.getTime()}
                   className="py-2 text-center text-xs font-medium text-muted-foreground"
                 >
-                  {format(day, "EEEE", {
+                  {format(day, isMobile ? "EEEEE" : "EEE", {
                     locale: locale == "ru" ? ru : kk,
-                  }).capitalize()}{" "}
+                  }).capitalize()}
                   <span className="ml-1 font-semibold text-foreground">
                     {format(day, "d")}
                   </span>
@@ -81,10 +78,10 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
           </div>
         </div>
 
-        <ScrollArea className="h-[736px]" type="always">
+        <ScrollArea type="always">
           <div className="flex overflow-hidden">
             {/* Hours column */}
-            <div className="relative w-18">
+            <div className="relative w-12 sm:w-18">
               {hours.map((hour, index) => (
                 <div key={hour} className="relative" style={{ height: "96px" }}>
                   <div className="absolute -top-3 right-2 flex h-6 items-center">
@@ -189,7 +186,7 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
                       })}
 
                       {groupedEvents.map((group, groupIndex) =>
-                        group.map(event => {
+                        group.map((event, eventIndex) => {
                           let style = getEventBlockStyle(
                             event,
                             day,
@@ -219,7 +216,7 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
 
                           return (
                             <div
-                              key={event.id}
+                              key={`${dayIndex}-${groupIndex}-${event.id}-${eventIndex}`}
                               className="absolute p-1"
                               style={style}
                             >
@@ -241,6 +238,5 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
           </div>
         </ScrollArea>
       </div>
-    </>
   );
 }

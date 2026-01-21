@@ -69,8 +69,6 @@ export function CalendarSettings() {
     setTempVisibleHours(null);
   }, [setTempBadgeVariant, setTempWorkingHours, setTempVisibleHours]);
 
-  console.log(tempWorkingHours);
-
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>

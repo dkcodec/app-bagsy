@@ -10,6 +10,7 @@ import { getMonthCellEvents } from "@/src/shared/utils/calendar";
 
 import type { ICalendarCell, IEvent } from "@/src/shared/types/calendar";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 interface IProps {
   cell: ICalendarCell;
@@ -20,6 +21,7 @@ interface IProps {
 const MAX_VISIBLE_EVENTS = 3;
 
 export function DayCell({ cell, events, eventPositions }: IProps) {
+  const t = useTranslations("Dashboard.Calendar.DayCell");
   const { day, currentMonth, date } = cell;
   const router = useRouter();
   const cellEvents = useMemo(
@@ -38,9 +40,9 @@ export function DayCell({ cell, events, eventPositions }: IProps) {
     <DroppableDayCell cell={cell}>
       <div
         className={cn(
-          "flex h-full flex-col gap-1 border-l border-t py-1.5 lg:py-2",
+          "flex h-full flex-col gap-1 border-r border-t py-1.5 lg:py-2",
           isMonday && "border-l-0",
-          isSunday && "border-r"
+          isSunday && "border-r-0"
         )}
         onClick={handleCellClick}
       >
@@ -100,7 +102,7 @@ export function DayCell({ cell, events, eventPositions }: IProps) {
             </span>
             <span className="hidden sm:inline">
               {" "}
-              {cellEvents.length - MAX_VISIBLE_EVENTS} more...
+              {cellEvents.length - MAX_VISIBLE_EVENTS} {t("more")}...
             </span>
           </p>
         )}

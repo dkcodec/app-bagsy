@@ -5,4 +5,4 @@
 export * from "./calendar-header";
 export * from "./date-navigator";
 export * from "./today-button";
-export * from "./user-select";
+export * from "./master-select";

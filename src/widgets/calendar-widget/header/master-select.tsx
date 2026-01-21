@@ -11,11 +11,15 @@ import {
 } from "@/src/entities/select";
 import { useTranslations } from "next-intl";
 
-export function UserSelect() {
-  const { users, selectedUserId, setSelectedUserId } = useCalendar();
+export function MasterSelect() {
+  const {
+    masters,
+    selectedMasterPhone,
+    setSelectedMasterPhone,
+  } = useCalendar();
   const t = useTranslations("Dashboard.Calendar.Header");
   return (
-    <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+    <Select value={selectedMasterPhone} onValueChange={setSelectedMasterPhone}>
       <SelectTrigger className="flex-1 md:w-48">
         <SelectValue />
       </SelectTrigger>
@@ -24,14 +28,14 @@ export function UserSelect() {
         <SelectItem value="all">
           <div className="flex items-center gap-1">
             <AvatarGroup max={2}>
-              {users.map(user => (
-                <Avatar key={user.id} className="size-6 text-xxs">
+              {masters.map(master => (
+                <Avatar key={master.phone} className="size-6 text-xxs">
                   <AvatarImage
-                    src={user.picturePath ?? undefined}
-                    alt={user.name}
+                    src={undefined}
+                    alt={`${master.name} ${master.surname}`}
                   />
                   <AvatarFallback className="text-xxs">
-                    {user.name[0]}
+                    {`${master.name[0]}${master.surname[0]}`}
                   </AvatarFallback>
                 </Avatar>
               ))}
@@ -40,20 +44,20 @@ export function UserSelect() {
           </div>
         </SelectItem>
 
-        {users.map(user => (
-          <SelectItem key={user.id} value={user.id} className="flex-1">
+        {masters.map(master => (
+          <SelectItem key={master.phone} value={master.phone} className="flex-1">
             <div className="flex items-center gap-2">
-              <Avatar key={user.id} className="size-6">
+              <Avatar key={master.phone} className="size-6">
                 <AvatarImage
-                  src={user.picturePath ?? undefined}
-                  alt={user.name}
+                  src={undefined}
+                  alt={`${master.name} ${master.surname}`}
                 />
                 <AvatarFallback className="text-xxs">
-                  {user.name[0]}
+                  {`${master.name[0]}${master.surname[0]}`}
                 </AvatarFallback>
               </Avatar>
 
-              <p className="truncate">{user.name}</p>
+              <p className="truncate">{`${master.name} ${master.surname}`}</p>
             </div>
           </SelectItem>
         ))}

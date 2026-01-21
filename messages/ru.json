@@ -48,7 +48,14 @@
       "thursday": "Четверг",
       "friday": "Пятница",
       "saturday": "Суббота",
-      "sunday": "Воскресенье"
+      "sunday": "Воскресенье",
+      "mon": "Пн",
+      "tue": "Вт",
+      "wed": "Ср",
+      "thu": "Чт",
+      "fri": "Пт",
+      "sat": "Сб",
+      "sun": "Вс"
     },
     "Calendar": {
       "Header": {
@@ -83,6 +90,12 @@
         "commentDescription": "Дополнительная информация",
         "add": "Добавить запись",
         "cancel": "Отмена"
+      },
+      "DayCell": {
+        "more": "ещё"
+      },
+      "AgendaView": {
+        "noEvents": "Нет записей для выбранного месяца"
       },
       "happeningNow": "Происходит сейчас",
       "noAppointmentsAtTheMoment": "Нет активной записи сейчас"

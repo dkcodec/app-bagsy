@@ -57,8 +57,7 @@ export default function LoginForm({
       });
       return;
     }
-
-    console.log(result);
+    
     setErrors({});
 
     try {

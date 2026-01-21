@@ -20,7 +20,7 @@
   },
   "Dashboard": {
     "content": { "calendar": "Күнтізбе" },
-    "title": { "welcome": "Кош келдіңіз!", "panel": "Панель {name}" },
+    "title": { "calendar": "Күнтізбе", "welcome": "Кош келдіңіз!", "panel": "Панель {name}" },
     "Settings": {
       "calendarSettings": "Күнтізбе параметрлері",
       "setYourSettings": "Күнтізбе параметрлерін орнату",
@@ -45,7 +45,14 @@
       "thursday": "Бейсенбі",
       "friday": "Жұма",
       "saturday": "Сенбі",
-      "sunday": "Жексенбі"
+      "sunday": "Жексенбі",
+      "mon": "Дc",
+      "tue": "Сc",
+      "wed": "Ср",
+      "thu": "Бc",
+      "fri": "Жм",
+      "sat": "Сб",
+      "sun": "Жс"
     },
     "Calendar": {
       "Header": {
@@ -80,6 +87,12 @@
         "commentDescription": "Қосымша ақпарат",
         "add": "Жазбаны қосу",
         "cancel": "Бас тарту"
+      },
+      "DayCell": {
+        "more": "тағы"
+      },
+      "AgendaView": {
+        "noEvents": "Таңдалған айда жазбалар жоқ"
       },
       "happeningNow": "Қазір өтеді",
       "noAppointmentsAtTheMoment": "Қазір қызмет көрсетуді қабылдауға мүмкіндік жоқ"

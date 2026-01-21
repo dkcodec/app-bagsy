@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "dev-network": "next dev --hostname 192.168.1.25 --port 3000",
+    "dev-network": "next dev --hostname 10.200.6.202 --port 3010",
     "dev-all": "next dev --hostname 0.0.0.0 --port 3000",
     "build": "next build",
     "start": "next start",

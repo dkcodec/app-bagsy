@@ -50,8 +50,8 @@ export function AgendaDayGroup({ date, events, multiDayEvents }: IProps) {
           })}
 
         {sortedEvents.length > 0 &&
-          sortedEvents.map(event => (
-            <AgendaEventCard key={event.id} event={event} />
+          sortedEvents.map((event, index) => (
+            <AgendaEventCard key={`${event.id}-${index}`} event={event} />
           ))}
       </div>
     </div>

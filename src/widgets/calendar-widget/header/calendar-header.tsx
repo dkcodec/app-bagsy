@@ -2,7 +2,7 @@ import { Columns, List, Plus, Grid2x2, CalendarRange } from "lucide-react";
 
 import { Button } from "@/src/entities/button";
 
-import { UserSelect } from "./user-select";
+import { MasterSelect } from "./master-select";
 import { TodayButton } from "./today-button";
 import { DateNavigator } from "./date-navigator";
 import { AddEventDialog } from "@/src/features/calendar/event-dialogs";
@@ -69,7 +69,7 @@ export function CalendarHeader({ view, events, onViewChange }: IProps) {
             </Button>
           </div>
 
-          <UserSelect />
+          <MasterSelect />
         </div>
 
         <AddEventDialog>

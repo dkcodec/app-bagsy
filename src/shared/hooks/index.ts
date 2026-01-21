@@ -17,5 +17,8 @@ export * from "./use-update-event";
 // Хуки для пользователей
 export * from "./use-users";
 
+// Хуки для календаря
+export * from "./use-calendar";
+
 // Хуки для debounce
 export * from "./use-debounce";

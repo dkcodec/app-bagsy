@@ -6,24 +6,25 @@ import {
   useCalendarStore,
   type CalendarState,
 } from "@/src/features/calendar/calendar-context/store";
+import { useCurrentUser } from "@/src/shared/hooks/use-users";
 
 import type { Dispatch, SetStateAction } from "react";
 import type {
   IEvent,
-  IUser,
   TBadgeVariant,
   TVisibleHours,
   TWorkingHours,
 } from "@/src/shared/types/calendar";
+import { IUserDto } from "@/src/shared/types/user";
 
 interface ICalendarContext {
   selectedDate: Date;
   setSelectedDate: (date: Date | undefined) => void;
-  selectedUserId: IUser["id"] | "all";
-  setSelectedUserId: (userId: IUser["id"] | "all") => void;
+  selectedMasterPhone: IUserDto["phone"] | "all";
+  setSelectedMasterPhone: (masterPhone: IUserDto["phone"] | "all") => void;
   badgeVariant: TBadgeVariant;
   setBadgeVariant: (variant: TBadgeVariant) => void;
-  users: IUser[];
+  masters: IUserDto[];
   workingHours: TWorkingHours;
   setWorkingHours: Dispatch<SetStateAction<TWorkingHours>>;
   visibleHours: TVisibleHours;
@@ -34,20 +35,26 @@ interface ICalendarContext {
 
 export function CalendarProvider({
   children,
-  users,
+  masters,
   events,
   initialDate,
   onDateChange,
+  onMasterPhoneChange,
 }: {
   children: React.ReactNode;
-  users: IUser[];
+  masters: IUserDto[];
   events: IEvent[];
   initialDate?: Date;
   onDateChange?: (date: Date) => void;
+  onMasterPhoneChange?: (masterPhone: string | undefined) => void;
 }) {
-  const setUsers = useCalendarStore((s: CalendarState) => s.setUsers);
+  const { data: currentUser } = useCurrentUser();
+  const setMasters = useCalendarStore((s: CalendarState) => s.setMasters);
   const setLocalEvents = useCalendarStore(
     (s: CalendarState) => s.setLocalEvents
+  );
+  const loadWorkingHours = useCalendarStore(
+    (s: CalendarState) => s.loadWorkingHours
   );
   const setSelectedDate = useCalendarStore(
     (s: CalendarState) => s.setSelectedDate
@@ -55,26 +62,100 @@ export function CalendarProvider({
   const selectedDateValue = useCalendarStore(
     (s: CalendarState) => s.selectedDate
   );
+  const selectedMasterPhone = useCalendarStore(
+    (s: CalendarState) => s.selectedMasterPhone
+  );
 
   const onDateChangeRef = useRef(onDateChange);
   useEffect(() => {
     onDateChangeRef.current = onDateChange;
   }, [onDateChange]);
 
+  const onMasterPhoneChangeRef = useRef(onMasterPhoneChange);
   useEffect(() => {
-    setUsers(users);
-    setLocalEvents(events);
+    onMasterPhoneChangeRef.current = onMasterPhoneChange;
+  }, [onMasterPhoneChange]);
+
+  // Сохраняем предыдущие значения для сравнения мастеров и событий
+  const prevMastersLengthRef = useRef<number>(masters.length);
+  const prevEventsLengthRef = useRef<number>(events.length);
+  const prevMastersPhonesRef = useRef<string>(
+    masters.map(master => master.phone).join(",")
+  );
+  const prevEventsIdsRef = useRef<string>(events.map(e => e.id).join(","));
+
+  useEffect(() => {
+    // Обновляем masters только если массив действительно изменился
+    const currentMastersPhones = masters.map(master => master.phone).join(",");
+    if (
+      prevMastersLengthRef.current !== masters.length ||
+      prevMastersPhonesRef.current !== currentMastersPhones
+    ) {
+      setMasters(masters);
+      prevMastersLengthRef.current = masters.length;
+      prevMastersPhonesRef.current = currentMastersPhones;
+    }
+    
+    // Обновляем events только если массив действительно изменился
+    const currentEventsIds = events.map(e => e.id).join(",");
+    if (
+      prevEventsLengthRef.current !== events.length ||
+      prevEventsIdsRef.current !== currentEventsIds
+    ) {
+      setLocalEvents(events);
+      prevEventsLengthRef.current = events.length;
+      prevEventsIdsRef.current = currentEventsIds;
+    }
+    
     if (initialDate) setSelectedDate(initialDate);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [users, events, initialDate]);
+  }, [masters, events, initialDate]);
+
+  useEffect(() => {
+    loadWorkingHours(currentUser?.point_code);
+  }, [currentUser?.point_code, loadWorkingHours]);
+
+  // Отслеживаем изменения selectedMasterPhone и вызываем колбэк (только если значение изменилось)
+  const prevSelectedMasterPhoneRef = useRef<IUserDto["phone"] | "all">(
+    selectedMasterPhone
+  );
+  const prevMasterPhoneRef = useRef<string | undefined>(
+    selectedMasterPhone !== "all" ? selectedMasterPhone : undefined
+  );
+  
+  useEffect(() => {
+    if (prevSelectedMasterPhoneRef.current !== selectedMasterPhone) {
+      const masterPhone =
+        selectedMasterPhone !== "all" ? selectedMasterPhone : undefined;
+      
+      // Вызываем колбэк только если masterPhone действительно изменился
+      if (prevMasterPhoneRef.current !== masterPhone) {
+        onMasterPhoneChangeRef.current?.(masterPhone);
+        prevMasterPhoneRef.current = masterPhone;
+      }
+      
+      prevSelectedMasterPhoneRef.current = selectedMasterPhone;
+    }
+  }, [selectedMasterPhone]);
 
   const didInitRef = useRef(false);
+  const prevSelectedDateRef = useRef<Date | null>(null);
+  
   useEffect(() => {
     if (!didInitRef.current) {
       didInitRef.current = true;
+      prevSelectedDateRef.current = selectedDateValue;
       return;
     }
-    if (selectedDateValue) onDateChangeRef.current?.(selectedDateValue);
+    
+    // Вызываем onDateChange только если дата действительно изменилась
+    if (
+      selectedDateValue &&
+      (!prevSelectedDateRef.current ||
+        selectedDateValue.getTime() !== prevSelectedDateRef.current.getTime())
+    ) {
+      onDateChangeRef.current?.(selectedDateValue);
+      prevSelectedDateRef.current = selectedDateValue;
+    }
   }, [selectedDateValue]);
 
   return <>{children}</>;
