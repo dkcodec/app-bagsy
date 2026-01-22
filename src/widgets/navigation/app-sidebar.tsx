@@ -7,7 +7,7 @@ import {
   Contact,
   Settings,
   Users,
-  BriefcaseBusiness
+  BriefcaseBusiness,
 } from "lucide-react";
 
 import { NavUser } from "./nav-user";
