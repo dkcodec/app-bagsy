@@ -110,8 +110,15 @@ export function CalendarProvider({
     if (initialDate) setSelectedDate(initialDate);
   }, [masters, events, initialDate]);
 
+  // Загружаем рабочие часы точки при изменении point_code
+  const prevPointCodeRef = useRef<string | undefined>(currentUser?.point_code);
   useEffect(() => {
-    loadWorkingHours(currentUser?.point_code);
+    const pointCode = currentUser?.point_code;
+    // Вызываем только если point_code изменился
+    if (pointCode && prevPointCodeRef.current !== pointCode) {
+      loadWorkingHours(pointCode);
+      prevPointCodeRef.current = pointCode;
+    }
   }, [currentUser?.point_code, loadWorkingHours]);
 
   // Отслеживаем изменения selectedMasterPhone и вызываем колбэк (только если значение изменилось)

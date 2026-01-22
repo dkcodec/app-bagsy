@@ -11,7 +11,7 @@ import { toast } from "sonner";
 export function DashboardPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  // Получаем вид из URL или используем "month" по умолчанию
+
   type View = "day" | "week" | "month" | "agenda";
   const isView = useCallback(
     (v: string): v is View =>
@@ -122,7 +122,7 @@ export function DashboardPage() {
 
   // Загружаем данные календаря через API
   // TODO: Добавить поддержку выбора точки для SelfOwner/NetManager
-  const { events, masters, isLoading, isError, error } = useCalendarApi({
+  const { events, masters, isError, error } = useCalendarApi({
     selectedDate,
     view: calendarView,
     masterPhone,
