@@ -1,20 +1,29 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import type { LatLngExpression } from "leaflet";
 import L from "leaflet";
 import { useTranslations } from "next-intl";
 
-// Исправление иконок маркера для Leaflet
-// По умолчанию иконки не загружаются правильно в Next.js
-const icon = L.icon({
-  iconUrl: "/map-pin-accent.png",
-  iconRetinaUrl: "/map-pin-accent.png",
-  iconSize: [30, 30],
-  iconAnchor: [12, 12],
-  popupAnchor: [0, -10],
-});
+// Инициализация иконки маркера только на клиенте
+// Leaflet требует window объект, который недоступен на сервере
+let icon: L.Icon | null = null;
+
+// Функция для получения иконки (создается только на клиенте)
+const getIcon = () => {
+  if (typeof window === "undefined") return null;
+  if (!icon) {
+    icon = L.icon({
+      iconUrl: "/map-pin-accent.png",
+      iconRetinaUrl: "/map-pin-accent.png",
+      iconSize: [30, 30],
+      iconAnchor: [12, 12],
+      popupAnchor: [0, -10],
+    });
+  }
+  return icon;
+};
 
 interface AddressMapProps {
   latitude: number;
@@ -34,6 +43,12 @@ export function AddressMap({
   className,
 }: AddressMapProps) {
   const t = useTranslations("Points.addPointForm.address");
+  const [isClient, setIsClient] = useState(false);
+
+  // Проверяем, что мы на клиенте (после гидратации)
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Проверяем, что координаты валидны
   const isValid =
@@ -63,6 +78,20 @@ export function AddressMap({
     );
   }
 
+  // Не рендерим карту до гидратации на клиенте
+  if (!isClient) {
+    return (
+      <div
+        className={`flex items-center justify-center h-[300px] border rounded-md bg-muted ${className || ""}`}
+      >
+        <p className="text-sm text-muted-foreground">{t("mapNoLocation")}</p>
+      </div>
+    );
+  }
+
+  // Получаем иконку только на клиенте
+  const markerIcon = getIcon();
+
   return (
     <div
       className={`h-[300px] w-full rounded-md overflow-hidden border ${className || ""}`}
@@ -78,7 +107,7 @@ export function AddressMap({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <Marker position={center} icon={icon}>
+        <Marker position={center} icon={markerIcon || undefined}>
           {address && (
             <Popup>
               <div className="text-sm">

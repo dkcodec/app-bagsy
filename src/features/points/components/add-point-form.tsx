@@ -32,9 +32,23 @@ import {
 } from "@/src/shared/hooks/use-network-points";
 import { ScheduleEditor } from "./schedule-editor";
 import { AddressSearch } from "./address-search";
-import { AddressMap } from "./address-map";
+import dynamic from "next/dynamic";
 import type { ISchedule } from "@/src/shared/types/user";
 import type { INominatimResult } from "@/src/shared/services/nominatim-service";
+
+// Динамический импорт карты с отключением SSR
+// react-leaflet требует window объект, который недоступен на сервере
+const AddressMap = dynamic(
+  () => import("./address-map").then(mod => ({ default: mod.AddressMap })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center h-[300px] border rounded-md bg-muted">
+        <p className="text-sm text-muted-foreground">Загрузка карты...</p>
+      </div>
+    ),
+  }
+);
 
 /**
  * Схема валидации для создания точки
