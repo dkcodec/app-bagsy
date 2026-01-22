@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
 @plugin 'tailwindcss-animate';
 
@@ -293,6 +294,90 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* ================================
+   Leaflet — shadcn-style overrides
+   ================================ */
+
+/* Контейнер карты */
+.leaflet-container {
+  font-family: var(--font-nunito, system-ui, sans-serif);
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+/* Popup */
+.leaflet-popup-content-wrapper {
+  background-color: hsl(var(--popover)) !important;
+  color: hsl(var(--popover-foreground)) !important;
+  border-radius: var(--radius) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.leaflet-popup-tip {
+  background-color: hsl(var(--popover)) !important;
+}
+
+/* Controls (zoom, attribution, etc.) */
+.leaflet-control {
+  border: 1px solid hsl(var(--foreground)) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: none;
+}
+
+.leaflet-control a {
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.leaflet-control a:first-child {
+  border-top-right-radius: var(--radius-md) !important;
+  border-top-left-radius: var(--radius-md) !important;
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.leaflet-control a:last-child {
+  border-bottom-right-radius: var(--radius-md) !important;
+  border-bottom-left-radius: var(--radius-md) !important;
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.leaflet-control a {
+  color: hsl(var(--background)) !important;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.leaflet-control a:hover {
+  background-color: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-background)) !important;
+}
+
+.leaflet-control-attribution {
+  display: none;
+}
+
+/* ================================
+   Dark mode map tiles
+   ================================ */
+
+/* Чёрно-белая карта */
+.leaflet-tile {
+  filter: grayscale(100%) contrast(1.1) brightness(0.95);
+}
+
+/* Dark mode — мягче, чтобы не «убить» детали */
+.dark .leaflet-tile {
+  filter: grayscale(100%) contrast(1.1) brightness(0.8);
+}
+
+/* Немного приглушаем overlay */
+.dark .leaflet-overlay-pane {
+  opacity: 0.85;
 }
 
 @layer utilities {

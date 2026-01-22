@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { usePointsPage } from "@/src/shared/hooks/use-network-points";
 import {
   Table,
@@ -12,17 +13,21 @@ import {
   CardHeader,
   CardTitle,
   Skeleton,
+  Button,
 } from "@/src/entities";
+import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ErrorMessage } from "./components/error-message";
 import { PointsTableHeader } from "./components/table-header";
 import { PointsTableRow } from "./components/table-row";
+import { AddPointDialog } from "./components/add-point-dialog";
 
 /**
  * Компонент таблицы точек обслуживания
  */
 export function PointsContent() {
   const t = useTranslations("Points");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Получение данных
   const { data, isLoading, error } = usePointsPage();
@@ -40,9 +45,17 @@ export function PointsContent() {
   return (
     <div className="flex flex-col md:p-4">
       {/* Таблица */}
-      <Card className="border-none">
+      <Card className="border-none bg-background">
         <CardHeader className="flex flex-row justify-between items-center px-6 py-2">
           <CardTitle>{t("tableTitle")}</CardTitle>
+          <Button
+            onClick={() => setIsDialogOpen(true)}
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            {t("addPoint")}
+          </Button>
         </CardHeader>
         <CardContent>
           {/* Состояние загрузки */}
@@ -89,6 +102,9 @@ export function PointsContent() {
           )}
         </CardContent>
       </Card>
+
+      {/* Диалог добавления точки */}
+      <AddPointDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} />
     </div>
   );
 }

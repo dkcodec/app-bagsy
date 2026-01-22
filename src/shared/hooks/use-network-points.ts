@@ -1,7 +1,11 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { PointService } from "../services/point-service";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  PointService,
+  type CreatePointRequestDto,
+  type IPointDto,
+} from "../services/point-service";
 import { useCurrentUser } from "./use-users";
 import { EUserRole } from "../types/user";
 
@@ -60,5 +64,35 @@ export function usePointsPage() {
     },
     enabled: !!hasAccess && !!networkCode,
     staleTime: 5 * 60 * 1000, // 5 минут - точки не меняются часто
+  });
+}
+
+/**
+ * Хук для загрузки списка категорий точек
+ * Категории кэшируются на 10 минут, так как меняются редко
+ */
+export function usePointCategories() {
+  return useQuery({
+    queryKey: ["pointCategories"],
+    queryFn: () => PointService.getPointCategories(),
+    staleTime: 20 * 60 * 1000, // 20 минут - категории меняются редко
+  });
+}
+
+/**
+ * Хук для создания новой точки обслуживания
+ * Инвалидирует кэш списка точек после успешного создания
+ */
+export function useCreatePoint() {
+  const queryClient = useQueryClient();
+
+  return useMutation<IPointDto, unknown, CreatePointRequestDto>({
+    mutationKey: ["points", "create"],
+    mutationFn: (data: CreatePointRequestDto) => PointService.createPoint(data),
+    onSuccess: () => {
+      // Инвалидируем кэш списка точек для обновления данных
+      queryClient.invalidateQueries({ queryKey: ["pointsPage"] });
+      queryClient.invalidateQueries({ queryKey: ["networkPoints"] });
+    },
   });
 }

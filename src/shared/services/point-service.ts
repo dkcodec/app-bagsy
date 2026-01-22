@@ -2,6 +2,25 @@ import { apiClient } from "../api";
 import type { ISchedule } from "../types/user";
 
 /**
+ * Категория точки обслуживания
+ */
+export interface IPointCategory {
+  id: number;
+  name: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Ответ API для получения списка категорий точек
+ */
+export interface IPointCategoriesResponse {
+  categories: IPointCategory[];
+  count: number;
+}
+
+/**
  * Адрес точки обслуживания
  */
 export interface IPointAddress {
@@ -11,6 +30,19 @@ export interface IPointAddress {
   };
   street: string;
   city: string;
+}
+
+/**
+ * Данные для создания точки обслуживания
+ */
+export interface CreatePointRequestDto {
+  name: string;
+  description?: string;
+  network_code: string;
+  category_id: number;
+  address: IPointAddress;
+  schedule: ISchedule[];
+  photo_ids?: string[];
 }
 
 /**
@@ -57,5 +89,19 @@ export class PointService {
     return apiClient.get<INetworkPointsResponse>(
       `v1/networks/${encodeURIComponent(networkCode)}/points`
     );
+  }
+
+  /**
+   * Получение списка категорий точек
+   */
+  static async getPointCategories(): Promise<IPointCategoriesResponse> {
+    return apiClient.get<IPointCategoriesResponse>("v1/point-categories");
+  }
+
+  /**
+   * Создание новой точки обслуживания
+   */
+  static async createPoint(data: CreatePointRequestDto): Promise<IPointDto> {
+    return apiClient.post<IPointDto>("v1/points", data);
   }
 }

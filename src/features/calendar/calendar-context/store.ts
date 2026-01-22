@@ -55,11 +55,12 @@ function mapPointScheduleToWorkingHours(
     week_day: number;
   }>
 ): TWorkingHours {
-  // API: week_day 0..6 (пн..вс). JS: 0..6 (вс..сб)
+  // API: week_day 0..6 (вс..сб). JS: 0..6 (вс..сб)
+  // 0 = воскресенье всегда
   const result = emptyWorkingHours();
 
   for (const day of schedule ?? []) {
-    const jsDay = (Number(day.week_day) + 1) % 7;
+    const jsDay = Number(day.week_day);
     if (day.all_day) {
       result[jsDay] = { from: 0, to: 24 };
       continue;

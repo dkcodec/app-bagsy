@@ -20,15 +20,30 @@ interface ScheduleCellProps {
 
 /**
  * Маппинг дней недели (API: 0=вс, 6=сб)
+ * 0 = воскресенье всегда
  */
 const WEEK_DAYS = [
+  { index: 0, name: "sunday", short: "sun" },
   { index: 1, name: "monday", short: "mon" },
   { index: 2, name: "tuesday", short: "tue" },
   { index: 3, name: "wednesday", short: "wed" },
   { index: 4, name: "thursday", short: "thu" },
   { index: 5, name: "friday", short: "fri" },
   { index: 6, name: "saturday", short: "sat" },
-  { index: 0, name: "sunday", short: "sun" },
+];
+
+/**
+ * Порядок дней для отображения в UI (понедельник первым)
+ * Использует правильные индексы API
+ */
+const WEEK_DAYS_FOR_UI = [
+  WEEK_DAYS[1], // Понедельник (index: 1)
+  WEEK_DAYS[2], // Вторник (index: 2)
+  WEEK_DAYS[3], // Среда (index: 3)
+  WEEK_DAYS[4], // Четверг (index: 4)
+  WEEK_DAYS[5], // Пятница (index: 5)
+  WEEK_DAYS[6], // Суббота (index: 6)
+  WEEK_DAYS[0], // Воскресенье (index: 0)
 ];
 
 /**
@@ -61,7 +76,8 @@ export function ScheduleCell({ schedule }: ScheduleCellProps) {
       schedule: ISchedule;
     }> = [];
 
-    WEEK_DAYS.forEach(day => {
+    // Обрабатываем дни в порядке UI (понедельник первым)
+    WEEK_DAYS_FOR_UI.forEach(day => {
       const daySchedule = scheduleByDay[day.index];
       if (!daySchedule) return;
 
@@ -89,7 +105,14 @@ export function ScheduleCell({ schedule }: ScheduleCellProps) {
     }
 
     const summaryParts = groups.map(group => {
-      const dayNames = group.days
+      // Сортируем дни по порядку UI (понедельник первым)
+      const sortedDays = group.days.sort((a, b) => {
+        const indexA = WEEK_DAYS_FOR_UI.findIndex(d => d.index === a);
+        const indexB = WEEK_DAYS_FOR_UI.findIndex(d => d.index === b);
+        return indexA - indexB;
+      });
+
+      const dayNames = sortedDays
         .map(dayIndex => {
           const day = WEEK_DAYS.find(d => d.index === dayIndex);
           return day ? tDays(day.short) : "";
@@ -126,7 +149,7 @@ export function ScheduleCell({ schedule }: ScheduleCellProps) {
         <Button
           variant="ghost"
           size="sm"
-          className="h-auto p-1 hover:bg-muted/50"
+          className="h-auto p-1 hover:bg-muted/50 cursor-pointer"
         >
           <div className="flex items-center gap-2">
             {hasActiveDays ? (
@@ -144,7 +167,7 @@ export function ScheduleCell({ schedule }: ScheduleCellProps) {
         <div className="space-y-3">
           <h4 className="font-semibold text-sm">{t("viewSchedule")}</h4>
           <div className="space-y-2">
-            {WEEK_DAYS.map(day => {
+            {WEEK_DAYS_FOR_UI.map(day => {
               const daySchedule = scheduleByDay[day.index];
 
               return (
