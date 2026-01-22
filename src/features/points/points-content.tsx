@@ -60,12 +60,15 @@ export function PointsContent() {
                   <TableBody>
                     {isLoading ? (
                       <TableRow>
-                        {Array.from({ length: tableColumns.length }).map((_, i) => (
-                          <TableCell key={i} className="h-12 w-full"><Skeleton className="h-12 w-full" /></TableCell>
-                        ))}
+                        {Array.from({ length: tableColumns.length }).map(
+                          (_, i) => (
+                            <TableCell key={i} className="h-12 w-full">
+                              <Skeleton className="h-12 w-full" />
+                            </TableCell>
+                          )
+                        )}
                       </TableRow>
-                    ) : 
-                    !data?.points || data.points.length === 0 ? (
+                    ) : !data?.points || data.points.length === 0 ? (
                       <TableRow>
                         <TableCell
                           colSpan={6}

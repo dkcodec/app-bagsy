@@ -1,7 +1,14 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button } from "@/src/entities";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Button,
+} from "@/src/entities";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -19,10 +26,13 @@ export function EmptyPointsState() {
           {/* Большой плюсик сверху */}
           <div className="flex justify-center">
             <div className="flex items-center justify-center w-20 h-20 rounded-full bg-background border-2 border-dashed border-muted-foreground/20">
-              <Plus className="h-10 w-10 text-muted-foreground/40" strokeWidth={1.5} />
+              <Plus
+                className="h-10 w-10 text-muted-foreground/40"
+                strokeWidth={1.5}
+              />
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <CardTitle className="text-2xl">{t("title")}</CardTitle>
             <CardDescription className="text-base">

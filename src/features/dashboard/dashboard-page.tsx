@@ -211,12 +211,12 @@ export function DashboardPage() {
 
   // Если точек нет - показываем EmptyPointsState
   if (hasNoPoints) {
-    return ( 
-    <>
-      <EmptyPointsHeader />
-      <EmptyPointsState />
-    </>
-    )
+    return (
+      <>
+        <EmptyPointsHeader />
+        <EmptyPointsState />
+      </>
+    );
   }
 
   // Для NET_MANAGER и SELF_OWNER не показываем календарь, пока точка не выбрана
@@ -236,9 +236,7 @@ export function DashboardPage() {
       selectedPointCode={selectedPointCode}
       onDateChange={date => {
         // Проверяем, изменилась ли дата перед обновлением
-        if (
-          format(date, "yyyy-MM-dd") !== format(selectedDate, "yyyy-MM-dd")
-        ) {
+        if (format(date, "yyyy-MM-dd") !== format(selectedDate, "yyyy-MM-dd")) {
           handleDateChange(date);
           setSelectedDate(date);
         }

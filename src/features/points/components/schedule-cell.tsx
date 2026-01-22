@@ -117,9 +117,7 @@ export function ScheduleCell({ schedule }: ScheduleCellProps) {
 
   // Проверяем, есть ли активные дни
   const hasActiveDays = useMemo(() => {
-    return schedule.some(
-      item => item.all_day || (item.open && item.close)
-    );
+    return schedule.some(item => item.all_day || (item.open && item.close));
   }, [schedule]);
 
   return (
@@ -154,9 +152,7 @@ export function ScheduleCell({ schedule }: ScheduleCellProps) {
                   key={day.index}
                   className="flex items-center justify-between text-sm"
                 >
-                  <span className="font-medium">
-                    {tDays(day.name)}
-                  </span>
+                  <span className="font-medium">{tDays(day.name)}</span>
                   <div className="flex items-center gap-2">
                     {!daySchedule ? (
                       <>
