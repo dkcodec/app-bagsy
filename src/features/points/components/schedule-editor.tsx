@@ -12,16 +12,30 @@ import type { ISchedule } from "@/src/shared/types/user";
 
 /**
  * Маппинг дней недели (API: 0=вс, 6=сб)
- * Соответствует формату из schedule-cell.tsx
+ * 0 = воскресенье всегда
  */
 const WEEK_DAYS = [
-  { index: 0, name: "monday", short: "mon" },
-  { index: 1, name: "tuesday", short: "tue" },
-  { index: 2, name: "wednesday", short: "wed" },
-  { index: 3, name: "thursday", short: "thu" },
-  { index: 4, name: "friday", short: "fri" },
-  { index: 5, name: "saturday", short: "sat" },
-  { index: 6, name: "sunday", short: "sun" },
+  { index: 0, name: "sunday", short: "sun" },
+  { index: 1, name: "monday", short: "mon" },
+  { index: 2, name: "tuesday", short: "tue" },
+  { index: 3, name: "wednesday", short: "wed" },
+  { index: 4, name: "thursday", short: "thu" },
+  { index: 5, name: "friday", short: "fri" },
+  { index: 6, name: "saturday", short: "sat" },
+];
+
+/**
+ * Порядок дней для отображения в UI (понедельник первым)
+ * Использует правильные индексы API
+ */
+const WEEK_DAYS_FOR_UI = [
+  WEEK_DAYS[1], // Понедельник (index: 1)
+  WEEK_DAYS[2], // Вторник (index: 2)
+  WEEK_DAYS[3], // Среда (index: 3)
+  WEEK_DAYS[4], // Четверг (index: 4)
+  WEEK_DAYS[5], // Пятница (index: 5)
+  WEEK_DAYS[6], // Суббота (index: 6)
+  WEEK_DAYS[0], // Воскресенье (index: 0)
 ];
 
 interface ScheduleEditorProps {
@@ -147,7 +161,7 @@ export function ScheduleEditor({
     <div className="flex flex-col gap-4">
       <h4 className="text-sm font-semibold">{t("title")}</h4>
       <div className="space-y-4">
-        {WEEK_DAYS.map(day => {
+        {WEEK_DAYS_FOR_UI.map(day => {
           const daySchedule = scheduleByDay[day.index];
           const isDayActive = !!daySchedule;
 
