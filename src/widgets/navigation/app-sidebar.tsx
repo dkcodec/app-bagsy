@@ -7,6 +7,7 @@ import {
   Contact,
   Settings,
   Users,
+  BriefcaseBusiness,
 } from "lucide-react";
 
 import { NavUser } from "./nav-user";
@@ -62,6 +63,17 @@ const navData: { navMain: NavItem[] } = {
       name: "staff",
       url: "/staff",
       icon: Users,
+      allowedRoles: [
+        EUserRole.ADMIN,
+        EUserRole.NET_MANAGER,
+        EUserRole.SELF_OWNER,
+        EUserRole.MANAGER,
+      ],
+    },
+    {
+      name: "points",
+      url: "/points",
+      icon: BriefcaseBusiness,
       allowedRoles: [
         EUserRole.ADMIN,
         EUserRole.NET_MANAGER,

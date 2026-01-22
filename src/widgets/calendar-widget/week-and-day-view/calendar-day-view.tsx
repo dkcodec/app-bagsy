@@ -84,7 +84,7 @@ export const CalendarDayView = memo(function CalendarDayView({
           />
 
           {/* Day header */}
-          <div className="relative z-20 flex border-b">
+          <div className="relative z-10 flex border-b">
             <div className="w-18"></div>
             <span className="flex-1 border-l py-2 text-center text-xs font-medium text-muted-foreground">
               {format(selectedDate, "EEEE", {

@@ -37,7 +37,7 @@ export function CalendarTimeline({
 
   return (
     <div
-      className="pointer-events-none absolute inset-x-0 z-50 border-t border-primary"
+      className="pointer-events-none absolute inset-x-0 z-10 border-t border-primary"
       style={{ top: `${getCurrentTimePosition()}%` }}
     >
       <div className="absolute left-0 top-0 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary"></div>
