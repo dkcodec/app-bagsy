@@ -48,29 +48,39 @@ const createAddPointSchema = (t: (key: string) => string) =>
       .optional()
       .or(z.literal("")),
     category_id: z
-      .number()
+      .number(t("errors.categoryIdRequired"))
       .positive(t("errors.categoryIdRequired"))
       .int(t("errors.categoryIdRequired")),
-    address: z.object({
-      city: z
-        .string()
-        .min(2, t("errors.cityMin"))
-        .max(100, t("errors.cityMax")),
-      street: z
-        .string()
-        .min(2, t("errors.streetMin"))
-        .max(200, t("errors.streetMax")),
-      coordinates: z.object({
-        latitude: z
-          .number()
-          .min(-90, t("errors.latitudeMin"))
-          .max(90, t("errors.latitudeMax")),
-        longitude: z
-          .number()
-          .min(-180, t("errors.longitudeMin"))
-          .max(180, t("errors.longitudeMax")),
-      }),
-    }),
+    address: z
+      .object({
+        city: z
+          .string(t("errors.cityMin"))
+          .min(2, t("errors.cityMin"))
+          .max(100, t("errors.cityMax")),
+        street: z
+          .string(t("errors.streetMin"))
+          .min(2, t("errors.streetMin"))
+          .max(200, t("errors.streetMax")),
+        coordinates: z.object({
+          latitude: z
+            .number()
+            .min(-90, t("errors.latitudeMin"))
+            .max(90, t("errors.latitudeMax")),
+          longitude: z
+            .number()
+            .min(-180, t("errors.longitudeMin"))
+            .max(180, t("errors.longitudeMax")),
+        }),
+      })
+      .refine(
+        address =>
+          address.coordinates.latitude !== 0 ||
+          address.coordinates.longitude !== 0,
+        {
+          message: t("errors.addressRequired"),
+          path: ["coordinates"],
+        }
+      ),
     schedule: z
       .array(
         z.object({
@@ -253,32 +263,43 @@ export function AddPointForm({ onSuccess, onCancel }: AddPointFormProps) {
           <h4 className="text-sm font-semibold">{t("address.title")}</h4>
 
           {/* Поиск адреса */}
-          <FormItem>
-            <FormLabel>{t("address.search")}</FormLabel>
-            <AddressSearch
-              onSelect={(result: INominatimResult) => {
-                // Заполняем поля адреса из результата поиска
-                const city =
-                  result.address.city ||
-                  result.address.town ||
-                  result.address.village ||
-                  "";
-                const street = result.address.road || "";
+          <FormField
+            control={form.control}
+            name="address.coordinates"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("address.search")}</FormLabel>
+                <FormControl>
+                  <AddressSearch
+                    onSelect={(result: INominatimResult) => {
+                      // Заполняем поля адреса из результата поиска
+                      const city =
+                        result.address.city ||
+                        result.address.town ||
+                        result.address.village ||
+                        "";
+                      const street = result.address.road || "";
 
-                form.setValue("address.city", city);
-                form.setValue("address.street", street);
-                form.setValue(
-                  "address.coordinates.latitude",
-                  parseFloat(result.lat)
-                );
-                form.setValue(
-                  "address.coordinates.longitude",
-                  parseFloat(result.lon)
-                );
-              }}
-              disabled={createPointMutation.isPending}
-            />
-          </FormItem>
+                      form.setValue("address.city", city);
+                      form.setValue("address.street", street);
+                      form.setValue(
+                        "address.coordinates.latitude",
+                        parseFloat(result.lat)
+                      );
+                      form.setValue(
+                        "address.coordinates.longitude",
+                        parseFloat(result.lon)
+                      );
+                      // Триггерим валидацию всего адреса
+                      form.trigger("address");
+                    }}
+                    disabled={createPointMutation.isPending}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           {/* Карта с выбранным адресом */}
           {form.watch("address.coordinates.latitude") !== 0 &&
@@ -292,6 +313,7 @@ export function AddPointForm({ onSuccess, onCancel }: AddPointFormProps) {
 
           {/* Поля для ручного редактирования */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="col-span-2 text-sm text-muted-foreground">{t("address.autocomplete")}</div>
             {/* Город */}
             <FormField
               control={form.control}
