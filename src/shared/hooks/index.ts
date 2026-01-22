@@ -20,5 +20,8 @@ export * from "./use-users";
 // Хуки для календаря
 export * from "./use-calendar";
 
+// Хуки для точек сети
+export * from "./use-network-points";
+
 // Хуки для debounce
 export * from "./use-debounce";
