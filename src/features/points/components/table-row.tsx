@@ -23,7 +23,9 @@ export function PointsTableRow({ point }: PointsTableRowProps) {
 
   return (
     <TableRow>
-      <TableCell className="font-medium">{point.code}</TableCell>
+      <TableCell className="font-medium">
+        {point.code.slice(0, 4)}...{point.code.slice(-11)}
+      </TableCell>
       <TableCell>{point.name}</TableCell>
       <TableCell className="text-sm">{address}</TableCell>
       <TableCell>

@@ -22,13 +22,13 @@ interface ScheduleCellProps {
  * Маппинг дней недели (API: 0=вс, 6=сб)
  */
 const WEEK_DAYS = [
-  { index: 1, name: "monday", short: "mon" },
-  { index: 2, name: "tuesday", short: "tue" },
-  { index: 3, name: "wednesday", short: "wed" },
-  { index: 4, name: "thursday", short: "thu" },
-  { index: 5, name: "friday", short: "fri" },
-  { index: 6, name: "saturday", short: "sat" },
-  { index: 0, name: "sunday", short: "sun" },
+  { index: 0, name: "monday", short: "mon" },
+  { index: 1, name: "tuesday", short: "tue" },
+  { index: 2, name: "wednesday", short: "wed" },
+  { index: 3, name: "thursday", short: "thu" },
+  { index: 4, name: "friday", short: "fri" },
+  { index: 5, name: "saturday", short: "sat" },
+  { index: 6, name: "sunday", short: "sun" },
 ];
 
 /**
@@ -126,7 +126,7 @@ export function ScheduleCell({ schedule }: ScheduleCellProps) {
         <Button
           variant="ghost"
           size="sm"
-          className="h-auto p-1 hover:bg-muted/50"
+          className="h-auto p-1 hover:bg-muted/50 cursor-pointer"
         >
           <div className="flex items-center gap-2">
             {hasActiveDays ? (
