@@ -313,7 +313,9 @@ export function AddPointForm({ onSuccess, onCancel }: AddPointFormProps) {
 
           {/* Поля для ручного редактирования */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="col-span-2 text-sm text-muted-foreground">{t("address.autocomplete")}</div>
+            <div className="col-span-2 text-sm text-muted-foreground">
+              {t("address.autocomplete")}
+            </div>
             {/* Город */}
             <FormField
               control={form.control}
