@@ -8,7 +8,7 @@
       "clients": "Клиенты",
       "services": "Услуги",
       "staff": "Сотрудники",
-      "points": "Филиалы",
+      "points": "Точки",
       "analytics": "Аналитика",
       "settings": "Настройки"
     },
@@ -364,6 +364,77 @@
         "scheduleMin": "Необходимо указать расписание хотя бы для одного дня",
         "networkCodeRequired": "Не удалось определить код сети",
         "submitError": "Ошибка при создании точки"
+      }
+    }
+  },
+  "Services": {
+    "title": "Услуги",
+    "tableTitle": "Услуги",
+    "addService": "Добавить услугу",
+    "noData": "Нет услуг для отображения",
+    "errorLoading": "Ошибка загрузки данных",
+    "accessDenied": "Доступ запрещен",
+    "accessDeniedDescription": "У вас нет прав для просмотра списка услуг",
+    "active": "Активна",
+    "inactive": "Неактивна",
+    "table": {
+      "name": "Название",
+      "description": "Описание",
+      "duration": "Длительность",
+      "color": "Цвет",
+      "price": "Цена",
+      "status": "Статус"
+    },
+    "pointSelect": {
+      "label": "Точка обслуживания",
+      "placeholder": "Выберите точку"
+    },
+    "addServiceDialog": {
+      "title": "Добавить услугу",
+      "description": "Заполните форму для создания новой услуги"
+    },
+    "addServiceForm": {
+      "name": "Название",
+      "namePlaceholder": "Введите название услуги",
+      "description": "Описание",
+      "descriptionPlaceholder": "Введите описание услуги",
+      "categoryId": "Категория",
+      "categoryIdPlaceholder": "Выберите категорию",
+      "subcategoryId": "Подкатегория",
+      "subcategoryIdPlaceholder": "Выберите подкатегорию",
+      "subcategoryIdPlaceholderSelectCategory": "Сначала выберите категорию",
+      "subcategoryIdPlaceholderNoSubcategories": "Нет подкатегорий",
+      "durationMinutes": "Длительность (минуты)",
+      "durationMinutesPlaceholder": "Введите длительность",
+      "color": "Цвет",
+      "colorPlaceholder": "Выберите цвет",
+      "submit": "Добавить услугу",
+      "submitting": "Добавление...",
+      "cancel": "Отмена",
+      "success": "Услуга успешно добавлена",
+      "colors": {
+        "black": "Черный",
+        "blue": "Синий",
+        "green": "Зеленый",
+        "red": "Красный",
+        "yellow": "Желтый",
+        "purple": "Фиолетовый",
+        "orange": "Оранжевый",
+        "gray": "Серый"
+      },
+      "errors": {
+        "nameMin": "Название должно содержать минимум 2 символа",
+        "nameMax": "Название не должно превышать 100 символов",
+        "descriptionMax": "Описание не должно превышать 500 символов",
+        "categoryIdRequired": "Выберите категорию",
+        "subcategoryIdRequired": "Выберите подкатегорию",
+        "durationRequired": "Введите длительность",
+        "durationMustBeInteger": "Длительность должна быть целым числом",
+        "durationMustBePositive": "Длительность должна быть положительным числом",
+        "colorRequired": "Выберите цвет",
+        "colorMax": "Цвет не должен превышать 50 символов",
+        "pointCodeRequired": "Не удалось определить код точки",
+        "submitError": "Ошибка при создании услуги"
       }
     }
   }

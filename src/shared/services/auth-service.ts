@@ -48,7 +48,6 @@ export interface PasswordChangeResponseDto {
   message?: string;
   code?: number;
 }
-
 export interface PasswordChangeRequestRequestDto {
   phone: string;
 }

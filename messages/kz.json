@@ -8,7 +8,7 @@
       "clients": "Клиенттері",
       "services": "Қызметтер",
       "staff": "Жұмысшылар",
-      "points": "Филиалдар",
+      "points": "Орындар",
       "analytics": "Аналитика",
       "settings": "Параметрлер"
     },
@@ -364,6 +364,77 @@
         "scheduleMin": "Кемінде бір күнге кестені көрсету қажет",
         "networkCodeRequired": "Желі кодын анықтау мүмкін болмады",
         "submitError": "Нүктені құру кезінде қате"
+      }
+    }
+  },
+  "Services": {
+    "title": "Қызметтер",
+    "tableTitle": "Қызметтер",
+    "addService": "Қызмет қосу",
+    "noData": "Көрсету үшін қызметтер жоқ",
+    "errorLoading": "Деректерді жүктеу қатесі",
+    "accessDenied": "Қол жетімсіз",
+    "accessDeniedDescription": "Қызметтер тізімін көруге құқығыңыз жоқ",
+    "active": "Белсенді",
+    "inactive": "Белсенді емес",
+    "table": {
+      "name": "Атауы",
+      "description": "Сипаттама",
+      "duration": "Ұзақтығы",
+      "color": "Түс",
+      "price": "Бағасы",
+      "status": "Күйі"
+    },
+    "pointSelect": {
+      "label": "Қызмет көрсету нүктесі",
+      "placeholder": "Нүктені таңдаңыз"
+    },
+    "addServiceDialog": {
+      "title": "Қызмет қосу",
+      "description": "Жаңа қызмет құру үшін форманы толтырыңыз"
+    },
+    "addServiceForm": {
+      "name": "Атауы",
+      "namePlaceholder": "Қызмет атауын енгізіңіз",
+      "description": "Сипаттама",
+      "descriptionPlaceholder": "Қызмет сипаттамасын енгізіңіз",
+      "categoryId": "Категория",
+      "categoryIdPlaceholder": "Категорияны таңдаңыз",
+      "subcategoryId": "Ішкі категория",
+      "subcategoryIdPlaceholder": "Ішкі категорияны таңдаңыз",
+      "subcategoryIdPlaceholderSelectCategory": "Алдымен категорияны таңдаңыз",
+      "subcategoryIdPlaceholderNoSubcategories": "Ішкі категориялар жоқ",
+      "durationMinutes": "Ұзақтығы (минут)",
+      "durationMinutesPlaceholder": "Ұзақтықты енгізіңіз",
+      "color": "Түс",
+      "colorPlaceholder": "Түсті таңдаңыз",
+      "submit": "Қызмет қосу",
+      "submitting": "Қосуда...",
+      "cancel": "Болдырмау",
+      "success": "Қызмет сәтті қосылды",
+      "colors": {
+        "black": "Қара",
+        "blue": "Көк",
+        "green": "Жасыл",
+        "red": "Қызыл",
+        "yellow": "Сары",
+        "purple": "Күлгін",
+        "orange": "Қызғылт сары",
+        "gray": "Сұр"
+      },
+      "errors": {
+        "nameMin": "Атауы кемінде 2 таңбадан тұруы керек",
+        "nameMax": "Атауы 100 таңбадан аспауы керек",
+        "descriptionMax": "Сипаттама 500 таңбадан аспауы керек",
+        "categoryIdRequired": "Категорияны таңдаңыз",
+        "subcategoryIdRequired": "Ішкі категорияны таңдаңыз",
+        "durationRequired": "Ұзақтықты енгізіңіз",
+        "durationMustBeInteger": "Ұзақтық бүтін сан болуы керек",
+        "durationMustBePositive": "Ұзақтық оң сан болуы керек",
+        "colorRequired": "Түсті таңдаңыз",
+        "colorMax": "Түс 50 таңбадан аспауы керек",
+        "pointCodeRequired": "Нүкте кодын анықтау мүмкін болмады",
+        "submitError": "Қызмет құру кезінде қате"
       }
     }
   }
