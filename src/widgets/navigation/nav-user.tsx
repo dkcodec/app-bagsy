@@ -40,7 +40,10 @@ export function NavUser({ user }: { user?: IUserDto }) {
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 {user?.avatar_url ? (
-                  <AvatarImage src={user?.avatar_url} alt={user?.name ?? "avatar"} />
+                  <AvatarImage
+                    src={user?.avatar_url}
+                    alt={user?.name ?? "avatar"}
+                  />
                 ) : null}
                 <AvatarFallback className="rounded-lg">
                   {`${user?.name?.[0].toUpperCase()}${user?.surname?.[0].toUpperCase()}`}
@@ -66,7 +69,10 @@ export function NavUser({ user }: { user?: IUserDto }) {
               >
                 <Avatar className="h-8 w-8 rounded-lg">
                   {user?.avatar_url ? (
-                    <AvatarImage src={user?.avatar_url} alt={user?.name ?? "avatar"} />
+                    <AvatarImage
+                      src={user?.avatar_url}
+                      alt={user?.name ?? "avatar"}
+                    />
                   ) : null}
                   <AvatarFallback className="rounded-lg">
                     {`${user?.name?.[0].toUpperCase()}${user?.surname?.[0].toUpperCase()}`}

@@ -16,10 +16,10 @@ export function useMediaUpload() {
   return useMutation<string, Error, File>({
     mutationKey: ["media", "upload"],
     mutationFn: async (file: File) => {
-      if (!ALLOWED_TYPES.includes(file.type as (typeof ALLOWED_TYPES)[number])) {
-        throw new Error(
-          "Недопустимый формат. Разрешены: JPEG, PNG, WebP."
-        );
+      if (
+        !ALLOWED_TYPES.includes(file.type as (typeof ALLOWED_TYPES)[number])
+      ) {
+        throw new Error("Недопустимый формат. Разрешены: JPEG, PNG, WebP.");
       }
       if (file.size > MAX_SIZE_BYTES) {
         throw new Error("Размер файла не должен превышать 5 MB.");

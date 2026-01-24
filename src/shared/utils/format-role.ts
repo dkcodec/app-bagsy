@@ -20,7 +20,10 @@ const ROLE_LABELS: Record<TUserRole, { ru: string; kz: string }> = {
  * @param role — роль из EUserRole
  * @param locale — "ru" | "kz"; при ином значении используется "ru"
  */
-export function formatRole(role: TUserRole, locale: TRoleLocale | string): string {
+export function formatRole(
+  role: TUserRole,
+  locale: TRoleLocale | string
+): string {
   const labels = ROLE_LABELS[role];
   if (!labels) return role;
   return locale === "kz" ? labels.kz : labels.ru;

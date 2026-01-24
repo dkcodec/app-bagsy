@@ -197,7 +197,10 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
                 </>
               ) : (
                 <Avatar className="h-16 w-16 rounded-2xl">
-                  <AvatarImage src={user?.avatar_url} alt={user?.name ?? "avatar"} />
+                  <AvatarImage
+                    src={user?.avatar_url}
+                    alt={user?.name ?? "avatar"}
+                  />
                   <AvatarFallback className="text-lg font-semibold rounded-2xl">
                     {isLoading ? (
                       <Skeleton className="h-16 w-16 rounded-2xl" />
@@ -286,7 +289,13 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
                 {t("role")}
               </h4>
               <div className="text-sm">
-                {isLoading ? <Skeleton className="h-4 w-20" /> : (user?.role ? formatRole(user.role, locale) : "-")}
+                {isLoading ? (
+                  <Skeleton className="h-4 w-20" />
+                ) : user?.role ? (
+                  formatRole(user.role, locale)
+                ) : (
+                  "-"
+                )}
               </div>
             </div>
 
@@ -298,7 +307,7 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
                 {isLoading ? (
                   <Skeleton className="h-4 w-16" />
                 ) : (
-                  user?.point_code ?? "-"
+                  (user?.point_code ?? "-")
                 )}
               </div>
             </div>
@@ -311,7 +320,7 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
                 {isLoading ? (
                   <Skeleton className="h-4 w-16" />
                 ) : (
-                  user?.network_code ?? "-"
+                  (user?.network_code ?? "-")
                 )}
               </div>
             </div>
