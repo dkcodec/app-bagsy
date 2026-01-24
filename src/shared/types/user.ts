@@ -15,6 +15,7 @@ export type TUserRole = (typeof EUserRole)[keyof typeof EUserRole];
 
 export interface IUserDto {
   active: boolean;
+  avatar_url?: string;
   created_at: string;
   name: string;
   network_code: string;
@@ -35,6 +36,7 @@ export interface ISchedule {
 }
 
 export interface UpdateProfileRequest {
+  avatar_id?: string;
   name: string;
   surname: string;
 }

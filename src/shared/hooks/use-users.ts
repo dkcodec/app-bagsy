@@ -82,3 +82,18 @@ export function useUpdateProfile() {
     },
   });
 }
+
+/**
+ * Хук удаления аватара. DELETE v1/users/me/avatar, инвалидация ["me"].
+ */
+export function useDeleteAvatar() {
+  const queryClient = useQueryClient();
+
+  return useMutation<{ message: string }, Error, void>({
+    mutationKey: ["me", "delete-avatar"],
+    mutationFn: () => UserService.deleteAvatar(),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+    },
+  });
+}

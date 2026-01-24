@@ -17,6 +17,9 @@ export * from "./use-update-event";
 // Хуки для пользователей
 export * from "./use-users";
 
+// Медиа (загрузка аватара и др.)
+export * from "./use-media-upload";
+
 // Хуки для календаря
 export * from "./use-calendar";
 
