@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -28,6 +28,7 @@ import { Loader } from "lucide-react";
 import { toast } from "sonner";
 import { EUserRole, TUserRole } from "@/src/shared/types/user";
 import { useCurrentUser } from "@/src/shared/hooks/use-users";
+import { useNetworkPoints } from "@/src/shared/hooks/use-network-points";
 
 /**
  * Схема валидации для регистрации сотрудника
@@ -77,9 +78,23 @@ export function RegisterStaffForm({
   const t = useTranslations("Staff.RegisterForm");
   const registerStaffMutation = useRegisterStaff();
   const { data: currentUser } = useCurrentUser();
+  const { data: networkPoints } = useNetworkPoints(currentUser?.network_code);
+
+  // Для manager — только его точка, для ролей выше — список из API
+  const pointOptions = useMemo(() => {
+    if (currentUser?.role === EUserRole.MANAGER && currentUser.point_code) {
+      return [{ code: currentUser.point_code, name: currentUser.point_code }];
+    }
+    return (
+      networkPoints?.points.map(p => ({
+        code: p.code,
+        name: p.name || p.code,
+      })) ?? []
+    );
+  }, [currentUser?.role, currentUser?.point_code, networkPoints?.points]);
 
   // Определяем доступные роли в зависимости от прав текущего пользователя
-  const availableRoles = React.useMemo(() => {
+  const availableRoles = useMemo(() => {
     const baseRoles = [EUserRole.MANAGER, EUserRole.STAFF];
     // Админ может создавать net_manager
     if (currentUser?.role === EUserRole.ADMIN) {
@@ -230,13 +245,24 @@ export function RegisterStaffForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>{t("pointCode")}</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder={t("pointCodePlaceholder")}
-                  disabled={registerStaffMutation.isPending}
-                  {...field}
-                />
-              </FormControl>
+              <Select
+                onValueChange={field.onChange}
+                value={field.value}
+                disabled={registerStaffMutation.isPending}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("pointCodePlaceholder")} />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {pointOptions.map(point => (
+                    <SelectItem key={point.code} value={point.code}>
+                      {point.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}

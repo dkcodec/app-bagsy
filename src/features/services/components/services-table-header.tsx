@@ -17,9 +17,7 @@ interface ServicesTableHeaderProps {
   columns: TableColumn[];
 }
 
-export function ServicesTableHeader({
-  columns,
-}: ServicesTableHeaderProps) {
+export function ServicesTableHeader({ columns }: ServicesTableHeaderProps) {
   const t = useTranslations("Services");
 
   return (

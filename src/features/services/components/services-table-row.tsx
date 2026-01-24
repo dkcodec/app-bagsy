@@ -49,9 +49,7 @@ export function ServicesTableRow({ service }: ServicesTableRowProps) {
           <span className="text-sm">{service.color}</span>
         </div>
       </TableCell>
-      <TableCell>
-        {formatPrice(service.min_price, service.max_price)}
-      </TableCell>
+      <TableCell>{formatPrice(service.min_price, service.max_price)}</TableCell>
       <TableCell>
         <Badge variant={service.active ? "default" : "outline"}>
           {service.active ? t("active") : t("inactive")}

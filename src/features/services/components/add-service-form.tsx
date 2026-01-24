@@ -25,7 +25,10 @@ import {
 import { Skeleton } from "@/src/entities/skeleton";
 import { Loader } from "lucide-react";
 import { toast } from "sonner";
-import { useServiceCategories, useCreateService } from "@/src/shared/hooks/use-services";
+import {
+  useServiceCategories,
+  useCreateService,
+} from "@/src/shared/hooks/use-services";
 import { useEffect, useMemo } from "react";
 
 /**
@@ -33,10 +36,7 @@ import { useEffect, useMemo } from "react";
  */
 const createAddServiceSchema = (t: (key: string) => string) =>
   z.object({
-    name: z
-      .string()
-      .min(2, t("errors.nameMin"))
-      .max(100, t("errors.nameMax")),
+    name: z.string().min(2, t("errors.nameMin")).max(100, t("errors.nameMax")),
     description: z
       .string()
       .max(500, t("errors.descriptionMax"))
@@ -340,7 +340,9 @@ export function AddServiceForm({
                     {colors.map(color => (
                       <SelectItem key={color.value} value={color.value}>
                         <div className="flex items-center gap-2">
-                          <div className={`size-3.5 rounded-full ${color.bgColor}`} />
+                          <div
+                            className={`size-3.5 rounded-full ${color.bgColor}`}
+                          />
                           {color.label}
                         </div>
                       </SelectItem>
