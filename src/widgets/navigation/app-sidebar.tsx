@@ -117,13 +117,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain main={filteredNav} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser
-          user={{
-            name: userData?.name ?? t("User.name"),
-            phone: userData?.phone ?? t("User.phone"),
-            avatar: "/avatars/shadcn.jpg",
-          }}
-        />
+        <NavUser user={userData} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

@@ -200,7 +200,12 @@
       "surname": "Тегі",
       "profileUpdatedSuccessfully": "Профиль сәтті жаңартылды",
       "errorUpdatingProfile": "Профиль жаңарту қатесі",
-      "changePassword": "Құпия сөзді өзгерту"
+      "changePassword": "Құпия сөзді өзгерту",
+      "changePhoto": "Суретті өзгерту",
+      "uploadError": "Сурет жүктеу қатесі",
+      "removePhoto": "Суретті жою",
+      "avatarRemovedSuccess": "Аватар жойылды",
+      "errorRemovingAvatar": "Аватарды жою қатесі"
     }
   },
   "Staff": {

@@ -201,7 +201,12 @@
       "surname": "Фамилия",
       "profileUpdatedSuccessfully": "Профиль успешно обновлен",
       "errorUpdatingProfile": "Ошибка при обновлении профиля",
-      "changePassword": "Сменить пароль"
+      "changePassword": "Сменить пароль",
+      "changePhoto": "Изменить фото",
+      "uploadError": "Ошибка загрузки фото",
+      "removePhoto": "Удалить фото",
+      "avatarRemovedSuccess": "Аватар удалён",
+      "errorRemovingAvatar": "Ошибка при удалении аватара"
     }
   },
   "Staff": {

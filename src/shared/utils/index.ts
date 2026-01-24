@@ -17,3 +17,6 @@ export * from "./calendar";
 
 // Утилиты для работы с куки
 export * from "./cookies";
+
+// Форматирование ролей (ru/kz)
+export * from "./format-role";
