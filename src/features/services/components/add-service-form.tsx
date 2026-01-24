@@ -46,10 +46,12 @@ const createAddServiceSchema = (t: (key: string) => string) =>
       .number(t("errors.categoryIdRequired"))
       .positive(t("errors.categoryIdRequired"))
       .int(t("errors.categoryIdRequired")),
+    // optional: сбрасывается в undefined при смене категории
     subcategory_id: z
       .number(t("errors.subcategoryIdRequired"))
       .positive(t("errors.subcategoryIdRequired"))
-      .int(t("errors.subcategoryIdRequired")),
+      .int(t("errors.subcategoryIdRequired"))
+      .optional(),
     duration_minutes: z
       .number(t("errors.durationRequired"))
       .int(t("errors.durationMustBeInteger"))
@@ -122,6 +124,13 @@ export function AddServiceForm({
   const onSubmit = async (data: AddServiceFormData) => {
     if (!pointCode) {
       toast.error(t("errors.pointCodeRequired"));
+      return;
+    }
+    // API требует number; при сбросе категории subcategory_id может быть undefined
+    if (data.subcategory_id == null) {
+      form.setError("subcategory_id", {
+        message: t("errors.subcategoryIdRequired"),
+      });
       return;
     }
 
