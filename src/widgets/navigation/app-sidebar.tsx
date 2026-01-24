@@ -52,12 +52,6 @@ const navData: { navMain: NavItem[] } = {
       name: "services",
       url: "/services",
       icon: ClipboardList,
-      allowedRoles: [
-        EUserRole.ADMIN,
-        EUserRole.NET_MANAGER,
-        EUserRole.SELF_OWNER,
-        EUserRole.MANAGER,
-      ],
     },
     {
       name: "staff",
