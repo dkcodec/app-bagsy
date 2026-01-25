@@ -1,9 +1,8 @@
 import { apiClient } from "@/src/shared/api";
 import type {
   UpdateProfileRequest,
-  IUserDto,
-  UsersListResponseDto,
-  UsersSearchRequest,
+  UpdateScheduleRequest,
+  IUserDto
 } from "@/src/shared/types/user";
 
 /**
@@ -33,5 +32,14 @@ export class UserService {
    */
   static async deleteAvatar(): Promise<{ message: string }> {
     return apiClient.delete<{ message: string }>("v1/users/me/avatar");
+  }
+
+  /**
+   * Обновление расписания текущего пользователя. PUT v1/users/me/schedule
+   */
+  static async updateSchedule(
+    data: UpdateScheduleRequest
+  ): Promise<{ message: string }> {
+    return apiClient.put<{ message: string }>("v1/users/me/schedule", data);
   }
 }
