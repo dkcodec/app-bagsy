@@ -16,7 +16,10 @@ import { Button } from "@/src/entities/button";
 import { useCalendar } from "@/src/features/calendar/calendar-context";
 import { mapPointScheduleToWorkingHours } from "@/src/features/calendar/calendar-context/store";
 import { useIsMobile } from "@/src/shared/hooks/use-mobile";
-import { useCurrentUser, useUpdateSchedule } from "@/src/shared/hooks/use-users";
+import {
+  useCurrentUser,
+  useUpdateSchedule,
+} from "@/src/shared/hooks/use-users";
 import { ChangeBadgeVariantInput } from "./change-badge-variant-input";
 import { ChangeVisibleHoursInput } from "./change-visible-hours-input";
 import { ScheduleEditor } from "@/src/features/points/components/schedule-editor";
@@ -55,8 +58,7 @@ export function CalendarSettings() {
     // 2. Сохраняем расписание в API
     const toSave = tempSchedule ?? currentUser?.schedule ?? [];
     const isValid =
-      toSave.length >= 1 &&
-      toSave.some(s => s.all_day || (s.open && s.close));
+      toSave.length >= 1 && toSave.some(s => s.all_day || (s.open && s.close));
     if (!isValid) {
       toast.error(t("scheduleMin"));
       return;
@@ -64,8 +66,8 @@ export function CalendarSettings() {
 
     const schedule = toSave.map(s => ({
       week_day: s.week_day,
-      from: s.all_day ? "00:00" : (s.open || "09:00"),
-      to: s.all_day ? "00:00" : (s.close || "18:00"),
+      from: s.all_day ? "00:00" : s.open || "09:00",
+      to: s.all_day ? "00:00" : s.close || "18:00",
       all_day: s.all_day,
       comment: s.comment || "",
     }));
@@ -100,17 +102,14 @@ export function CalendarSettings() {
     setTempVisibleHours(null);
   }, []);
 
-  const handleOpenChange = useCallback(
-    (open: boolean) => {
-      setIsOpen(open);
-      if (!open) {
-        setTempSchedule(null);
-        setTempBadgeVariant(null);
-        setTempVisibleHours(null);
-      }
-    },
-    []
-  );
+  const handleOpenChange = useCallback((open: boolean) => {
+    setIsOpen(open);
+    if (!open) {
+      setTempSchedule(null);
+      setTempBadgeVariant(null);
+      setTempVisibleHours(null);
+    }
+  }, []);
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>

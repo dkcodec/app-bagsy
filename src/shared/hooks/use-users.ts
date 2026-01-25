@@ -93,11 +93,7 @@ export function useUpdateProfile() {
 export function useUpdateSchedule() {
   const queryClient = useQueryClient();
 
-  return useMutation<
-    { message: string },
-    Error,
-    UpdateScheduleRequest
-  >({
+  return useMutation<{ message: string }, Error, UpdateScheduleRequest>({
     mutationKey: ["me", "update-schedule"],
     mutationFn: (data: UpdateScheduleRequest) =>
       UserService.updateSchedule(data),

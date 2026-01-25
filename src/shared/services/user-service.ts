@@ -2,7 +2,7 @@ import { apiClient } from "@/src/shared/api";
 import type {
   UpdateProfileRequest,
   UpdateScheduleRequest,
-  IUserDto
+  IUserDto,
 } from "@/src/shared/types/user";
 
 /**
