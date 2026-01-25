@@ -41,6 +41,19 @@ export interface UpdateProfileRequest {
   surname: string;
 }
 
+/** Элемент расписания для PUT /api/v1/users/me/schedule (from/to вместо open/close) */
+export interface UpdateScheduleItemRequest {
+  week_day: number;
+  from: string;
+  to: string;
+  all_day: boolean;
+  comment: string;
+}
+
+export interface UpdateScheduleRequest {
+  schedule: UpdateScheduleItemRequest[];
+}
+
 export interface UsersListResponseDto extends UserResponse {
   users: IUserDto[];
   total: number;

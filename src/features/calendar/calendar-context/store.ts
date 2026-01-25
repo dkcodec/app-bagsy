@@ -47,7 +47,8 @@ function emptyWorkingHours(): TWorkingHours {
   };
 }
 
-function mapPointScheduleToWorkingHours(
+/** Маппинг ISchedule[] (open/close) в TWorkingHours. Экспорт для calendar-settings. */
+export function mapPointScheduleToWorkingHours(
   schedule: Array<{
     all_day: boolean;
     open: string;

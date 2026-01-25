@@ -42,6 +42,8 @@ interface ScheduleEditorProps {
   value: ISchedule[];
   onChange: (schedule: ISchedule[]) => void;
   isMobile?: boolean;
+  /** Переопределение заголовка (напр. «Моё рабочее расписание» в calendar-settings) */
+  title?: string;
 }
 
 /**
@@ -52,6 +54,7 @@ export function ScheduleEditor({
   value,
   onChange,
   isMobile = false,
+  title,
 }: ScheduleEditorProps) {
   const t = useTranslations("Points.addPointForm.schedule");
   const tDays = useTranslations("Dashboard.Settings");
@@ -159,7 +162,7 @@ export function ScheduleEditor({
 
   return (
     <div className="flex flex-col gap-4">
-      <h4 className="text-sm font-semibold">{t("title")}</h4>
+      <h4 className="text-sm font-semibold">{title ?? t("title")}</h4>
       <div className="space-y-4">
         {WEEK_DAYS_FOR_UI.map(day => {
           const daySchedule = scheduleByDay[day.index];

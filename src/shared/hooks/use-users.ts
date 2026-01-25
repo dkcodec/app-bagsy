@@ -1,7 +1,11 @@
 "use client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { UserService } from "../services/user-service";
-import type { UpdateProfileRequest, IUserDto } from "../types/user";
+import type {
+  UpdateProfileRequest,
+  UpdateScheduleRequest,
+  IUserDto,
+} from "../types/user";
 
 /**
  * Получение текущего пользователя
@@ -78,6 +82,22 @@ export function useUpdateProfile() {
     },
     onSettled: () => {
       // Инвалидируем кэш для получения актуальных данных
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+    },
+  });
+}
+
+/**
+ * Хук обновления расписания. PUT v1/users/me/schedule, инвалидация ["me"].
+ */
+export function useUpdateSchedule() {
+  const queryClient = useQueryClient();
+
+  return useMutation<{ message: string }, Error, UpdateScheduleRequest>({
+    mutationKey: ["me", "update-schedule"],
+    mutationFn: (data: UpdateScheduleRequest) =>
+      UserService.updateSchedule(data),
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["me"] });
     },
   });
