@@ -95,7 +95,8 @@ export function ServicesContent() {
     { field: "duration", labelKey: "table.duration", sortable: false },
     { field: "color", labelKey: "table.color", sortable: false },
     { field: "price", labelKey: "table.price", sortable: false },
-    { field: "status", labelKey: "table.status", sortable: false },
+    //{ field: "status", labelKey: "table.status", sortable: false },
+    { field: "masters", labelKey: "table.masters", sortable: false },
   ];
 
   return (
@@ -160,7 +161,11 @@ export function ServicesContent() {
                       </TableRow>
                     ) : (
                       data.services.map(service => (
-                        <ServicesTableRow key={service.id} service={service} />
+                        <ServicesTableRow
+                          key={service.id}
+                          service={service}
+                          pointCode={pointCodeForQuery}
+                        />
                       ))
                     )}
                   </TableBody>
