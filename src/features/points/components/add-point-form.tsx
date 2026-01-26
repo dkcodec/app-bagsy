@@ -33,6 +33,10 @@ import {
 import { ScheduleEditor } from "./schedule-editor";
 import { AddressSearch } from "./address-search";
 import dynamic from "next/dynamic";
+import {
+  timeOfDayToTimestampWithTz,
+  parseScheduleTime,
+} from "@/src/shared/utils/formater";
 import type { ISchedule } from "@/src/shared/types/user";
 import type { INominatimResult } from "@/src/shared/services/nominatim-service";
 
@@ -161,14 +165,27 @@ export function AddPointForm({ onSuccess, onCancel }: AddPointFormProps) {
     }
 
     try {
-      // Преобразуем schedule: убираем пустые строки open/close если all_day
-      const schedule: ISchedule[] = data.schedule.map(item => ({
-        week_day: item.week_day,
-        all_day: item.all_day,
-        open: item.all_day ? "00:00" : item.open,
-        close: item.all_day ? "23:59" : item.close,
-        comment: item.comment || "",
-      }));
+      // Преобразуем schedule: open/close в ISO с таймзоной для бэка
+      const schedule: ISchedule[] = data.schedule.map(item => {
+        if (item.all_day) {
+          return {
+            week_day: item.week_day,
+            all_day: item.all_day,
+            open: timeOfDayToTimestampWithTz(0, 0),
+            close: timeOfDayToTimestampWithTz(23, 59),
+            comment: item.comment || "",
+          };
+        }
+        const open = parseScheduleTime(item.open);
+        const close = parseScheduleTime(item.close);
+        return {
+          week_day: item.week_day,
+          all_day: item.all_day,
+          open: timeOfDayToTimestampWithTz(open.hour, open.minute),
+          close: timeOfDayToTimestampWithTz(close.hour, close.minute),
+          comment: item.comment || "",
+        };
+      });
 
       await createPointMutation.mutateAsync({
         name: data.name,

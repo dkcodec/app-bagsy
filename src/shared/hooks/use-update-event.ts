@@ -1,7 +1,7 @@
 "use client";
 
 import { useCalendar } from "@/src/features/calendar";
-
+import { parseTimestamp, toTimestampWithTz } from "@/src/shared/utils/formater";
 import type { IEvent } from "@/src/shared/types/calendar";
 
 export function useUpdateEvent() {
@@ -13,8 +13,8 @@ export function useUpdateEvent() {
     // Создаем новый объект вместо мутации существующего
     const newEvent: IEvent = {
       ...event,
-      startDate: new Date(event.startDate).toISOString(),
-      endDate: new Date(event.endDate).toISOString(),
+      startDate: toTimestampWithTz(parseTimestamp(event.startDate)),
+      endDate: toTimestampWithTz(parseTimestamp(event.endDate)),
     };
 
     setLocalEvents(prev => {

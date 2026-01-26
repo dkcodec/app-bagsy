@@ -1,10 +1,10 @@
 "use client";
 
 import { useDrop } from "react-dnd";
-import { parseISO, differenceInMilliseconds } from "date-fns";
+import { differenceInMilliseconds } from "date-fns";
 
 import { useUpdateEvent } from "@/src/shared/hooks";
-
+import { parseTimestamp, toTimestampWithTz } from "@/src/shared/utils/formater";
 import { cn } from "@/src/shared/utils/styles";
 import { ItemTypes } from "./draggable-event";
 
@@ -31,8 +31,8 @@ export function DroppableTimeBlock({
       drop: (item: { event: IEvent }) => {
         const droppedEvent = item.event;
 
-        const eventStartDate = parseISO(droppedEvent.startDate);
-        const eventEndDate = parseISO(droppedEvent.endDate);
+        const eventStartDate = parseTimestamp(droppedEvent.startDate);
+        const eventEndDate = parseTimestamp(droppedEvent.endDate);
 
         const eventDurationMs = differenceInMilliseconds(
           eventEndDate,
@@ -45,8 +45,8 @@ export function DroppableTimeBlock({
 
         updateEvent({
           ...droppedEvent,
-          startDate: newStartDate.toISOString(),
-          endDate: newEndDate.toISOString(),
+          startDate: toTimestampWithTz(newStartDate),
+          endDate: toTimestampWithTz(newEndDate),
         });
 
         return { moved: true };

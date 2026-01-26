@@ -3,9 +3,11 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 
-import { useDisclosure } from "@/src/shared/hooks";
+import { useDisclosure, useCreateBagsie } from "@/src/shared/hooks";
 import { useCalendar } from "@/src/features/calendar/calendar-context";
+import { toTimestampWithTz } from "@/src/shared/utils/formater";
 
 import { Input } from "@/src/entities/input";
 import { Button } from "@/src/entities/button";
@@ -47,36 +49,77 @@ interface IProps {
   children: React.ReactNode;
   startDate?: Date;
   startTime?: { hour: number; minute: number };
+  /** Код точки (для CreateBagsieRequestDto.provider.point_code). */
+  pointCode?: string;
 }
 
-export function AddEventDialog({ children, startDate, startTime }: IProps) {
+export function AddEventDialog({
+  children,
+  startDate,
+  startTime,
+  pointCode,
+}: IProps) {
   const { masters } = useCalendar();
   const t = useTranslations("Dashboard.Calendar.AddEventDialog");
-
-  // const createBagsie = useCreateBagsie();
+  const createBagsie = useCreateBagsie();
 
   const { isOpen, onClose, onToggle } = useDisclosure();
 
   const form = useForm<TEventFormData>({
     resolver: zodResolver(eventSchema),
     defaultValues: {
+      user: "",
       title: "",
+      first_name: "",
+      last_name: "",
+      phone: "",
       comment: "",
       startDate: typeof startDate !== "undefined" ? startDate : undefined,
       startTime: typeof startTime !== "undefined" ? startTime : undefined,
+      endDate: typeof startDate !== "undefined" ? startDate : new Date(),
+      endTime:
+        typeof startTime !== "undefined"
+          ? { hour: Math.min(23, startTime.hour + 1), minute: startTime.minute }
+          : { hour: 10, minute: 0 },
+      color: "blue",
     },
   });
 
-  const onSubmit = () => {
-    console.log(form.getValues());
-    onClose();
-    form.reset();
+  const onSubmit = async (values: TEventFormData) => {
+    const startDateTime = new Date(values.startDate);
+    startDateTime.setHours(values.startTime.hour, values.startTime.minute);
+    const endDateTime = new Date(values.endDate);
+    endDateTime.setHours(values.endTime.hour, values.endTime.minute);
+    const start_at = toTimestampWithTz(startDateTime);
+    const end_at = toTimestampWithTz(endDateTime);
+
+    try {
+      await createBagsie.mutateAsync({
+        description: values.comment ?? "",
+        end_at,
+        first_name: values.first_name,
+        last_name: values.last_name,
+        phone: values.phone,
+        provider: { phone: values.user, point_code: pointCode ?? "" },
+        service: values.title,
+        start_at,
+      });
+      onClose();
+      form.reset();
+    } catch {
+      toast.error(t("errorCreating") ?? "Ошибка при создании записи");
+    }
   };
 
   useEffect(() => {
     form.reset({
       startDate,
       startTime,
+      endDate: startDate,
+      endTime:
+        startTime != null
+          ? { hour: Math.min(23, startTime.hour + 1), minute: startTime.minute }
+          : { hour: 10, minute: 0 },
     });
   }, [startDate, startTime, form]);
 
@@ -159,6 +202,60 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
                 </FormItem>
               )}
             />
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <FormField
+                control={form.control}
+                name="first_name"
+                render={({ field, fieldState }) => (
+                  <FormItem>
+                    <FormLabel>{t("firstName")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={t("firstName")}
+                        data-invalid={fieldState.invalid}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="last_name"
+                render={({ field, fieldState }) => (
+                  <FormItem>
+                    <FormLabel>{t("lastName")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={t("lastName")}
+                        data-invalid={fieldState.invalid}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field, fieldState }) => (
+                  <FormItem>
+                    <FormLabel>{t("phone")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={t("phone")}
+                        data-invalid={fieldState.invalid}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <div className="flex items-start gap-2">
               <FormField

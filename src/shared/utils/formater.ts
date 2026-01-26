@@ -1,4 +1,19 @@
-import { TUserRole } from "../types/user";
+import {
+  parseTimestamp,
+  formatTimestamp,
+  toTimestampWithTz,
+  nowTimestampWithTz,
+} from "./datetime";
+
+// Реэкспорт для форм, DnD, хуков, schedule
+export {
+  toTimestampWithTz,
+  nowTimestampWithTz,
+  parseTimestamp,
+  timeOfDayToTimestampWithTz,
+  parseScheduleTime,
+  formatScheduleTime,
+} from "./datetime";
 
 /**
  * Форматирование номера телефона
@@ -11,14 +26,22 @@ export function formatPhone(phone: string) {
 }
 
 /**
- * Форматирование даты для отображения
+ * Форматирование даты и времени для отображения (ISO с Z или ±HH:mm → локальная дата+время).
+ * Для пустой/невалидной строки — "—".
  */
 export function formatDate(dateString: string, locale: string = "ru-RU") {
-  return new Date(dateString).toLocaleDateString(locale, {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
+  if (!dateString?.trim()) return "—";
+  return formatTimestamp(parseTimestamp(dateString), locale, {
+    showTime: true,
+  });
+}
+
+/**
+ * Форматирование только даты (без времени). Для пустой/невалидной строки — "—".
+ */
+export function formatDateOnly(dateString: string, locale: string = "ru-RU") {
+  if (!dateString?.trim()) return "—";
+  return formatTimestamp(parseTimestamp(dateString), locale, {
+    showTime: false,
   });
 }

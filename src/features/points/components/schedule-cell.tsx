@@ -9,6 +9,7 @@ import {
   Button,
 } from "@/src/entities";
 import { useTranslations } from "next-intl";
+import { formatScheduleTime } from "@/src/shared/utils/formater";
 import type { ISchedule } from "@/src/shared/types/user";
 
 /**
@@ -81,12 +82,14 @@ export function ScheduleCell({ schedule }: ScheduleCellProps) {
       const daySchedule = scheduleByDay[day.index];
       if (!daySchedule) return;
 
-      // Ищем группу с таким же расписанием
+      // Ищем группу с таким же расписанием (formatScheduleTime для ISO и "HH:mm")
       const existingGroup = groups.find(
         g =>
           g.schedule.all_day === daySchedule.all_day &&
-          g.schedule.open === daySchedule.open &&
-          g.schedule.close === daySchedule.close
+          formatScheduleTime(g.schedule.open) ===
+            formatScheduleTime(daySchedule.open) &&
+          formatScheduleTime(g.schedule.close) ===
+            formatScheduleTime(daySchedule.close)
       );
 
       if (existingGroup) {
@@ -132,7 +135,7 @@ export function ScheduleCell({ schedule }: ScheduleCellProps) {
         return `${dayRange}: ${t("closed")}`;
       }
 
-      return `${dayRange}: ${group.schedule.open} - ${group.schedule.close}`;
+      return `${dayRange}: ${formatScheduleTime(group.schedule.open)} - ${formatScheduleTime(group.schedule.close)}`;
     });
 
     return summaryParts.join(", ");
@@ -193,7 +196,8 @@ export function ScheduleCell({ schedule }: ScheduleCellProps) {
                       <>
                         <Clock className="h-4 w-4 text-muted-foreground" />
                         <span>
-                          {daySchedule.open} - {daySchedule.close}
+                          {formatScheduleTime(daySchedule.open)} -{" "}
+                          {formatScheduleTime(daySchedule.close)}
                         </span>
                         {daySchedule.comment && (
                           <span className="text-xs text-muted-foreground">

@@ -1,6 +1,7 @@
 "use client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { UserService } from "../services/user-service";
+import { nowTimestampWithTz } from "../utils/formater";
 import type {
   UpdateProfileRequest,
   UpdateScheduleRequest,
@@ -64,7 +65,7 @@ export function useUpdateProfile() {
           data: {
             ...prevUser,
             ...newData,
-            updated_at: new Date().toISOString(),
+            updated_at: nowTimestampWithTz(),
           },
         });
       }

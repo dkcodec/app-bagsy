@@ -8,6 +8,7 @@ import { Input } from "@/src/entities/input";
 import { Label } from "@/src/entities/label";
 import type { TimeValue } from "react-aria-components";
 import { useTranslations } from "next-intl";
+import { parseScheduleTime } from "@/src/shared/utils/formater";
 import type { ISchedule } from "@/src/shared/types/user";
 
 /**
@@ -210,18 +211,15 @@ export function ScheduleEditor({
                           id={`${day.name}-open`}
                           hourCycle={24}
                           granularity="minute"
-                          value={
-                            daySchedule.open
-                              ? (() => {
-                                  const [hours, minutes] =
-                                    daySchedule.open.split(":");
-                                  return {
-                                    hour: parseInt(hours || "9", 10),
-                                    minute: parseInt(minutes || "0", 10),
-                                  } as TimeValue;
-                                })()
-                              : ({ hour: 9, minute: 0 } as TimeValue)
-                          }
+                          value={(() => {
+                            const p = parseScheduleTime(
+                              daySchedule.open || "09:00"
+                            );
+                            return {
+                              hour: p.hour,
+                              minute: p.minute,
+                            } as TimeValue;
+                          })()}
                           onChange={value =>
                             handleTimeChange(day.index, "open", value)
                           }
@@ -237,18 +235,15 @@ export function ScheduleEditor({
                           id={`${day.name}-close`}
                           hourCycle={24}
                           granularity="minute"
-                          value={
-                            daySchedule.close
-                              ? (() => {
-                                  const [hours, minutes] =
-                                    daySchedule.close.split(":");
-                                  return {
-                                    hour: parseInt(hours || "18", 10),
-                                    minute: parseInt(minutes || "0", 10),
-                                  } as TimeValue;
-                                })()
-                              : ({ hour: 18, minute: 0 } as TimeValue)
-                          }
+                          value={(() => {
+                            const p = parseScheduleTime(
+                              daySchedule.close || "18:00"
+                            );
+                            return {
+                              hour: p.hour,
+                              minute: p.minute,
+                            } as TimeValue;
+                          })()}
                           onChange={value =>
                             handleTimeChange(day.index, "close", value)
                           }

@@ -1,7 +1,8 @@
 "use client";
 
-import { parseISO } from "date-fns";
 import { useForm } from "react-hook-form";
+
+import { parseTimestamp, toTimestampWithTz } from "@/src/shared/utils/formater";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useDisclosure, useUpdateEvent } from "@/src/shared/hooks";
@@ -62,15 +63,15 @@ export function EditEventDialog({ children, event }: IProps) {
       user: event.masterPhone,
       title: event.title,
       comment: event.comment,
-      startDate: parseISO(event.startDate),
+      startDate: parseTimestamp(event.startDate),
       startTime: {
-        hour: parseISO(event.startDate).getHours(),
-        minute: parseISO(event.startDate).getMinutes(),
+        hour: parseTimestamp(event.startDate).getHours(),
+        minute: parseTimestamp(event.startDate).getMinutes(),
       },
-      endDate: parseISO(event.endDate),
+      endDate: parseTimestamp(event.endDate),
       endTime: {
-        hour: parseISO(event.endDate).getHours(),
-        minute: parseISO(event.endDate).getMinutes(),
+        hour: parseTimestamp(event.endDate).getHours(),
+        minute: parseTimestamp(event.endDate).getMinutes(),
       },
       color: event.color,
     },
@@ -93,8 +94,8 @@ export function EditEventDialog({ children, event }: IProps) {
       title: values.title,
       color: values.color,
       comment: values.comment ?? "",
-      startDate: startDateTime.toISOString(),
-      endDate: endDateTime.toISOString(),
+      startDate: toTimestampWithTz(startDateTime),
+      endDate: toTimestampWithTz(endDateTime),
     });
 
     onClose();

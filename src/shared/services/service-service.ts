@@ -7,7 +7,9 @@ export interface IServiceSubcategory {
   id: number;
   name: string;
   description: string;
+  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
   created_at: string;
+  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
   updated_at: string;
 }
 
@@ -18,7 +20,9 @@ export interface IServiceCategory {
   id: number;
   name: string;
   description: string;
+  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
   created_at: string;
+  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
   updated_at: string;
   subcategories: IServiceSubcategory[];
 }
