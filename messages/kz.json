@@ -106,6 +106,9 @@
         "add": "Жазбаны қосу",
         "cancel": "Бас тарту"
       },
+      "EventDetailsDialog": {
+        "edit": "Өңдеу"
+      },
       "DayCell": {
         "more": "тағы"
       },

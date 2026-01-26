@@ -16,6 +16,7 @@ import {
 } from "@/src/entities/dialog";
 
 import type { IEvent } from "@/src/shared/types/calendar";
+import { useTranslations } from "next-intl";
 
 interface IProps {
   event: IEvent;
@@ -27,7 +28,7 @@ export function EventDetailsDialog({ event, children }: IProps) {
   const startDate = parseISO(event.startDate);
   const endDate = parseISO(event.endDate);
   const master = masters.find(m => m.phone === event.masterPhone) ?? null;
-
+  const t = useTranslations("Dashboard.Calendar.EventDetailsDialog");
   return (
     <>
       <Dialog>
@@ -81,14 +82,14 @@ export function EventDetailsDialog({ event, children }: IProps) {
               </div>
             )}
           </div>
-
+          {/* 
           <DialogFooter>
             <EditEventDialog event={event}>
               <Button type="button" variant="outline">
-                Edit
+                {t("edit")}
               </Button>
             </EditEventDialog>
-          </DialogFooter>
+          </DialogFooter> */}
         </DialogContent>
       </Dialog>
     </>

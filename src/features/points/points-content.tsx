@@ -21,6 +21,8 @@ import { ErrorMessage } from "./components/error-message";
 import { PointsTableHeader } from "./components/table-header";
 import { PointsTableRow } from "./components/table-row";
 import { AddPointDialog } from "./components/add-point-dialog";
+import { useCurrentUser } from "@/src/shared/hooks/use-users";
+import { EUserRole } from "@/src/shared/types/user";
 
 /**
  * Компонент таблицы точек обслуживания
@@ -28,9 +30,12 @@ import { AddPointDialog } from "./components/add-point-dialog";
 export function PointsContent() {
   const t = useTranslations("Points");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { data: currentUser } = useCurrentUser();
 
   // Получение данных
   const { data, isLoading, error } = usePointsPage();
+
+  const disableAddButton = isLoading || (currentUser?.role === EUserRole.SELF_OWNER && data?.points?.length && data.points.length > 0)
 
   // Определение колонок таблицы
   const tableColumns = [
@@ -48,14 +53,16 @@ export function PointsContent() {
       <Card className="border-none bg-background">
         <CardHeader className="flex flex-row justify-between items-center px-6 py-2">
           <CardTitle>{t("tableTitle")}</CardTitle>
-          <Button
-            onClick={() => setIsDialogOpen(true)}
-            size="sm"
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            {t("addPoint")}
-          </Button>
+          {!disableAddButton && (
+            <Button
+              onClick={() => setIsDialogOpen(true)}
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              {t("addPoint")}
+            </Button>
+          )}
         </CardHeader>
         <CardContent>
           {/* Состояние загрузки */}
@@ -75,7 +82,7 @@ export function PointsContent() {
                       <TableRow>
                         {Array.from({ length: tableColumns.length }).map(
                           (_, i) => (
-                            <TableCell key={i} className="h-12 w-full">
+                            <TableCell key={i} className="h-12">
                               <Skeleton className="h-12 w-full" />
                             </TableCell>
                           )
