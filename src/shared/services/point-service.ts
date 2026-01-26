@@ -8,7 +8,9 @@ export interface IPointCategory {
   id: number;
   name: string;
   description: string;
+  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
   created_at: string;
+  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
   updated_at: string;
 }
 
@@ -57,7 +59,9 @@ export interface IPointDto {
   city: string;
   active: boolean;
   schedule: ISchedule[];
+  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
   created_at: string;
+  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
   updated_at: string;
 }
 

@@ -23,6 +23,9 @@ export * from "./use-media-upload";
 // Хуки для календаря
 export * from "./use-calendar";
 
+// Хуки для записей (bagsies)
+export * from "./use-bagsies";
+
 // Хуки для точек сети
 export * from "./use-network-points";
 

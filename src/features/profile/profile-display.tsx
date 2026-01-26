@@ -28,6 +28,7 @@ import {
 import { Loader } from "lucide-react";
 import { toast } from "sonner";
 import { formatRole } from "@/src/shared/utils/format-role";
+import { formatDateOnly } from "@/src/shared/utils/formater";
 
 interface ProfileDisplayProps {
   user?: IUserDto;
@@ -333,7 +334,10 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
                 {isLoading ? (
                   <Skeleton className="h-4 w-24" />
                 ) : (
-                  new Date(user?.created_at || "").toLocaleDateString("ru-RU")
+                  formatDateOnly(
+                    user?.created_at ?? "",
+                    locale === "kz" ? "kk-KZ" : "ru-RU"
+                  )
                 )}
               </div>
             </div>
@@ -346,7 +350,10 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
                 {isLoading ? (
                   <Skeleton className="h-4 w-24" />
                 ) : (
-                  new Date(user?.updated_at || "").toLocaleDateString("ru-RU")
+                  formatDateOnly(
+                    user?.updated_at ?? "",
+                    locale === "kz" ? "kk-KZ" : "ru-RU"
+                  )
                 )}
               </div>
             </div>

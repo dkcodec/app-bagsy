@@ -20,6 +20,10 @@ import {
   useCurrentUser,
   useUpdateSchedule,
 } from "@/src/shared/hooks/use-users";
+import {
+  timeOfDayToTimestampWithTz,
+  parseScheduleTime,
+} from "@/src/shared/utils/formater";
 import { ChangeBadgeVariantInput } from "./change-badge-variant-input";
 import { ChangeVisibleHoursInput } from "./change-visible-hours-input";
 import { ScheduleEditor } from "@/src/features/points/components/schedule-editor";
@@ -64,13 +68,26 @@ export function CalendarSettings() {
       return;
     }
 
-    const schedule = toSave.map(s => ({
-      week_day: s.week_day,
-      from: s.all_day ? "00:00" : s.open || "09:00",
-      to: s.all_day ? "00:00" : s.close || "18:00",
-      all_day: s.all_day,
-      comment: s.comment || "",
-    }));
+    const schedule = toSave.map(s => {
+      if (s.all_day) {
+        return {
+          week_day: s.week_day,
+          from: timeOfDayToTimestampWithTz(0, 0),
+          to: timeOfDayToTimestampWithTz(23, 59),
+          all_day: s.all_day,
+          comment: s.comment || "",
+        };
+      }
+      const from = parseScheduleTime(s.open || "09:00");
+      const to = parseScheduleTime(s.close || "18:00");
+      return {
+        week_day: s.week_day,
+        from: timeOfDayToTimestampWithTz(from.hour, from.minute),
+        to: timeOfDayToTimestampWithTz(to.hour, to.minute),
+        all_day: s.all_day,
+        comment: s.comment || "",
+      };
+    });
 
     try {
       await updateScheduleMutation.mutateAsync({ schedule });

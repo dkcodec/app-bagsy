@@ -18,13 +18,17 @@ export type TVisibleHours = { from: number; to: number };
 export interface IEvent {
   id: number;
   clientPhone: string;
+  /** С бэка всегда ISO 8601 с таймзоной; на бэк — с offset. */
   startDate: string;
+  /** С бэка всегда ISO 8601 с таймзоной; на бэк — с offset. */
   endDate: string;
   title: string;
   masterPhone: string;
   pointCode: string;
   price: number;
+  /** С бэка всегда ISO 8601 с таймзоной. */
   createdAt: string;
+  /** С бэка всегда ISO 8601 с таймзоной. */
   updatedAt: string;
   status: string;
   color: TEventColor;
@@ -62,13 +66,17 @@ export interface CalendarBagsyInfo {
   id: string;
   client_phone: string;
   comment: string;
+  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
   created_at: string;
+  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
   end_at: string;
   master_phone: string;
   point_code: string;
   price: number;
+  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
   start_at: string;
   status: string;
+  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
   updated_at: string;
 }
 
@@ -77,11 +85,13 @@ export interface CalendarBagsyInfo {
  */
 export interface CalendarServiceInfo {
   color: string;
+  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
   created_at: string;
   description: string;
   duration_minutes: number;
   id: string;
   name: string;
+  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
   updated_at: string;
 }
 

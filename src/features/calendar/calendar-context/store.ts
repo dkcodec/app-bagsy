@@ -11,6 +11,7 @@ import type {
 } from "@/src/shared/types/calendar";
 import { IUserDto } from "@/src/shared/types/user";
 import { PointService } from "@/src/shared/services/point-service";
+import { parseScheduleTime } from "@/src/shared/utils/datetime";
 
 const WORKING_HOURS: TWorkingHours = {
   0: { from: 8, to: 17 },
@@ -23,12 +24,6 @@ const WORKING_HOURS: TWorkingHours = {
 };
 
 const VISIBLE_HOURS: TVisibleHours = { from: 7, to: 18 };
-
-function parseHour(time: string): number | null {
-  // Ожидаем "HH:mm" или "HH:mm:ss" и берём число часов до первого двоеточия.
-  const hour = Number(time?.split(":")[0]);
-  return Number.isFinite(hour) ? hour : null;
-}
 
 function clampHour(hour: number) {
   return Math.min(24, Math.max(0, hour));
@@ -66,12 +61,9 @@ export function mapPointScheduleToWorkingHours(
       result[jsDay] = { from: 0, to: 24 };
       continue;
     }
-    const from = parseHour(day.open);
-    const to = parseHour(day.close);
-    result[jsDay] = {
-      from: from ?? 0,
-      to: to ?? 0,
-    };
+    const from = parseScheduleTime(day.open).hour;
+    const to = parseScheduleTime(day.close).hour;
+    result[jsDay] = { from, to };
   }
 
   return result;
@@ -118,6 +110,9 @@ export type CalendarState = {
   isVisibleHoursAuto: boolean;
   events: IEvent[];
   setLocalEvents: (updater: IEvent[] | ((prev: IEvent[]) => IEvent[])) => void;
+  /** Код точки: selectedPointCode || currentUser.point_code. Для выборов услуги в форме записи. */
+  pointCode: string | undefined;
+  setPointCode: (v: string | undefined) => void;
 };
 
 export const useCalendarStore = create<CalendarState>((set, get) => ({
@@ -182,4 +177,6 @@ export const useCalendarStore = create<CalendarState>((set, get) => ({
           ? (updater as (prev: IEvent[]) => IEvent[])(state.events)
           : updater,
     })),
+  pointCode: undefined,
+  setPointCode: (v: string | undefined) => set({ pointCode: v }),
 }));
