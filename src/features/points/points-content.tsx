@@ -35,7 +35,11 @@ export function PointsContent() {
   // Получение данных
   const { data, isLoading, error } = usePointsPage();
 
-  const disableAddButton = isLoading || (currentUser?.role === EUserRole.SELF_OWNER && data?.points?.length && data.points.length > 0)
+  const disableAddButton =
+    isLoading ||
+    (currentUser?.role === EUserRole.SELF_OWNER &&
+      data?.points?.length &&
+      data.points.length > 0);
 
   // Определение колонок таблицы
   const tableColumns = [
