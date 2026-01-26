@@ -110,6 +110,9 @@ export type CalendarState = {
   isVisibleHoursAuto: boolean;
   events: IEvent[];
   setLocalEvents: (updater: IEvent[] | ((prev: IEvent[]) => IEvent[])) => void;
+  /** Код точки: selectedPointCode || currentUser.point_code. Для выборов услуги в форме записи. */
+  pointCode: string | undefined;
+  setPointCode: (v: string | undefined) => void;
 };
 
 export const useCalendarStore = create<CalendarState>((set, get) => ({
@@ -174,4 +177,6 @@ export const useCalendarStore = create<CalendarState>((set, get) => ({
           ? (updater as (prev: IEvent[]) => IEvent[])(state.events)
           : updater,
     })),
+  pointCode: undefined,
+  setPointCode: (v: string | undefined) => set({ pointCode: v }),
 }));

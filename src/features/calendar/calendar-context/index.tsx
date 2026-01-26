@@ -31,6 +31,8 @@ interface ICalendarContext {
   setVisibleHours: Dispatch<SetStateAction<TVisibleHours>>;
   events: IEvent[];
   setLocalEvents: Dispatch<SetStateAction<IEvent[]>>;
+  /** Код точки (selectedPointCode || currentUser.point_code). Для выборов услуги в форме записи. */
+  pointCode: string | undefined;
 }
 
 export function CalendarProvider({
@@ -68,6 +70,7 @@ export function CalendarProvider({
   const selectedMasterPhone = useCalendarStore(
     (s: CalendarState) => s.selectedMasterPhone
   );
+  const setPointCode = useCalendarStore((s: CalendarState) => s.setPointCode);
 
   const onDateChangeRef = useRef(onDateChange);
   useEffect(() => {
@@ -119,7 +122,9 @@ export function CalendarProvider({
   const pointCodeToUse = selectedPointCode || currentUser?.point_code;
   const prevPointCodeRef = useRef<string | undefined>(pointCodeToUse);
   useEffect(() => {
-    // Вызываем только если point_code изменился
+    setPointCode(pointCodeToUse ?? undefined);
+  }, [pointCodeToUse, setPointCode]);
+  useEffect(() => {
     if (pointCodeToUse && prevPointCodeRef.current !== pointCodeToUse) {
       loadWorkingHours(pointCodeToUse);
       prevPointCodeRef.current = pointCodeToUse;
