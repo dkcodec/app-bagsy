@@ -396,7 +396,8 @@
       "duration": "Ұзақтығы",
       "color": "Түс",
       "price": "Бағасы",
-      "status": "Күйі"
+      "status": "Күйі",
+      "masters": "Шеберлер"
     },
     "pointSelect": {
       "label": "Қызмет көрсету нүктесі",
@@ -449,6 +450,28 @@
         "pointCodeRequired": "Нүкте кодын анықтау мүмкін болмады",
         "submitError": "Қызмет құру кезінде қате"
       }
+    },
+    "attachMaster": {
+      "dialogTitle": "Қызметке шеберді байланыстыру",
+      "dialogDescription": "Қызметке шеберді байланыстыру: {serviceName}",
+      "addMaster": "Шебер қосу",
+      "master": "Шебер",
+      "selectMaster": "Шеберді таңдаңыз",
+      "myself": "Өзім",
+      "price": "Бағасы",
+      "pricePlaceholder": "Бағаны енгізіңіз",
+      "attach": "Байланыстыру",
+      "attaching": "Байланыстыруда...",
+      "cancel": "Болдырмау",
+      "moreDetails": "Толығырақ",
+      "success": "Шебер қызметке сәтті байланыстырылды",
+      "error": "Шеберді байланыстыру кезінде қате",
+      "priceRequired": "Баға міндетті",
+      "priceInvalid": "Баға сан болуы керек",
+      "pricePositive": "Баға оң сан болуы керек",
+      "priceMin": "Баға кемінде 1 болуы керек",
+      "serviceIdRequired": "Қызмет ID міндетті",
+      "masterPhoneRequired": "Шеберді таңдаңыз"
     }
   }
 }

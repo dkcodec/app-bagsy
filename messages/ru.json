@@ -396,7 +396,8 @@
       "duration": "Длительность",
       "color": "Цвет",
       "price": "Цена",
-      "status": "Статус"
+      "status": "Статус",
+      "masters": "Мастера"
     },
     "pointSelect": {
       "label": "Точка обслуживания",
@@ -449,6 +450,28 @@
         "pointCodeRequired": "Не удалось определить код точки",
         "submitError": "Ошибка при создании услуги"
       }
+    },
+    "attachMaster": {
+      "dialogTitle": "Привязать мастера к услуге",
+      "dialogDescription": "Привязка мастера к услуге: {serviceName}",
+      "addMaster": "Добавить мастера",
+      "master": "Мастер",
+      "selectMaster": "Выберите мастера",
+      "myself": "Себя",
+      "price": "Цена",
+      "pricePlaceholder": "Введите цену",
+      "attach": "Привязать",
+      "attaching": "Привязка...",
+      "cancel": "Отмена",
+      "moreDetails": "Подробнее",
+      "success": "Мастер успешно привязан к услуге",
+      "error": "Ошибка при привязке мастера",
+      "priceRequired": "Цена обязательна",
+      "priceInvalid": "Цена должна быть числом",
+      "pricePositive": "Цена должна быть положительным числом",
+      "priceMin": "Цена должна быть не менее 1",
+      "serviceIdRequired": "ID услуги обязателен",
+      "masterPhoneRequired": "Выберите мастера"
     }
   }
 }

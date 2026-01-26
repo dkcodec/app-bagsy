@@ -30,6 +30,18 @@ import {
   useCreateService,
 } from "@/src/shared/hooks/use-services";
 import { useEffect, useMemo } from "react";
+import { TEventColor } from "@/src/shared/types/calendar";
+
+// Массив цветов из типа TEventColor для использования в валидации и UI
+const EVENT_COLORS: TEventColor[] = [
+  "blue",
+  "green",
+  "red",
+  "yellow",
+  "purple",
+  "orange",
+  "gray",
+];
 
 /**
  * Схема валидации для создания услуги
@@ -57,10 +69,8 @@ const createAddServiceSchema = (t: (key: string) => string) =>
       .int(t("errors.durationMustBeInteger"))
       .positive(t("errors.durationMustBePositive"))
       .min(1, t("errors.durationMustBePositive")),
-    color: z
-      .string()
-      .min(1, t("errors.colorRequired"))
-      .max(50, t("errors.colorMax")),
+    // Валидация цвета только из типов TEventColor
+    color: z.enum(EVENT_COLORS as [TEventColor, ...TEventColor[]]),
   });
 
 type AddServiceFormData = z.infer<ReturnType<typeof createAddServiceSchema>>;
@@ -96,7 +106,8 @@ export function AddServiceForm({
       category_id: undefined,
       subcategory_id: undefined,
       duration_minutes: 30,
-      color: "black",
+      // Дефолтный цвет из типа TEventColor
+      color: EVENT_COLORS[0],
     },
   });
 
@@ -154,17 +165,22 @@ export function AddServiceForm({
     }
   };
 
-  // Цвета для выбора
-  const colors = [
-    { value: "black", label: t("colors.black"), bgColor: "bg-black" },
-    { value: "blue", label: t("colors.blue"), bgColor: "bg-blue-600" },
-    { value: "green", label: t("colors.green"), bgColor: "bg-green-600" },
-    { value: "red", label: t("colors.red"), bgColor: "bg-red-600" },
-    { value: "yellow", label: t("colors.yellow"), bgColor: "bg-yellow-600" },
-    { value: "purple", label: t("colors.purple"), bgColor: "bg-purple-600" },
-    { value: "orange", label: t("colors.orange"), bgColor: "bg-orange-600" },
-    { value: "gray", label: t("colors.gray"), bgColor: "bg-gray-600" },
-  ];
+  // Маппинг цветов для UI (только из типа TEventColor)
+  const colorMap: Record<TEventColor, { label: string; bgColor: string }> = {
+    blue: { label: t("colors.blue"), bgColor: "bg-blue-600" },
+    green: { label: t("colors.green"), bgColor: "bg-green-600" },
+    red: { label: t("colors.red"), bgColor: "bg-red-600" },
+    yellow: { label: t("colors.yellow"), bgColor: "bg-yellow-600" },
+    purple: { label: t("colors.purple"), bgColor: "bg-purple-600" },
+    orange: { label: t("colors.orange"), bgColor: "bg-orange-600" },
+    gray: { label: t("colors.gray"), bgColor: "bg-gray-600" },
+  };
+
+  // Цвета для выбора (только из типа TEventColor)
+  const colors = EVENT_COLORS.map(color => ({
+    value: color,
+    ...colorMap[color],
+  }));
 
   return (
     <Form {...form}>
