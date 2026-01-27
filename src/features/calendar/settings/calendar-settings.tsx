@@ -164,10 +164,10 @@ export function CalendarSettings() {
             badgeVariant={tempBadgeVariant || badgeVariant}
             isMobile={isMobile}
           />
-          <ChangeVisibleHoursInput
+          {/* <ChangeVisibleHoursInput
             onVisibleHoursChange={setTempVisibleHours}
             isMobile={isMobile}
-          />
+          /> */}
         </div>
 
         {/* Кнопки действий */}

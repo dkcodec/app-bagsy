@@ -6,7 +6,6 @@ import {
   setRequestLocale,
 } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { ConditionalSidebarLayout } from "@/src/widgets/navigation/conditional-sidebar-layout";
 import type { ReactNode } from "react";
 
 export function generateStaticParams() {
@@ -49,7 +48,7 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
-      <ConditionalSidebarLayout>{children}</ConditionalSidebarLayout>
+      {children}
     </NextIntlClientProvider>
   );
 }

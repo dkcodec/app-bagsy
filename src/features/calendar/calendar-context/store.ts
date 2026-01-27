@@ -1,6 +1,5 @@
-"use client";
-
 import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 import { isSameDay } from "date-fns";
 
 import type {
@@ -115,68 +114,81 @@ export type CalendarState = {
   setPointCode: (v: string | undefined) => void;
 };
 
-export const useCalendarStore = create<CalendarState>((set, get) => ({
-  selectedDate: new Date(),
-  setSelectedDate: (date: Date | undefined) => {
-    if (!date) return;
-    const current = get().selectedDate;
-    if (isSameDay(current, date)) return;
-    set({ selectedDate: date });
-  },
-  selectedMasterPhone: "all",
-  setSelectedMasterPhone: (masterPhone: IUserDto["phone"] | "all") =>
-    set({ selectedMasterPhone: masterPhone }),
-  badgeVariant: "colored",
-  setBadgeVariant: (variant: TBadgeVariant) => set({ badgeVariant: variant }),
-  masters: [],
-  setMasters: (masters: IUserDto[]) => set({ masters }),
-  workingHours: WORKING_HOURS,
-  setWorkingHours: (
-    updater: TWorkingHours | ((prev: TWorkingHours) => TWorkingHours)
-  ) =>
-    set(state => ({
-      workingHours:
-        typeof updater === "function"
-          ? (updater as (prev: TWorkingHours) => TWorkingHours)(
-              state.workingHours
-            )
-          : updater,
-    })),
-  loadWorkingHours: async (pointCode: string | undefined) => {
-    if (!pointCode) return;
-    const point = await PointService.getPoint(pointCode);
-    const workingHours = mapPointScheduleToWorkingHours(point.schedule);
-    const nextVisibleHours = deriveVisibleHoursFromWorkingHours(workingHours);
+export const useCalendarStore = create<CalendarState>()(
+  persist(
+    (set, get) => ({
+      selectedDate: new Date(),
+      setSelectedDate: (date: Date | undefined) => {
+        if (!date) return;
+        const current = get().selectedDate;
+        if (isSameDay(current, date)) return;
+        set({ selectedDate: date });
+      },
+      selectedMasterPhone: "all",
+      setSelectedMasterPhone: (masterPhone: IUserDto["phone"] | "all") =>
+        set({ selectedMasterPhone: masterPhone }),
+      badgeVariant: "colored",
+      setBadgeVariant: (variant: TBadgeVariant) =>
+        set({ badgeVariant: variant }),
+      masters: [],
+      setMasters: (masters: IUserDto[]) => set({ masters }),
+      workingHours: WORKING_HOURS,
+      setWorkingHours: (
+        updater: TWorkingHours | ((prev: TWorkingHours) => TWorkingHours)
+      ) =>
+        set(state => ({
+          workingHours:
+            typeof updater === "function"
+              ? (updater as (prev: TWorkingHours) => TWorkingHours)(
+                  state.workingHours
+                )
+              : updater,
+        })),
+      loadWorkingHours: async (pointCode: string | undefined) => {
+        if (!pointCode) return;
+        const point = await PointService.getPoint(pointCode);
+        const workingHours = mapPointScheduleToWorkingHours(point.schedule);
+        const nextVisibleHours =
+          deriveVisibleHoursFromWorkingHours(workingHours);
 
-    set(state => ({
-      workingHours,
-      ...(state.isVisibleHoursAuto && nextVisibleHours
-        ? { visibleHours: nextVisibleHours }
-        : {}),
-    }));
-  },
-  visibleHours: VISIBLE_HOURS,
-  setVisibleHours: (
-    updater: TVisibleHours | ((prev: TVisibleHours) => TVisibleHours)
-  ) =>
-    set(state => ({
-      visibleHours:
-        typeof updater === "function"
-          ? (updater as (prev: TVisibleHours) => TVisibleHours)(
-              state.visibleHours
-            )
-          : updater,
-      isVisibleHoursAuto: false,
-    })),
-  isVisibleHoursAuto: true,
-  events: [],
-  setLocalEvents: (updater: IEvent[] | ((prev: IEvent[]) => IEvent[])) =>
-    set(state => ({
-      events:
-        typeof updater === "function"
-          ? (updater as (prev: IEvent[]) => IEvent[])(state.events)
-          : updater,
-    })),
-  pointCode: undefined,
-  setPointCode: (v: string | undefined) => set({ pointCode: v }),
-}));
+        set(state => ({
+          workingHours,
+          ...(state.isVisibleHoursAuto && nextVisibleHours
+            ? { visibleHours: nextVisibleHours }
+            : {}),
+        }));
+      },
+      visibleHours: VISIBLE_HOURS,
+      setVisibleHours: (
+        updater: TVisibleHours | ((prev: TVisibleHours) => TVisibleHours)
+      ) =>
+        set(state => ({
+          visibleHours:
+            typeof updater === "function"
+              ? (updater as (prev: TVisibleHours) => TVisibleHours)(
+                  state.visibleHours
+                )
+              : updater,
+          isVisibleHoursAuto: false,
+        })),
+      isVisibleHoursAuto: true,
+      events: [],
+      setLocalEvents: (updater: IEvent[] | ((prev: IEvent[]) => IEvent[])) =>
+        set(state => ({
+          events:
+            typeof updater === "function"
+              ? (updater as (prev: IEvent[]) => IEvent[])(state.events)
+              : updater,
+        })),
+      pointCode: undefined,
+      setPointCode: (v: string | undefined) => set({ pointCode: v }),
+    }),
+    {
+      name: "calendar-store",
+      partialize: state => ({
+        badgeVariant: state.badgeVariant,
+      }),
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+);

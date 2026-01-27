@@ -1,7 +1,7 @@
 "use server";
 import { AppSidebar } from "./app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/src/entities/sidebar";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 
 interface ConditionalSidebarLayoutProps {
   children: React.ReactNode;
