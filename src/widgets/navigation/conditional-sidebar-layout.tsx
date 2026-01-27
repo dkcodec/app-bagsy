@@ -1,32 +1,19 @@
-"use client";
-
-import { usePathname } from "next/navigation";
+"use server";
 import { AppSidebar } from "./app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/src/entities/sidebar";
+import { cookies, headers } from "next/headers";
 
 interface ConditionalSidebarLayoutProps {
   children: React.ReactNode;
 }
 
-export function ConditionalSidebarLayout({
+export async function ConditionalSidebarLayout({
   children,
 }: ConditionalSidebarLayoutProps) {
-  const pathname = usePathname();
-
-  // Определяем пути, где НЕ нужно показывать сайдбар
-  const excludePaths = ["/login", "/invite"];
-
-  // Проверяем, содержит ли текущий путь один из исключенных путей
-  const shouldShowSidebar = !excludePaths.some(path => pathname.includes(path));
-
-  // Если сайдбар не нужен, просто возвращаем children
-  if (!shouldShowSidebar) {
-    return <>{children}</>;
-  }
-
-  // Если сайдбар нужен, оборачиваем в SidebarProvider
+  const cookieStore = await cookies();
+  const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={defaultOpen}>
       <AppSidebar />
       <SidebarInset>{children}</SidebarInset>
     </SidebarProvider>

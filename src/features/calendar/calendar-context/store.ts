@@ -1,6 +1,5 @@
-"use client";
-
 import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 import { isSameDay } from "date-fns";
 
 import type {
@@ -11,6 +10,7 @@ import type {
 } from "@/src/shared/types/calendar";
 import { IUserDto } from "@/src/shared/types/user";
 import { PointService } from "@/src/shared/services/point-service";
+import { parseScheduleTime } from "@/src/shared/utils/datetime";
 
 const WORKING_HOURS: TWorkingHours = {
   0: { from: 8, to: 17 },
@@ -23,12 +23,6 @@ const WORKING_HOURS: TWorkingHours = {
 };
 
 const VISIBLE_HOURS: TVisibleHours = { from: 7, to: 18 };
-
-function parseHour(time: string): number | null {
-  // Ожидаем "HH:mm" или "HH:mm:ss" и берём число часов до первого двоеточия.
-  const hour = Number(time?.split(":")[0]);
-  return Number.isFinite(hour) ? hour : null;
-}
 
 function clampHour(hour: number) {
   return Math.min(24, Math.max(0, hour));
@@ -47,7 +41,8 @@ function emptyWorkingHours(): TWorkingHours {
   };
 }
 
-function mapPointScheduleToWorkingHours(
+/** Маппинг ISchedule[] (open/close) в TWorkingHours. Экспорт для calendar-settings. */
+export function mapPointScheduleToWorkingHours(
   schedule: Array<{
     all_day: boolean;
     open: string;
@@ -55,21 +50,19 @@ function mapPointScheduleToWorkingHours(
     week_day: number;
   }>
 ): TWorkingHours {
-  // API: week_day 0..6 (пн..вс). JS: 0..6 (вс..сб)
+  // API: week_day 0..6 (вс..сб). JS: 0..6 (вс..сб)
+  // 0 = воскресенье всегда
   const result = emptyWorkingHours();
 
   for (const day of schedule ?? []) {
-    const jsDay = (Number(day.week_day) + 1) % 7;
+    const jsDay = Number(day.week_day);
     if (day.all_day) {
       result[jsDay] = { from: 0, to: 24 };
       continue;
     }
-    const from = parseHour(day.open);
-    const to = parseHour(day.close);
-    result[jsDay] = {
-      from: from ?? 0,
-      to: to ?? 0,
-    };
+    const from = parseScheduleTime(day.open).hour;
+    const to = parseScheduleTime(day.close).hour;
+    result[jsDay] = { from, to };
   }
 
   return result;
@@ -116,68 +109,86 @@ export type CalendarState = {
   isVisibleHoursAuto: boolean;
   events: IEvent[];
   setLocalEvents: (updater: IEvent[] | ((prev: IEvent[]) => IEvent[])) => void;
+  /** Код точки: selectedPointCode || currentUser.point_code. Для выборов услуги в форме записи. */
+  pointCode: string | undefined;
+  setPointCode: (v: string | undefined) => void;
 };
 
-export const useCalendarStore = create<CalendarState>((set, get) => ({
-  selectedDate: new Date(),
-  setSelectedDate: (date: Date | undefined) => {
-    if (!date) return;
-    const current = get().selectedDate;
-    if (isSameDay(current, date)) return;
-    set({ selectedDate: date });
-  },
-  selectedMasterPhone: "all",
-  setSelectedMasterPhone: (masterPhone: IUserDto["phone"] | "all") =>
-    set({ selectedMasterPhone: masterPhone }),
-  badgeVariant: "colored",
-  setBadgeVariant: (variant: TBadgeVariant) => set({ badgeVariant: variant }),
-  masters: [],
-  setMasters: (masters: IUserDto[]) => set({ masters }),
-  workingHours: WORKING_HOURS,
-  setWorkingHours: (
-    updater: TWorkingHours | ((prev: TWorkingHours) => TWorkingHours)
-  ) =>
-    set(state => ({
-      workingHours:
-        typeof updater === "function"
-          ? (updater as (prev: TWorkingHours) => TWorkingHours)(
-              state.workingHours
-            )
-          : updater,
-    })),
-  loadWorkingHours: async (pointCode: string | undefined) => {
-    if (!pointCode) return;
-    const point = await PointService.getPoint(pointCode);
-    const workingHours = mapPointScheduleToWorkingHours(point.schedule);
-    const nextVisibleHours = deriveVisibleHoursFromWorkingHours(workingHours);
+export const useCalendarStore = create<CalendarState>()(
+  persist(
+    (set, get) => ({
+      selectedDate: new Date(),
+      setSelectedDate: (date: Date | undefined) => {
+        if (!date) return;
+        const current = get().selectedDate;
+        if (isSameDay(current, date)) return;
+        set({ selectedDate: date });
+      },
+      selectedMasterPhone: "all",
+      setSelectedMasterPhone: (masterPhone: IUserDto["phone"] | "all") =>
+        set({ selectedMasterPhone: masterPhone }),
+      badgeVariant: "colored",
+      setBadgeVariant: (variant: TBadgeVariant) =>
+        set({ badgeVariant: variant }),
+      masters: [],
+      setMasters: (masters: IUserDto[]) => set({ masters }),
+      workingHours: WORKING_HOURS,
+      setWorkingHours: (
+        updater: TWorkingHours | ((prev: TWorkingHours) => TWorkingHours)
+      ) =>
+        set(state => ({
+          workingHours:
+            typeof updater === "function"
+              ? (updater as (prev: TWorkingHours) => TWorkingHours)(
+                  state.workingHours
+                )
+              : updater,
+        })),
+      loadWorkingHours: async (pointCode: string | undefined) => {
+        if (!pointCode) return;
+        const point = await PointService.getPoint(pointCode);
+        const workingHours = mapPointScheduleToWorkingHours(point.schedule);
+        const nextVisibleHours =
+          deriveVisibleHoursFromWorkingHours(workingHours);
 
-    set(state => ({
-      workingHours,
-      ...(state.isVisibleHoursAuto && nextVisibleHours
-        ? { visibleHours: nextVisibleHours }
-        : {}),
-    }));
-  },
-  visibleHours: VISIBLE_HOURS,
-  setVisibleHours: (
-    updater: TVisibleHours | ((prev: TVisibleHours) => TVisibleHours)
-  ) =>
-    set(state => ({
-      visibleHours:
-        typeof updater === "function"
-          ? (updater as (prev: TVisibleHours) => TVisibleHours)(
-              state.visibleHours
-            )
-          : updater,
-      isVisibleHoursAuto: false,
-    })),
-  isVisibleHoursAuto: true,
-  events: [],
-  setLocalEvents: (updater: IEvent[] | ((prev: IEvent[]) => IEvent[])) =>
-    set(state => ({
-      events:
-        typeof updater === "function"
-          ? (updater as (prev: IEvent[]) => IEvent[])(state.events)
-          : updater,
-    })),
-}));
+        set(state => ({
+          workingHours,
+          ...(state.isVisibleHoursAuto && nextVisibleHours
+            ? { visibleHours: nextVisibleHours }
+            : {}),
+        }));
+      },
+      visibleHours: VISIBLE_HOURS,
+      setVisibleHours: (
+        updater: TVisibleHours | ((prev: TVisibleHours) => TVisibleHours)
+      ) =>
+        set(state => ({
+          visibleHours:
+            typeof updater === "function"
+              ? (updater as (prev: TVisibleHours) => TVisibleHours)(
+                  state.visibleHours
+                )
+              : updater,
+          isVisibleHoursAuto: false,
+        })),
+      isVisibleHoursAuto: true,
+      events: [],
+      setLocalEvents: (updater: IEvent[] | ((prev: IEvent[]) => IEvent[])) =>
+        set(state => ({
+          events:
+            typeof updater === "function"
+              ? (updater as (prev: IEvent[]) => IEvent[])(state.events)
+              : updater,
+        })),
+      pointCode: undefined,
+      setPointCode: (v: string | undefined) => set({ pointCode: v }),
+    }),
+    {
+      name: "calendar-store",
+      partialize: state => ({
+        badgeVariant: state.badgeVariant,
+      }),
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+);

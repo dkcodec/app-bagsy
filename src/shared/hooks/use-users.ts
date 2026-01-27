@@ -1,7 +1,12 @@
 "use client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { UserService } from "../services/user-service";
-import type { UpdateProfileRequest, IUserDto } from "../types/user";
+import { nowTimestampWithTz } from "../utils/formater";
+import type {
+  UpdateProfileRequest,
+  UpdateScheduleRequest,
+  IUserDto,
+} from "../types/user";
 
 /**
  * Получение текущего пользователя
@@ -60,7 +65,7 @@ export function useUpdateProfile() {
           data: {
             ...prevUser,
             ...newData,
-            updated_at: new Date().toISOString(),
+            updated_at: nowTimestampWithTz(),
           },
         });
       }
@@ -78,6 +83,37 @@ export function useUpdateProfile() {
     },
     onSettled: () => {
       // Инвалидируем кэш для получения актуальных данных
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+    },
+  });
+}
+
+/**
+ * Хук обновления расписания. PUT v1/users/me/schedule, инвалидация ["me"].
+ */
+export function useUpdateSchedule() {
+  const queryClient = useQueryClient();
+
+  return useMutation<{ message: string }, Error, UpdateScheduleRequest>({
+    mutationKey: ["me", "update-schedule"],
+    mutationFn: (data: UpdateScheduleRequest) =>
+      UserService.updateSchedule(data),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+    },
+  });
+}
+
+/**
+ * Хук удаления аватара. DELETE v1/users/me/avatar, инвалидация ["me"].
+ */
+export function useDeleteAvatar() {
+  const queryClient = useQueryClient();
+
+  return useMutation<{ message: string }, Error, void>({
+    mutationKey: ["me", "delete-avatar"],
+    mutationFn: () => UserService.deleteAvatar(),
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["me"] });
     },
   });

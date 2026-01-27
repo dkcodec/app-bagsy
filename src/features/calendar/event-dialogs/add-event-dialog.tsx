@@ -3,9 +3,14 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 
-import { useDisclosure } from "@/src/shared/hooks";
+import { useDisclosure, useCreateBagsie } from "@/src/shared/hooks";
+import { usePointServices } from "@/src/shared/hooks/use-services";
+import { useCurrentUser } from "@/src/shared/hooks/use-users";
 import { useCalendar } from "@/src/features/calendar/calendar-context";
+import { toTimestampWithTz } from "@/src/shared/utils/formater";
+import { EUserRole } from "@/src/shared/types/user";
 
 import { Input } from "@/src/entities/input";
 import { Button } from "@/src/entities/button";
@@ -13,6 +18,7 @@ import { Textarea } from "@/src/entities/textarea";
 import { TimeInput } from "@/src/entities/time-input";
 import { SingleDayPicker } from "@/src/entities/single-day-picker";
 import { Avatar, AvatarFallback, AvatarImage } from "@/src/entities/avatar";
+import { Skeleton } from "@/src/entities/skeleton";
 import {
   Form,
   FormField,
@@ -38,10 +44,11 @@ import {
   DialogFooter,
 } from "@/src/entities/dialog";
 
-import { eventSchema, type TEventFormData } from "@/src/shared/schemas";
+import { addBagsieSchema, type TAddBagsieFormData } from "@/src/shared/schemas";
 import { useTranslations } from "next-intl";
 
 import type { TimeValue } from "react-aria-components";
+import { PhoneInput } from "@/src/widgets";
 
 interface IProps {
   children: React.ReactNode;
@@ -50,34 +57,63 @@ interface IProps {
 }
 
 export function AddEventDialog({ children, startDate, startTime }: IProps) {
-  const { masters } = useCalendar();
+  const { masters, pointCode } = useCalendar();
+  const { data: currentUser } = useCurrentUser();
+  const { data: servicesData, isLoading: isLoadingServices } =
+    usePointServices(pointCode);
   const t = useTranslations("Dashboard.Calendar.AddEventDialog");
-
-  // const createBagsie = useCreateBagsie();
+  const createBagsie = useCreateBagsie();
 
   const { isOpen, onClose, onToggle } = useDisclosure();
+  const isStaff = currentUser?.role === EUserRole.STAFF;
+  // manager и выше: выбор мастера из /staff; STAFF: только свой номер (поле скрыто)
+  const showMasterSelect = !isStaff && masters.length > 0;
 
-  const form = useForm<TEventFormData>({
-    resolver: zodResolver(eventSchema),
+  const form = useForm<TAddBagsieFormData>({
+    resolver: zodResolver(addBagsieSchema),
     defaultValues: {
-      title: "",
+      name: "",
+      surname: "",
+      client_phone: "",
       comment: "",
-      startDate: typeof startDate !== "undefined" ? startDate : undefined,
-      startTime: typeof startTime !== "undefined" ? startTime : undefined,
+      master_phone: showMasterSelect ? "" : undefined,
+      service_id: "",
+      startDate: startDate ?? new Date(),
+      startTime: startTime ?? { hour: 10, minute: 0 },
     },
   });
 
-  const onSubmit = () => {
-    console.log(form.getValues());
-    onClose();
-    form.reset();
+  const onSubmit = async (values: TAddBagsieFormData) => {
+    const masterPhone = isStaff ? currentUser?.phone : values.master_phone;
+    if (!masterPhone) {
+      toast.error(t("staffDescription") ?? "Выберите мастера");
+      return;
+    }
+    const d = new Date(values.startDate);
+    d.setHours(values.startTime.hour, values.startTime.minute, 0, 0);
+    const start_at = toTimestampWithTz(d);
+
+    try {
+      await createBagsie.mutateAsync({
+        client_phone: values.client_phone,
+        comment: values.comment ?? "",
+        master_phone: masterPhone,
+        name: values.name,
+        service_id: values.service_id,
+        start_at,
+        surname: values.surname,
+      });
+      onClose();
+      form.reset();
+    } catch {
+      toast.error(t("errorCreating") ?? "Ошибка при создании записи");
+    }
   };
 
+  // Обновляем дату/время при открытии из ячейки с другими startDate/startTime
   useEffect(() => {
-    form.reset({
-      startDate,
-      startTime,
-    });
+    if (startDate != null) form.setValue("startDate", startDate);
+    if (startTime != null) form.setValue("startTime", startTime);
   }, [startDate, startTime, form]);
 
   return (
@@ -95,249 +131,213 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
             onSubmit={form.handleSubmit(onSubmit)}
             className="grid sm:grid-cols-2 gap-4 py-4 px-1 max-h-[400px] md:max-h-none overflow-y-auto"
           >
-            <FormField
-              control={form.control}
-              name="user"
-              render={({ field, fieldState }) => (
-                <FormItem>
-                  <FormLabel>{t("staff")}</FormLabel>
-                  <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger data-invalid={fieldState.invalid}>
-                        <SelectValue placeholder={t("staffDescription")} />
-                      </SelectTrigger>
-
-                      <SelectContent>
-                        {masters.map(master => (
-                          <SelectItem
-                            key={master.phone}
-                            value={master.phone}
-                            className="flex-1"
-                          >
-                            <div className="flex items-center gap-2">
-                              <Avatar key={master.phone} className="size-6">
-                                <AvatarImage
-                                  src={undefined}
-                                  alt={`${master.name} ${master.surname}`}
-                                />
-                                <AvatarFallback className="text-xxs">
-                                  {`${master.name[0]}${master.surname[0]}`}
-                                </AvatarFallback>
-                              </Avatar>
-
-                              <p className="truncate">
-                                {master.name} {master.surname}
-                              </p>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field, fieldState }) => (
-                <FormItem>
-                  <FormLabel htmlFor="title">{t("service")}</FormLabel>
-
-                  <FormControl>
-                    <Input
-                      id="title"
-                      placeholder={t("serviceDescription")}
-                      data-invalid={fieldState.invalid}
-                      {...field}
-                    />
-                  </FormControl>
-
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex items-start gap-2">
+            {/* Мастер: для manager+ — выбор из /staff; для STAFF — только свой номер (readonly/скрыто) */}
+            {showMasterSelect && (
               <FormField
                 control={form.control}
-                name="startDate"
+                name="master_phone"
                 render={({ field, fieldState }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel htmlFor="startDate">{t("startDate")}</FormLabel>
-
+                  <FormItem>
+                    <FormLabel>{t("staff")}</FormLabel>
                     <FormControl>
-                      <SingleDayPicker
-                        id="startDate"
-                        value={field.value}
-                        onSelect={date => field.onChange(date as Date)}
-                        placeholder={t("startDateDescription")}
-                        data-invalid={fieldState.invalid}
-                      />
+                      <Select
+                        value={field.value ?? ""}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger data-invalid={fieldState.invalid}>
+                          <SelectValue placeholder={t("staffDescription")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {masters.map(master => (
+                            <SelectItem
+                              key={master.phone}
+                              value={master.phone}
+                              className="flex-1"
+                            >
+                              <div className="flex items-center gap-2">
+                                <Avatar className="size-6">
+                                  <AvatarImage
+                                    src={undefined}
+                                    alt={`${master.name} ${master.surname}`}
+                                  />
+                                  <AvatarFallback className="text-xxs">
+                                    {`${master.name[0]}${master.surname[0]}`}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <p className="truncate">
+                                  {master.name} {master.surname}
+                                </p>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </FormControl>
-
                     <FormMessage />
                   </FormItem>
                 )}
               />
+            )}
 
+            {/* Услуга: select из /services по pointCode */}
+            <FormField
+              control={form.control}
+              name="service_id"
+              render={({ field, fieldState }) => (
+                <FormItem>
+                  <FormLabel htmlFor="service_id">{t("service")}</FormLabel>
+                  <FormControl>
+                    {isLoadingServices ? (
+                      <Skeleton className="h-9 w-full" />
+                    ) : (
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        disabled={!pointCode}
+                      >
+                        <SelectTrigger data-invalid={fieldState.invalid}>
+                          <SelectValue
+                            placeholder={
+                              pointCode
+                                ? t("serviceDescription")
+                                : "Сначала выберите точку"
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {servicesData?.services
+                            ?.filter(s => s.active)
+                            .map(s => (
+                              <SelectItem key={s.id} value={s.id}>
+                                {s.name}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-1 gap-2">
               <FormField
                 control={form.control}
-                name="startTime"
+                name="name"
                 render={({ field, fieldState }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>{t("startTime")}</FormLabel>
-
+                  <FormItem>
+                    <FormLabel>{t("firstName")}</FormLabel>
                     <FormControl>
-                      <TimeInput
-                        value={field.value as TimeValue}
-                        onChange={field.onChange}
-                        hourCycle={24}
+                      <Input
+                        placeholder={t("firstName")}
                         data-invalid={fieldState.invalid}
+                        {...field}
                       />
                     </FormControl>
-
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="surname"
+                render={({ field, fieldState }) => (
+                  <FormItem>
+                    <FormLabel>{t("lastName")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={t("lastName")}
+                        data-invalid={fieldState.invalid}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="client_phone"
+                render={({ field, fieldState }) => (
+                  <FormItem>
+                    <FormLabel>{t("phone")}</FormLabel>
+                    <FormControl>
+                      <PhoneInput
+                        placeholder={t("phone")}
+                        data-invalid={fieldState.invalid}
+                        {...field}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
 
-            <div className="flex items-start gap-2">
-              <FormField
-                control={form.control}
-                name="endDate"
-                render={({ field, fieldState }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>{t("endDate")}</FormLabel>
-                    <FormControl>
-                      <SingleDayPicker
-                        value={field.value}
-                        onSelect={date => field.onChange(date as Date)}
-                        placeholder={t("endDateDescription")}
-                        data-invalid={fieldState.invalid}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <div className="flex flex-col gap-2">
+              <div className="flex items-start gap-2">
+                <FormField
+                  control={form.control}
+                  name="startDate"
+                  render={({ field, fieldState }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel htmlFor="startDate">
+                        {t("startDate")}
+                      </FormLabel>
+                      <FormControl>
+                        <SingleDayPicker
+                          id="startDate"
+                          value={field.value}
+                          onSelect={date => field.onChange(date as Date)}
+                          placeholder={t("startDateDescription")}
+                          data-invalid={fieldState.invalid}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="startTime"
+                  render={({ field, fieldState }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>{t("startTime")}</FormLabel>
+                      <FormControl>
+                        <TimeInput
+                          value={field.value as TimeValue}
+                          onChange={field.onChange}
+                          hourCycle={24}
+                          data-invalid={fieldState.invalid}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <FormField
                 control={form.control}
-                name="endTime"
+                name="comment"
                 render={({ field, fieldState }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel className="text-nowrap">
-                      {t("endTime")}
-                    </FormLabel>
-
+                  <FormItem className="flex flex-col flex-1">
+                    <FormLabel>{t("comment")}</FormLabel>
                     <FormControl>
-                      <TimeInput
-                        value={field.value as TimeValue}
-                        onChange={field.onChange}
-                        hourCycle={24}
+                      <Textarea
+                        className="flex-1"
+                        {...field}
+                        placeholder={t("commentDescription")}
+                        value={field.value ?? ""}
                         data-invalid={fieldState.invalid}
                       />
                     </FormControl>
-
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-
-            <FormField
-              control={form.control}
-              name="color"
-              render={({ field, fieldState }) => (
-                <FormItem>
-                  <FormLabel>{t("Color.title")}</FormLabel>
-                  <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger data-invalid={fieldState.invalid}>
-                        <SelectValue placeholder={t("Color.description")} />
-                      </SelectTrigger>
-
-                      <SelectContent>
-                        <SelectItem value="blue">
-                          <div className="flex items-center gap-2">
-                            <div className="size-3.5 rounded-full bg-blue-600" />
-                            {t("Color.blue")}
-                          </div>
-                        </SelectItem>
-
-                        <SelectItem value="green">
-                          <div className="flex items-center gap-2">
-                            <div className="size-3.5 rounded-full bg-green-600" />
-                            {t("Color.green")}
-                          </div>
-                        </SelectItem>
-
-                        <SelectItem value="red">
-                          <div className="flex items-center gap-2">
-                            <div className="size-3.5 rounded-full bg-red-600" />
-                            {t("Color.red")}
-                          </div>
-                        </SelectItem>
-
-                        <SelectItem value="yellow">
-                          <div className="flex items-center gap-2">
-                            <div className="size-3.5 rounded-full bg-yellow-600" />
-                            {t("Color.yellow")}
-                          </div>
-                        </SelectItem>
-
-                        <SelectItem value="purple">
-                          <div className="flex items-center gap-2">
-                            <div className="size-3.5 rounded-full bg-purple-600" />
-                            {t("Color.purple")}
-                          </div>
-                        </SelectItem>
-
-                        <SelectItem value="orange">
-                          <div className="flex items-center gap-2">
-                            <div className="size-3.5 rounded-full bg-orange-600" />
-                            {t("Color.orange")}
-                          </div>
-                        </SelectItem>
-
-                        <SelectItem value="gray">
-                          <div className="flex items-center gap-2">
-                            <div className="size-3.5 rounded-full bg-neutral-600" />
-                            {t("Color.gray")}
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="comment"
-              render={({ field, fieldState }) => (
-                <FormItem>
-                  <FormLabel>{t("comment")}</FormLabel>
-
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder={t("commentDescription")}
-                      value={field.value}
-                      data-invalid={fieldState.invalid}
-                    />
-                  </FormControl>
-
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           </form>
         </Form>
 
@@ -347,7 +347,6 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
               {t("cancel")}
             </Button>
           </DialogClose>
-
           <Button form="event-form" type="submit">
             {t("add")}
           </Button>

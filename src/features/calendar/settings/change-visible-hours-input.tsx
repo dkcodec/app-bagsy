@@ -40,7 +40,7 @@ export function ChangeVisibleHoursInput({
   // Уведомляем родительский компонент об изменениях
   useEffect(() => {
     const toHour = to.hour === 0 ? 24 : to.hour;
-    onVisibleHoursChange?.({ from: from.hour, to: toHour });
+    onVisibleHoursChange?.({ from: from?.hour, to: toHour });
   }, [from, to, onVisibleHoursChange]);
 
   return (

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
 @plugin 'tailwindcss-animate';
 
@@ -49,6 +50,9 @@
 
   --color-mutedBackground: hsl(var(--muted-background));
 
+  --color-error: hsl(var(--error));
+  --color-error-foreground: hsl(var(--error-foreground));
+
   --color-accent-50: hsla(35.65 100% 95%);
   --color-accent-100: hsl(35.65 100% 90%);
   --color-accent-200: hsl(35.65 100% 80%);
@@ -69,6 +73,9 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
+
+  --color-error: hsl(var(--error));
+  --color-error-foreground: hsl(var(--error-foreground));
 
   --color-chart-1: hsl(var(--chart-1));
   --color-chart-2: hsl(var(--chart-2));
@@ -230,6 +237,9 @@
     --ring: 0 0% 3.9%;
     --muted-background: #fafaf9;
 
+    --error: 0 84.2% 60.2%;
+    --error-foreground: 0 0% 98%;
+
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
@@ -267,6 +277,9 @@
     --ring: 0 0% 83.1%;
     --muted-background: #181818;
 
+    --error: 0 84.2% 60.2%;
+    --error-foreground: 0 0% 98%;
+
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -293,6 +306,90 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* ================================
+   Leaflet — shadcn-style overrides
+   ================================ */
+
+/* Контейнер карты */
+.leaflet-container {
+  font-family: var(--font-nunito, system-ui, sans-serif);
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+/* Popup */
+.leaflet-popup-content-wrapper {
+  background-color: hsl(var(--popover)) !important;
+  color: hsl(var(--popover-foreground)) !important;
+  border-radius: var(--radius) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.leaflet-popup-tip {
+  background-color: hsl(var(--popover)) !important;
+}
+
+/* Controls (zoom, attribution, etc.) */
+.leaflet-control {
+  border: 1px solid hsl(var(--foreground)) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: none;
+}
+
+.leaflet-control a {
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.leaflet-control a:first-child {
+  border-top-right-radius: var(--radius-md) !important;
+  border-top-left-radius: var(--radius-md) !important;
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.leaflet-control a:last-child {
+  border-bottom-right-radius: var(--radius-md) !important;
+  border-bottom-left-radius: var(--radius-md) !important;
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.leaflet-control a {
+  color: hsl(var(--background)) !important;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.leaflet-control a:hover {
+  background-color: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-background)) !important;
+}
+
+.leaflet-control-attribution {
+  display: none;
+}
+
+/* ================================
+   Dark mode map tiles
+   ================================ */
+
+/* Чёрно-белая карта */
+.leaflet-tile {
+  filter: grayscale(100%) contrast(1.1) brightness(0.95);
+}
+
+/* Dark mode — мягче, чтобы не «убить» детали */
+.dark .leaflet-tile {
+  filter: grayscale(100%) contrast(1.1) brightness(0.8);
+}
+
+/* Немного приглушаем overlay */
+.dark .leaflet-overlay-pane {
+  opacity: 0.85;
 }
 
 @layer utilities {

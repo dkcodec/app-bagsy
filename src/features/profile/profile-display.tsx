@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   Card,
   CardContent,
@@ -8,6 +8,7 @@ import {
   CardTitle,
   Avatar,
   AvatarFallback,
+  AvatarImage,
   Badge,
   Skeleton,
   Button,
@@ -16,11 +17,18 @@ import {
 import { IUserDto } from "@/src/shared/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
-import { usePasswordChangeRequest, useUpdateProfile } from "@/src/shared/hooks";
+import {
+  usePasswordChangeRequest,
+  useUpdateProfile,
+  useMediaUpload,
+  useDeleteAvatar,
+} from "@/src/shared/hooks";
 import { Loader } from "lucide-react";
 import { toast } from "sonner";
+import { formatRole } from "@/src/shared/utils/format-role";
+import { formatDateOnly } from "@/src/shared/utils/formater";
 
 interface ProfileDisplayProps {
   user?: IUserDto;
@@ -33,10 +41,27 @@ interface ProfileDisplayProps {
  */
 export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
   const t = useTranslations("Profile.ProfileDisplay");
+  const locale = useLocale();
   const updateProfile = useUpdateProfile();
+  const uploadAvatar = useMediaUpload();
+  const deleteAvatar = useDeleteAvatar();
   const [isEditing, setIsEditing] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const passwordChangeRequestMutation = usePasswordChangeRequest();
+
+  // Превью выбранного файла; cleanup revokeObjectURL
+  useEffect(() => {
+    if (!selectedFile) {
+      setPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(selectedFile);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [selectedFile]);
   // Генерируем инициалы для аватара
   const initials = user
     ? `${user.name.charAt(0)}${user.surname.charAt(0)}`.toUpperCase()
@@ -77,16 +102,23 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
   }, [user]);
 
   const onSubmit = async (data: ProfileFormData) => {
+    const updateData: { name: string; surname: string; avatar_id?: string } = {
+      name: data.name,
+      surname: data.surname,
+    };
+    if (selectedFile) {
+      try {
+        updateData.avatar_id = await uploadAvatar.mutateAsync(selectedFile);
+      } catch {
+        toast.error(t("uploadError"));
+        return;
+      }
+    }
     try {
-      // Подготавливаем данные для отправки - убираем пустые поля пароля
-      const updateData: { name: string; surname: string } = {
-        name: data.name,
-        surname: data.surname,
-      };
-
       await updateProfile.mutateAsync(updateData);
-      reset();
+      setSelectedFile(null);
       setIsEditing(false);
+      reset();
       toast.success(t("profileUpdatedSuccessfully"));
     } catch (error) {
       toast.error(t("errorUpdatingProfile"));
@@ -95,8 +127,23 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
   };
 
   const handleCancel = () => {
+    setSelectedFile(null);
     reset();
     setIsEditing(false);
+  };
+
+  const handleRemoveAvatar = async () => {
+    if (selectedFile) {
+      setSelectedFile(null);
+      return;
+    }
+    if (!user?.avatar_url) return;
+    try {
+      await deleteAvatar.mutateAsync();
+      toast.success(t("avatarRemovedSuccess"));
+    } catch {
+      toast.error(t("errorRemovingAvatar"));
+    }
   };
 
   return (
@@ -108,15 +155,80 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Аватар и основная информация */}
           <div className="flex items-center space-x-4">
-            <Avatar className="h-16 w-16">
-              <AvatarFallback className="text-lg font-semibold">
-                {isLoading ? (
-                  <Skeleton className="h-16 w-16 rounded-full" />
-                ) : (
-                  initials
-                )}
-              </AvatarFallback>
-            </Avatar>
+            <div className="flex flex-col items-center gap-1">
+              {/* В режиме редактирования — клик по аватару открывает выбор файла */}
+              {isEditing ? (
+                <>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={e => {
+                      const f = e.target.files?.[0];
+                      if (f) setSelectedFile(f);
+                      e.target.value = "";
+                    }}
+                  />
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => fileInputRef.current?.click()}
+                    onKeyDown={e =>
+                      (e.key === "Enter" || e.key === " ") &&
+                      fileInputRef.current?.click()
+                    }
+                    className="cursor-pointer rounded-2xl outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring"
+                    title={t("changePhoto")}
+                  >
+                    <Avatar className="h-16 w-16 rounded-2xl">
+                      <AvatarImage
+                        src={previewUrl ?? user?.avatar_url}
+                        alt=""
+                      />
+                      <AvatarFallback className="text-lg font-semibold">
+                        {isLoading ? (
+                          <Skeleton className="h-16 w-16 rounded-2xl" />
+                        ) : (
+                          initials
+                        )}
+                      </AvatarFallback>
+                    </Avatar>
+                  </span>
+                </>
+              ) : (
+                <Avatar className="h-16 w-16 rounded-2xl">
+                  <AvatarImage
+                    src={user?.avatar_url}
+                    alt={user?.name ?? "avatar"}
+                  />
+                  <AvatarFallback className="text-lg font-semibold rounded-2xl">
+                    {isLoading ? (
+                      <Skeleton className="h-16 w-16 rounded-2xl" />
+                    ) : (
+                      initials
+                    )}
+                  </AvatarFallback>
+                </Avatar>
+              )}
+              {/* Удалить фото — в режиме редактирования при наличии аватара или выбранного файла */}
+              {isEditing && (user?.avatar_url || selectedFile) && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-auto px-2.5 py-0.5 text-muted-foreground hover:text-white hover:bg-destructive"
+                  disabled={deleteAvatar.isPending}
+                  onClick={handleRemoveAvatar}
+                >
+                  {deleteAvatar.isPending ? (
+                    <Loader className="size-3 animate-loader" />
+                  ) : (
+                    t("removePhoto")
+                  )}
+                </Button>
+              )}
+            </div>
             <div className="space-y-1">
               <h3 className="text-lg font-semibold">
                 {isLoading ? (
@@ -178,7 +290,13 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
                 {t("role")}
               </h4>
               <div className="text-sm">
-                {isLoading ? <Skeleton className="h-4 w-20" /> : user?.role}
+                {isLoading ? (
+                  <Skeleton className="h-4 w-20" />
+                ) : user?.role ? (
+                  formatRole(user.role, locale)
+                ) : (
+                  "-"
+                )}
               </div>
             </div>
 
@@ -190,7 +308,7 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
                 {isLoading ? (
                   <Skeleton className="h-4 w-16" />
                 ) : (
-                  user?.point_code
+                  (user?.point_code ?? "-")
                 )}
               </div>
             </div>
@@ -203,7 +321,7 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
                 {isLoading ? (
                   <Skeleton className="h-4 w-16" />
                 ) : (
-                  user?.network_code
+                  (user?.network_code ?? "-")
                 )}
               </div>
             </div>
@@ -216,7 +334,10 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
                 {isLoading ? (
                   <Skeleton className="h-4 w-24" />
                 ) : (
-                  new Date(user?.created_at || "").toLocaleDateString("ru-RU")
+                  formatDateOnly(
+                    user?.created_at ?? "",
+                    locale === "kz" ? "kk-KZ" : "ru-RU"
+                  )
                 )}
               </div>
             </div>
@@ -229,7 +350,10 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
                 {isLoading ? (
                   <Skeleton className="h-4 w-24" />
                 ) : (
-                  new Date(user?.updated_at || "").toLocaleDateString("ru-RU")
+                  formatDateOnly(
+                    user?.updated_at ?? "",
+                    locale === "kz" ? "kk-KZ" : "ru-RU"
+                  )
                 )}
               </div>
             </div>
@@ -247,7 +371,7 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
                     }
                   : handleSubmit(onSubmit)
               }
-              disabled={isSubmitting}
+              disabled={isSubmitting || uploadAvatar.isPending}
               className="flex-1"
             >
               {isEditing ? (

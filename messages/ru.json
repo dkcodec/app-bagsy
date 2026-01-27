@@ -8,7 +8,7 @@
       "clients": "Клиенты",
       "services": "Услуги",
       "staff": "Сотрудники",
-      "points": "Филиалы",
+      "points": "Точки",
       "analytics": "Аналитика",
       "settings": "Настройки"
     },
@@ -25,10 +25,19 @@
       "welcome": "Добро пожаловать!",
       "calendar": "Календарь"
     },
+    "emptyPoints": {
+      "title": "Нет точек обслуживания",
+      "description": "У вас пока нет точек обслуживания. Добавьте первую точку, чтобы начать работу с календарем.",
+      "addPointButton": "Добавить точку"
+    },
     "Settings": {
-      "calendarSettings": "Настройки календаря",
-      "setYourSettings": "Настройте ваше расписание и вид отображения",
+      "calendarSettings": "Расписание и настройки календаря",
+      "setYourSettings": "Настройте своё рабочее расписание и вид календаря. Изменения сохраняются и влияют на ваше расписание в системе.",
       "settings": "Настройки",
+      "myScheduleTitle": "Моё рабочее расписание",
+      "scheduleMin": "Укажите расписание хотя бы для одного дня",
+      "scheduleSaved": "Расписание обновлено",
+      "scheduleSaveError": "Ошибка сохранения расписания",
       "save": "Сохранить",
       "cancel": "Отмена",
       "workingHours": "Рабочие часы",
@@ -70,6 +79,10 @@
         "staffDescription": "Выберите работника",
         "service": "Услуга",
         "serviceDescription": "Выберите услугу",
+        "firstName": "Имя",
+        "lastName": "Фамилия",
+        "phone": "Телефон",
+        "errorCreating": "Ошибка при создании записи",
         "startDate": "Дата начала",
         "startDateDescription": "Выберите дату",
         "startTime": "Время начала",
@@ -91,6 +104,13 @@
         "commentDescription": "Дополнительная информация",
         "add": "Добавить запись",
         "cancel": "Отмена"
+      },
+      "EventDetailsDialog": {
+        "edit": "Редактировать",
+        "responsible": "Ответственный",
+        "startDate": "Дата и время начала",
+        "endDate": "Дата и время окончания",
+        "comment": "Комментарий"
       },
       "DayCell": {
         "more": "ещё"
@@ -196,7 +216,12 @@
       "surname": "Фамилия",
       "profileUpdatedSuccessfully": "Профиль успешно обновлен",
       "errorUpdatingProfile": "Ошибка при обновлении профиля",
-      "changePassword": "Сменить пароль"
+      "changePassword": "Сменить пароль",
+      "changePhoto": "Изменить фото",
+      "uploadError": "Ошибка загрузки фото",
+      "removePhoto": "Удалить фото",
+      "avatarRemovedSuccess": "Аватар удалён",
+      "errorRemovingAvatar": "Ошибка при удалении аватара"
     }
   },
   "Staff": {
@@ -285,6 +310,175 @@
         "pointCodeMax": "Код точки не должен превышать 50 символов",
         "submitError": "Ошибка при добавлении сотрудника"
       }
+    }
+  },
+  "Points": {
+    "title": "Точки обслуживания",
+    "tableTitle": "Точки обслуживания",
+    "code": "Код",
+    "name": "Название",
+    "address": "Адрес",
+    "status": "Статус",
+    "createdAt": "Дата создания",
+    "active": "Активна",
+    "inactive": "Неактивна",
+    "noData": "Нет данных для отображения",
+    "errorLoading": "Ошибка загрузки данных",
+    "accessDenied": "Доступ запрещен",
+    "accessDeniedDescription": "У вас нет прав для просмотра списка точек",
+    "addPoint": "Добавить точку",
+    "schedule": {
+      "title": "Расписание",
+      "allDay": "Весь день",
+      "closed": "Закрыто",
+      "viewSchedule": "Посмотреть расписание",
+      "noSchedule": "Расписание не указано"
+    },
+    "addPointDialog": {
+      "title": "Добавить новую точку",
+      "description": "Заполните информацию о точке обслуживания"
+    },
+    "addPointForm": {
+      "name": "Название",
+      "description": "Описание",
+      "categoryId": "Категория",
+      "categoryIdPlaceholder": "Выберите категорию",
+      "address": {
+        "title": "Адрес",
+        "autocomplete": "Город и улица заполнятся автоматически при выборе адреса из поиска, но вы можете их изменить вручную",
+        "search": "Поиск адреса",
+        "searchPlaceholder": "Введите адрес для поиска...",
+        "searchHint": "Введите минимум 3 символа для поиска",
+        "searchError": "Ошибка при поиске адреса",
+        "noResults": "Адреса не найдены",
+        "mapTitle": "Расположение на карте",
+        "mapNoLocation": "Выберите адрес для отображения на карте",
+        "city": "Город",
+        "street": "Улица",
+        "latitude": "Широта",
+        "longitude": "Долгота"
+      },
+      "schedule": {
+        "title": "Расписание",
+        "allDay": "Весь день",
+        "comment": "Комментарий"
+      },
+      "submit": "Создать",
+      "submitting": "Создание...",
+      "cancel": "Отмена",
+      "success": "Точка успешно создана",
+      "errors": {
+        "nameMin": "Название должно содержать минимум 2 символа",
+        "nameMax": "Название не должно превышать 100 символов",
+        "descriptionMax": "Описание не должно превышать 500 символов",
+        "categoryIdRequired": "Необходимо выбрать категорию",
+        "cityMin": "Название города должно содержать минимум 2 символа",
+        "cityMax": "Название города не должно превышать 100 символов",
+        "streetMin": "Название улицы должно содержать минимум 2 символа",
+        "streetMax": "Название улицы не должно превышать 200 символов",
+        "latitudeMin": "Широта должна быть не менее -90",
+        "latitudeMax": "Широта должна быть не более 90",
+        "longitudeMin": "Долгота должна быть не менее -180",
+        "longitudeMax": "Долгота должна быть не более 180",
+        "addressRequired": "Необходимо выбрать адрес из поиска",
+        "scheduleMin": "Необходимо указать расписание хотя бы для одного дня",
+        "networkCodeRequired": "Не удалось определить код сети",
+        "submitError": "Ошибка при создании точки"
+      }
+    }
+  },
+  "Services": {
+    "title": "Услуги",
+    "tableTitle": "Услуги",
+    "addService": "Добавить услугу",
+    "noData": "Нет услуг для отображения",
+    "errorLoading": "Ошибка загрузки данных",
+    "accessDenied": "Доступ запрещен",
+    "accessDeniedDescription": "У вас нет прав для просмотра списка услуг",
+    "active": "Активна",
+    "inactive": "Неактивна",
+    "table": {
+      "name": "Название",
+      "description": "Описание",
+      "duration": "Длительность",
+      "color": "Цвет",
+      "price": "Цена",
+      "status": "Статус",
+      "masters": "Мастера"
+    },
+    "pointSelect": {
+      "label": "Точка обслуживания",
+      "placeholder": "Выберите точку"
+    },
+    "addServiceDialog": {
+      "title": "Добавить услугу",
+      "description": "Заполните форму для создания новой услуги"
+    },
+    "addServiceForm": {
+      "name": "Название",
+      "namePlaceholder": "Введите название услуги",
+      "description": "Описание",
+      "descriptionPlaceholder": "Введите описание услуги",
+      "categoryId": "Категория",
+      "categoryIdPlaceholder": "Выберите категорию",
+      "subcategoryId": "Подкатегория",
+      "subcategoryIdPlaceholder": "Выберите подкатегорию",
+      "subcategoryIdPlaceholderSelectCategory": "Сначала выберите категорию",
+      "subcategoryIdPlaceholderNoSubcategories": "Нет подкатегорий",
+      "durationMinutes": "Длительность (минуты)",
+      "durationMinutesPlaceholder": "Введите длительность",
+      "color": "Цвет",
+      "colorPlaceholder": "Выберите цвет",
+      "submit": "Добавить услугу",
+      "submitting": "Добавление...",
+      "cancel": "Отмена",
+      "success": "Услуга успешно добавлена",
+      "colors": {
+        "black": "Черный",
+        "blue": "Синий",
+        "green": "Зеленый",
+        "red": "Красный",
+        "yellow": "Желтый",
+        "purple": "Фиолетовый",
+        "orange": "Оранжевый",
+        "gray": "Серый"
+      },
+      "errors": {
+        "nameMin": "Название должно содержать минимум 2 символа",
+        "nameMax": "Название не должно превышать 100 символов",
+        "descriptionMax": "Описание не должно превышать 500 символов",
+        "categoryIdRequired": "Выберите категорию",
+        "subcategoryIdRequired": "Выберите подкатегорию",
+        "durationRequired": "Введите длительность",
+        "durationMustBeInteger": "Длительность должна быть целым числом",
+        "durationMustBePositive": "Длительность должна быть положительным числом",
+        "colorRequired": "Выберите цвет",
+        "colorMax": "Цвет не должен превышать 50 символов",
+        "pointCodeRequired": "Не удалось определить код точки",
+        "submitError": "Ошибка при создании услуги"
+      }
+    },
+    "attachMaster": {
+      "dialogTitle": "Привязать мастера к услуге",
+      "dialogDescription": "Привязка мастера к услуге: {serviceName}",
+      "addMaster": "Добавить мастера",
+      "master": "Мастер",
+      "selectMaster": "Выберите мастера",
+      "myself": "Себя",
+      "price": "Цена",
+      "pricePlaceholder": "Введите цену",
+      "attach": "Привязать",
+      "attaching": "Привязка...",
+      "cancel": "Отмена",
+      "moreDetails": "Подробнее",
+      "success": "Мастер успешно привязан к услуге",
+      "error": "Ошибка при привязке мастера",
+      "priceRequired": "Цена обязательна",
+      "priceInvalid": "Цена должна быть числом",
+      "pricePositive": "Цена должна быть положительным числом",
+      "priceMin": "Цена должна быть не менее 1",
+      "serviceIdRequired": "ID услуги обязателен",
+      "masterPhoneRequired": "Выберите мастера"
     }
   }
 }

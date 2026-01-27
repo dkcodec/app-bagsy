@@ -5,3 +5,4 @@
 
 export { DashboardContent } from "./dashboard-content";
 export { DashboardHeader } from "./dashboard-header";
+export { EmptyPointsState } from "./empty-points-state";

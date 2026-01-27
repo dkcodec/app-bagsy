@@ -31,6 +31,8 @@ interface ICalendarContext {
   setVisibleHours: Dispatch<SetStateAction<TVisibleHours>>;
   events: IEvent[];
   setLocalEvents: Dispatch<SetStateAction<IEvent[]>>;
+  /** Код точки (selectedPointCode || currentUser.point_code). Для выборов услуги в форме записи. */
+  pointCode: string | undefined;
 }
 
 export function CalendarProvider({
@@ -40,6 +42,7 @@ export function CalendarProvider({
   initialDate,
   onDateChange,
   onMasterPhoneChange,
+  selectedPointCode,
 }: {
   children: React.ReactNode;
   masters: IUserDto[];
@@ -47,6 +50,8 @@ export function CalendarProvider({
   initialDate?: Date;
   onDateChange?: (date: Date) => void;
   onMasterPhoneChange?: (masterPhone: string | undefined) => void;
+  /** Выбранный код точки для net_manager и self_owner (приоритет над currentUser.point_code) */
+  selectedPointCode?: string;
 }) {
   const { data: currentUser } = useCurrentUser();
   const setMasters = useCalendarStore((s: CalendarState) => s.setMasters);
@@ -65,6 +70,7 @@ export function CalendarProvider({
   const selectedMasterPhone = useCalendarStore(
     (s: CalendarState) => s.selectedMasterPhone
   );
+  const setPointCode = useCalendarStore((s: CalendarState) => s.setPointCode);
 
   const onDateChangeRef = useRef(onDateChange);
   useEffect(() => {
@@ -111,15 +117,19 @@ export function CalendarProvider({
   }, [masters, events, initialDate]);
 
   // Загружаем рабочие часы точки при изменении point_code
-  const prevPointCodeRef = useRef<string | undefined>(currentUser?.point_code);
+  // Используем selectedPointCode если он передан (для net_manager/self_owner),
+  // иначе используем currentUser.point_code (для других ролей)
+  const pointCodeToUse = selectedPointCode || currentUser?.point_code;
+  const prevPointCodeRef = useRef<string | undefined>(pointCodeToUse);
   useEffect(() => {
-    const pointCode = currentUser?.point_code;
-    // Вызываем только если point_code изменился
-    if (pointCode && prevPointCodeRef.current !== pointCode) {
-      loadWorkingHours(pointCode);
-      prevPointCodeRef.current = pointCode;
+    setPointCode(pointCodeToUse ?? undefined);
+  }, [pointCodeToUse, setPointCode]);
+  useEffect(() => {
+    if (pointCodeToUse && prevPointCodeRef.current !== pointCodeToUse) {
+      loadWorkingHours(pointCodeToUse);
+      prevPointCodeRef.current = pointCodeToUse;
     }
-  }, [currentUser?.point_code, loadWorkingHours]);
+  }, [pointCodeToUse, loadWorkingHours]);
 
   // Отслеживаем изменения selectedMasterPhone и вызываем колбэк (только если значение изменилось)
   const prevSelectedMasterPhoneRef = useRef<IUserDto["phone"] | "all">(

@@ -20,16 +20,10 @@ import {
 import { useLogout } from "@/src/shared/hooks/use-auth";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
+import type { IUserDto } from "@/src/shared/types/user";
+import { Skeleton } from "@/src/entities/skeleton";
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string;
-    phone: string;
-    avatar: string;
-  };
-}) {
+export function NavUser({ user }: { user?: IUserDto }) {
   const { isMobile } = useSidebar();
   const t = useTranslations("Sidebar.User");
 
@@ -46,14 +40,28 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                {/* <AvatarImage src={user.avatar} alt={user.name} /> */}
+                {user?.avatar_url ? (
+                  <AvatarImage
+                    src={user?.avatar_url}
+                    alt={user?.name ?? "avatar"}
+                  />
+                ) : null}
                 <AvatarFallback className="rounded-lg">
-                  {user.name[0].toUpperCase()}
+                  {`${user?.name?.[0].toUpperCase() || ""}${user?.surname?.[0].toUpperCase() || ""}`}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user.name}</span>
-                <span className="truncate text-xs">{user.phone}</span>
+                {user ? (
+                  <>
+                    <span className="truncate font-semibold">{user?.name}</span>
+                    <span className="truncate text-xs">{user?.phone}</span>
+                  </>
+                ) : (
+                  <div className="flex flex-col gap-1">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-3 w-24" />
+                  </div>
+                )}
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -70,14 +78,19 @@ export function NavUser({
                 onClick={() => router.push("/profile")}
               >
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
+                  {user?.avatar_url ? (
+                    <AvatarImage
+                      src={user?.avatar_url}
+                      alt={user?.name ?? "avatar"}
+                    />
+                  ) : null}
                   <AvatarFallback className="rounded-lg">
-                    {user.name[0].toUpperCase()}
+                    {`${user?.name?.[0].toUpperCase()}${user?.surname?.[0].toUpperCase()}`}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{user.name}</span>
-                  <span className="truncate text-xs">{user.phone}</span>
+                  <span className="truncate font-semibold">{user?.name}</span>
+                  <span className="truncate text-xs">{user?.phone}</span>
                 </div>
               </div>
             </DropdownMenuLabel>

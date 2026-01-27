@@ -1,9 +1,8 @@
 import { apiClient } from "@/src/shared/api";
 import type {
   UpdateProfileRequest,
+  UpdateScheduleRequest,
   IUserDto,
-  UsersListResponseDto,
-  UsersSearchRequest,
 } from "@/src/shared/types/user";
 
 /**
@@ -26,5 +25,21 @@ export class UserService {
 
   static async getUserByPhone(phone: string): Promise<IUserDto> {
     return apiClient.get<IUserDto>(`v1/users/${phone}`);
+  }
+
+  /**
+   * Удаление аватара (soft delete user_media, деактивация media)
+   */
+  static async deleteAvatar(): Promise<{ message: string }> {
+    return apiClient.delete<{ message: string }>("v1/users/me/avatar");
+  }
+
+  /**
+   * Обновление расписания текущего пользователя. PUT v1/users/me/schedule
+   */
+  static async updateSchedule(
+    data: UpdateScheduleRequest
+  ): Promise<{ message: string }> {
+    return apiClient.put<{ message: string }>("v1/users/me/schedule", data);
   }
 }

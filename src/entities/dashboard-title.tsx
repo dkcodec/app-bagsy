@@ -13,7 +13,7 @@ const DashboardTitle = () => {
   return (
     <div className="relative h-6 w-full">
       <h1
-        className={`text-xl font-bold transition-opacity duration-700 ease-out ${
+        className={`text-md md:text-xl font-bold transition-opacity duration-700 ease-out ${
           showWelcome ? "opacity-100" : "opacity-0"
         }`}
       >

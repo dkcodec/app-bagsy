@@ -19,3 +19,20 @@ export const eventSchema = z.object({
 });
 
 export type TEventFormData = z.infer<typeof eventSchema>;
+
+/** Схема для создания записи POST /api/v1/bagsies/master */
+export const addBagsieSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  surname: z.string().min(1, "Surname is required"),
+  client_phone: z.string().min(1, "Phone is required"),
+  comment: z.string().optional(),
+  /** Для STAFF не в форме — подставляется phone текущего пользователя. Для manager+ — выбор из /staff. */
+  master_phone: z.string().optional(),
+  service_id: z.string().min(1, "Service is required"),
+  startDate: z
+    .date()
+    .refine(val => !!val, { message: "Start date is required" }),
+  startTime: z.object({ hour: z.number(), minute: z.number() }),
+});
+
+export type TAddBagsieFormData = z.infer<typeof addBagsieSchema>;

@@ -1,5 +1,4 @@
 "use client";
-import * as React from "react";
 import {
   Calendar,
   ChartSpline,
@@ -22,10 +21,10 @@ import { ThemeLogo } from "../ui/theme-logo";
 import { NavMain } from "./nav-main";
 import Link from "next/link";
 import { useCurrentUser } from "@/src/shared/hooks/use-users";
-import { useTranslations } from "next-intl";
 import type { TUserRole } from "@/src/shared/types/user";
 import { EUserRole } from "@/src/shared/types/user";
 import type { LucideIcon } from "lucide-react";
+import { useMemo } from "react";
 
 type NavItem = {
   name: string;
@@ -43,21 +42,15 @@ const navData: { navMain: NavItem[] } = {
       icon: Calendar,
       isActive: true,
     },
-    {
-      name: "clients",
-      url: "/clients",
-      icon: Contact,
-    },
+    // {
+    //   name: "clients",
+    //   url: "/clients",
+    //   icon: Contact,
+    // },
     {
       name: "services",
       url: "/services",
       icon: ClipboardList,
-      allowedRoles: [
-        EUserRole.ADMIN,
-        EUserRole.NET_MANAGER,
-        EUserRole.SELF_OWNER,
-        EUserRole.MANAGER,
-      ],
     },
     {
       name: "staff",
@@ -81,11 +74,11 @@ const navData: { navMain: NavItem[] } = {
         EUserRole.MANAGER,
       ],
     },
-    {
-      name: "analytics",
-      url: "/analytics",
-      icon: ChartSpline,
-    },
+    // {
+    //   name: "analytics",
+    //   url: "/analytics",
+    //   icon: ChartSpline,
+    // },
     {
       name: "settings",
       url: "/settings",
@@ -95,11 +88,10 @@ const navData: { navMain: NavItem[] } = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const t = useTranslations("Sidebar");
   const { data: userData } = useCurrentUser();
 
   // Фильтрация навигации по ролям пользователя
-  const filteredNav = React.useMemo(() => {
+  const filteredNav = useMemo(() => {
     if (!userData?.role) return navData.navMain;
 
     return navData.navMain
@@ -123,13 +115,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain main={filteredNav} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser
-          user={{
-            name: userData?.name ?? t("User.name"),
-            phone: userData?.phone ?? t("User.phone"),
-            avatar: "/avatars/shadcn.jpg",
-          }}
-        />
+        <NavUser user={userData} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

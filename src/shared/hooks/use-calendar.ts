@@ -53,6 +53,15 @@ export function useCalendar({
   const calendarParams = useMemo<GetCalendarParams | null>(() => {
     if (!currentUser) return null;
 
+    // Для SelfOwner и NetManager точка обязательна - не запрашиваем календарь без точки
+    if (
+      (currentUser.role === EUserRole.SELF_OWNER ||
+        currentUser.role === EUserRole.NET_MANAGER) &&
+      !pointCode
+    ) {
+      return null;
+    }
+
     const params: GetCalendarParams = {
       from: dateRange.from,
       to: dateRange.to,
@@ -119,7 +128,11 @@ export function useCalendar({
     ) {
       return {
         ...(pointCode && { point_code: pointCode }),
-        role: [EUserRole.STAFF, EUserRole.MANAGER] as TUserRole[],
+        role: [
+          EUserRole.STAFF,
+          EUserRole.SELF_OWNER,
+          EUserRole.MANAGER,
+        ] as TUserRole[],
       };
     }
 

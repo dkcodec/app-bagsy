@@ -1,4 +1,6 @@
 import { format } from "date-fns";
+import { ru, kk } from "date-fns/locale";
+import { useLocale } from "next-intl";
 
 import { useDisclosure } from "@/src/shared/hooks";
 
@@ -34,7 +36,7 @@ function SingleDayPicker({
   ...props
 }: TProps) {
   const { isOpen, onClose, onToggle } = useDisclosure();
-
+  const locale = useLocale();
   const handleSelect = (date: Date | undefined) => {
     onSelect(date);
     onClose();
@@ -52,7 +54,13 @@ function SingleDayPicker({
           )}
           {...props}
         >
-          {value && <span>{format(value, labelVariant)}</span>}
+          {value && (
+            <span>
+              {format(value, labelVariant, {
+                locale: locale === "ru" ? ru : kk,
+              })}
+            </span>
+          )}
           {!value && (
             <span className="text-muted-foreground">{placeholder}</span>
           )}
