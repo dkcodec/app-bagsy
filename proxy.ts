@@ -2,7 +2,6 @@ import createMiddleware from "next-intl/middleware";
 import { NextRequest, NextResponse } from "next/server";
 import { routing } from "@/i18n/routing";
 
-// ВАЖНО: routing должен быть edge-safe (только plain-объект с locales/defaultLocale)
 const intl = createMiddleware(routing);
 
 export default function middleware(req: NextRequest) {
@@ -18,22 +17,40 @@ export default function middleware(req: NextRequest) {
   const refreshToken = req.cookies.get("refresh_token")?.value;
   const isAuthenticated = Boolean(refreshToken);
 
+  // Добавляем pathname в headers для использования в Server Components
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("x-pathname", pathname);
+
   if (!isAuthenticated && !isLoginPath && !isInvitePath) {
     const url = req.nextUrl.clone();
     url.pathname = `/${locale}/login`;
-    return NextResponse.redirect(url);
+    const response = NextResponse.redirect(url);
+    response.headers.set("x-pathname", pathname);
+    return response;
   }
 
   if (isAuthenticated && isLoginPath) {
     const url = req.nextUrl.clone();
     url.pathname = `/${locale}`;
-    return NextResponse.redirect(url);
+    const response = NextResponse.redirect(url);
+    response.headers.set("x-pathname", pathname);
+    return response;
   }
 
-  return intlRes || NextResponse.next();
+  // Если используем intl response, добавляем header к нему
+  if (intlRes) {
+    intlRes.headers.set("x-pathname", pathname);
+    return intlRes;
+  }
+
+  // Иначе создаём новый response с headers
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
 }
 
 export const config = {
-  // Проверь, что исключения соответствуют твоим нуждам
   matcher: "/((?!api|trpc|_next|_vercel|.*\\..*).*)",
 };
