@@ -43,7 +43,7 @@ export function EventDetailsDialog({ event, children }: IProps) {
             <div className="flex items-start gap-2">
               <User className="mt-1 size-4 shrink-0" />
               <div>
-                <p className="text-sm font-medium">Responsible</p>
+                <p className="text-sm font-medium">{t("responsible")}</p>
                 <p className="text-sm text-muted-foreground">
                   {`${master?.name} ${master?.surname}` || event.masterPhone}
                 </p>
@@ -53,7 +53,7 @@ export function EventDetailsDialog({ event, children }: IProps) {
             <div className="flex items-start gap-2">
               <Calendar className="mt-1 size-4 shrink-0" />
               <div>
-                <p className="text-sm font-medium">Start Date</p>
+                <p className="text-sm font-medium">{t("startDate")}</p>
                 <p className="text-sm text-muted-foreground">
                   {format(startDate, "MMM d, yyyy HH:mm")}
                 </p>
@@ -63,7 +63,7 @@ export function EventDetailsDialog({ event, children }: IProps) {
             <div className="flex items-start gap-2">
               <Clock className="mt-1 size-4 shrink-0" />
               <div>
-                <p className="text-sm font-medium">End Date</p>
+                <p className="text-sm font-medium">{t("endDate")}</p>
                 <p className="text-sm text-muted-foreground">
                   {format(endDate, "MMM d, yyyy HH:mm")}
                 </p>
@@ -74,7 +74,7 @@ export function EventDetailsDialog({ event, children }: IProps) {
               <div className="flex items-start gap-2">
                 <Text className="mt-1 size-4 shrink-0" />
                 <div>
-                  <p className="text-sm font-medium">Comment</p>
+                  <p className="text-sm font-medium">{t("comment")}</p>
                   <p className="text-sm text-muted-foreground">
                     {event.comment}
                   </p>

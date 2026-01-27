@@ -107,7 +107,11 @@
         "cancel": "Бас тарту"
       },
       "EventDetailsDialog": {
-        "edit": "Өңдеу"
+        "edit": "Өңдеу",
+        "responsible": "Қызметкер",
+        "startDate": "Басталу күні және уақыты",
+        "endDate": "Аяқталу күні және уақыты",
+        "comment": "Пікір"
       },
       "DayCell": {
         "more": "тағы"
