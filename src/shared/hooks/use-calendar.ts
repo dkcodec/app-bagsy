@@ -128,7 +128,11 @@ export function useCalendar({
     ) {
       return {
         ...(pointCode && { point_code: pointCode }),
-        role: [EUserRole.STAFF, EUserRole.MANAGER] as TUserRole[],
+        role: [
+          EUserRole.STAFF,
+          EUserRole.SELF_OWNER,
+          EUserRole.MANAGER,
+        ] as TUserRole[],
       };
     }
 
