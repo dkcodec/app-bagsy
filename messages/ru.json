@@ -105,6 +105,9 @@
         "add": "Добавить запись",
         "cancel": "Отмена"
       },
+      "EventDetailsDialog": {
+        "edit": "Редактировать"
+      },
       "DayCell": {
         "more": "ещё"
       },

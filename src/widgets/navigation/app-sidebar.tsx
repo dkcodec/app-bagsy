@@ -42,11 +42,11 @@ const navData: { navMain: NavItem[] } = {
       icon: Calendar,
       isActive: true,
     },
-    {
-      name: "clients",
-      url: "/clients",
-      icon: Contact,
-    },
+    // {
+    //   name: "clients",
+    //   url: "/clients",
+    //   icon: Contact,
+    // },
     {
       name: "services",
       url: "/services",
@@ -74,11 +74,11 @@ const navData: { navMain: NavItem[] } = {
         EUserRole.MANAGER,
       ],
     },
-    {
-      name: "analytics",
-      url: "/analytics",
-      icon: ChartSpline,
-    },
+    // {
+    //   name: "analytics",
+    //   url: "/analytics",
+    //   icon: ChartSpline,
+    // },
     {
       name: "settings",
       url: "/settings",
