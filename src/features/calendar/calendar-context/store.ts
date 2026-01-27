@@ -1,6 +1,5 @@
-"use client";
-
 import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 import { isSameDay } from "date-fns";
 
 import type {
@@ -115,7 +114,8 @@ export type CalendarState = {
   setPointCode: (v: string | undefined) => void;
 };
 
-export const useCalendarStore = create<CalendarState>((set, get) => ({
+export const useCalendarStore = create<CalendarState>()(
+  persist((set, get) => ({
   selectedDate: new Date(),
   setSelectedDate: (date: Date | undefined) => {
     if (!date) return;
@@ -179,4 +179,10 @@ export const useCalendarStore = create<CalendarState>((set, get) => ({
     })),
   pointCode: undefined,
   setPointCode: (v: string | undefined) => set({ pointCode: v }),
+}), {
+  name: "calendar-store",
+  partialize: (state) => ({
+    badgeVariant: state.badgeVariant,
+  }),
+  storage: createJSONStorage(() => localStorage),
 }));

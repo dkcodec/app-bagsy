@@ -21,6 +21,7 @@ import { useLogout } from "@/src/shared/hooks/use-auth";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import type { IUserDto } from "@/src/shared/types/user";
+import { Skeleton } from "@/src/entities/skeleton";
 
 export function NavUser({ user }: { user?: IUserDto }) {
   const { isMobile } = useSidebar();
@@ -46,12 +47,21 @@ export function NavUser({ user }: { user?: IUserDto }) {
                   />
                 ) : null}
                 <AvatarFallback className="rounded-lg">
-                  {`${user?.name?.[0].toUpperCase()}${user?.surname?.[0].toUpperCase()}`}
+                  {`${user?.name?.[0].toUpperCase() || ""}${user?.surname?.[0].toUpperCase() || ""}`}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user?.name}</span>
-                <span className="truncate text-xs">{user?.phone}</span>
+                {user ? (
+                  <>
+                    <span className="truncate font-semibold">{user?.name}</span>
+                    <span className="truncate text-xs">{user?.phone}</span>
+                  </>
+                ) : (
+                  <div className="flex flex-col gap-1">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-3 w-24" />
+                  </div>
+                )}
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
