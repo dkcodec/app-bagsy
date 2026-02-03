@@ -19,6 +19,13 @@
       "logout": "Выйти"
     }
   },
+  "PwaInstallPrompt": {
+    "add-to-home-screen": "Добавить на главный экран",
+    "share": "Поделиться",
+    "to-home-screen": "На экран \"Домой\"",
+    "install-app": "Установить приложение",
+    "install": "Установить"
+  },
   "Dashboard": {
     "content": { "calendar": "Календарь" },
     "title": {

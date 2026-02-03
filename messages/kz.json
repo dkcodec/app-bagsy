@@ -19,6 +19,13 @@
       "logout": "Шығу"
     }
   },
+  "PwaInstallPrompt": {
+    "add-to-home-screen": "Басты экранға қосу",
+    "share": "Бөлісу",
+    "to-home-screen": "Басты экранға",
+    "install-app": "Қолданбасын орнату",
+    "install": "Орнату"
+  },
   "Dashboard": {
     "content": { "calendar": "Күнтізбе" },
     "title": {

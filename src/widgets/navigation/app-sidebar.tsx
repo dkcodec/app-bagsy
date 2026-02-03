@@ -18,6 +18,7 @@ import {
   SidebarRail,
 } from "@/src/entities/sidebar";
 import { ThemeLogo } from "../ui/theme-logo";
+import { PwaInstallPrompt } from "../ui/pwa-install-prompt";
 import { NavMain } from "./nav-main";
 import Link from "next/link";
 import { useCurrentUser } from "@/src/shared/hooks/use-users";
@@ -115,6 +116,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain main={filteredNav} />
       </SidebarContent>
       <SidebarFooter>
+        <PwaInstallPrompt />
         <NavUser user={userData} />
       </SidebarFooter>
       <SidebarRail />
