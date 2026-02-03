@@ -25,7 +25,8 @@ interface BeforeInstallPromptEvent extends Event {
  */
 export function PwaInstallPrompt() {
   const t = useTranslations("PwaInstallPrompt");
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [deferredPrompt, setDeferredPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
   const [showIOSPrompt, setShowIOSPrompt] = useState(false);
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
@@ -34,8 +35,10 @@ export function PwaInstallPrompt() {
     if (typeof window === "undefined") return;
 
     // Проверяем, не установлено ли уже приложение
-    const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
-    if(isStandalone) return;
+    const isStandalone = window.matchMedia(
+      "(display-mode: standalone)"
+    ).matches;
+    if (isStandalone) return;
 
     // Обработка beforeinstallprompt для Android/Desktop
     const handleBeforeInstallPrompt = (e: Event) => {
@@ -44,9 +47,10 @@ export function PwaInstallPrompt() {
     };
 
     // Проверка iOS
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && 
+    const isIOS =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) &&
       !(window as unknown as { MSStream?: boolean }).MSStream;
-    
+
     if (isIOS) {
       setShowIOSPrompt(true);
     }
@@ -54,7 +58,10 @@ export function PwaInstallPrompt() {
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
     return () => {
-      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt
+      );
     };
   }, []);
 
@@ -67,7 +74,7 @@ export function PwaInstallPrompt() {
 
     // Ждем результата
     const { outcome } = await deferredPrompt.userChoice;
-    
+
     // Очищаем промпт после использования (браузер может показать его снова позже)
     setDeferredPrompt(null);
   };
@@ -80,8 +87,7 @@ export function PwaInstallPrompt() {
     return (
       <div className="border-t px-2 py-2 text-center text-xs text-muted-foreground">
         {t("add-to-home-screen")}: {t("share")}
-        <span aria-hidden> ⎋ </span>
-        → {t("to-home-screen")}
+        <span aria-hidden> ⎋ </span>→ {t("to-home-screen")}
       </div>
     );
   }
@@ -107,9 +113,7 @@ export function PwaInstallPrompt() {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="border-t pt-2">
-                {buttonContent}
-              </div>
+              <div className="border-t pt-2">{buttonContent}</div>
             </TooltipTrigger>
             <TooltipContent side="right">
               <p>{t("install-app")}</p>
@@ -120,11 +124,7 @@ export function PwaInstallPrompt() {
     }
 
     // Если сайдбар развернут, показываем кнопку с текстом
-    return (
-      <div className="border-t px-2 py-2">
-        {buttonContent}
-      </div>
-    );
+    return <div className="border-t px-2 py-2">{buttonContent}</div>;
   }
 
   return null;
