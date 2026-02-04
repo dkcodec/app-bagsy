@@ -4,6 +4,7 @@ import withSerwistInit from "@serwist/next";
 
 // Плагин next-intl
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
+const locales = ["ru", "kz"];
 
 // Ревизия для precache (при обновлении SW инвалидируется кэш)
 const revision = crypto.randomUUID?.() ?? Date.now().toString();
@@ -12,7 +13,10 @@ const revision = crypto.randomUUID?.() ?? Date.now().toString();
 const withSerwist = withSerwistInit({
   swSrc: "app/sw.ts",
   swDest: "public/sw.js",
-  additionalPrecacheEntries: [{ url: "/~offline", revision }],
+  additionalPrecacheEntries: locales.map(locale => ({
+    url: `/${locale}/offline`,
+    revision,
+  })),
   register: true,
   scope: "/",
   disable: process.env.NODE_ENV !== "production",

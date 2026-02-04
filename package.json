@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "dev-network": "next dev --hostname 10.200.6.202 --port 3010",
+    "dev": "next dev --webpack",
+    "dev-network": "next dev --hostname 192.168.1.28",
     "dev-all": "next dev --hostname 0.0.0.0 --port 3000",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
