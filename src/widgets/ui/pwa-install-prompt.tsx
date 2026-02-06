@@ -79,9 +79,6 @@ export function PwaInstallPrompt() {
     setDeferredPrompt(null);
   };
 
-  // Если нет промпта для установки и не iOS - не показываем ничего
-  if (!deferredPrompt && !showIOSPrompt) return null;
-
   // Для iOS показываем инструкции
   if (showIOSPrompt && !deferredPrompt) {
     return (
