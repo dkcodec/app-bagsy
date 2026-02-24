@@ -42,7 +42,7 @@ export function TimeRangeRow({
           hourCycle={24}
           granularity="minute"
           value={timeToValue(value.start)}
-          onChange={(v) => v && onChange({ ...value, start: valueToTime(v) })}
+          onChange={v => v && onChange({ ...value, start: valueToTime(v) })}
           className="flex-1"
           disabled={disabled}
         />
@@ -53,7 +53,7 @@ export function TimeRangeRow({
           hourCycle={24}
           granularity="minute"
           value={timeToValue(value.end)}
-          onChange={(v) => v && onChange({ ...value, end: valueToTime(v) })}
+          onChange={v => v && onChange({ ...value, end: valueToTime(v) })}
           className="flex-1"
           disabled={disabled}
         />

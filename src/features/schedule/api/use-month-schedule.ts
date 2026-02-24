@@ -2,12 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { MonthSchedule, ScheduleScope } from "@/src/shared/types/schedule";
-import {
-  getDaysInMonth,
-  startOfMonth,
-  addMonths,
-  subMonths,
-} from "date-fns";
+import { getDaysInMonth, startOfMonth, addMonths, subMonths } from "date-fns";
 
 const QUERY_KEY_PREFIX = "month-schedule" as const;
 
@@ -21,7 +16,10 @@ function emptyDaySchedule() {
 }
 
 /** Строит пустой MonthSchedule для указанного месяца (дни 1..N). */
-export function buildEmptyMonthSchedule(year: number, month: number): MonthSchedule {
+export function buildEmptyMonthSchedule(
+  year: number,
+  month: number
+): MonthSchedule {
   const daysInMonth = getDaysInMonth(new Date(year, month, 1));
   const result: MonthSchedule = {};
   for (let d = 1; d <= daysInMonth; d++) {
@@ -36,7 +34,7 @@ async function fetchMonthSchedule(
   _year: number,
   _month: number
 ): Promise<MonthSchedule> {
-  await new Promise((r) => setTimeout(r, 200));
+  await new Promise(r => setTimeout(r, 200));
   const daysInMonth = getDaysInMonth(new Date(_year, _month, 1));
   const result: MonthSchedule = {};
   for (let d = 1; d <= daysInMonth; d++) {
@@ -52,7 +50,7 @@ async function saveMonthSchedule(
   _month: number,
   data: MonthSchedule
 ): Promise<void> {
-  await new Promise((r) => setTimeout(r, 300));
+  await new Promise(r => setTimeout(r, 300));
   void data;
 }
 

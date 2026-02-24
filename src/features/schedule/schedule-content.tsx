@@ -100,7 +100,10 @@ export function ScheduleContent() {
         /* Откат авто-открытого дня: возвращаем isClosed если пользователь не редактировал. */
         if (autoOpenedDaysRef.current.has(day)) {
           autoOpenedDaysRef.current.delete(day);
-          setLocalSchedule(p => ({ ...p, [day]: { isClosed: true, workRanges: [], breaks: [] } }));
+          setLocalSchedule(p => ({
+            ...p,
+            [day]: { isClosed: true, workRanges: [], breaks: [] },
+          }));
         }
         return prev.filter(d => d !== day);
       }
