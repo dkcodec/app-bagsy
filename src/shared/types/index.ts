@@ -5,3 +5,5 @@
 
 // Типы календаря
 export * from "./calendar";
+// Типы графика (расписание по месяцам)
+export * from "./schedule";

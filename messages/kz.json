@@ -10,6 +10,7 @@
     "sidebarDescription": "Боковое меню көрсетеді.",
     "Main": {
       "calendar": "Күнтізбе",
+      "schedule": "Жұмыс графигі",
       "clients": "Клиенттері",
       "services": "Қызметтер",
       "staff": "Жұмысшылар",
@@ -491,6 +492,64 @@
       "priceMin": "Баға кемінде 1 болуы керек",
       "serviceIdRequired": "Қызмет ID міндетті",
       "masterPhoneRequired": "Шеберді таңдаңыз"
+    }
+  },
+  "Schedule": {
+    "title": "Жұмыс графигі",
+    "description": "Ай күндері бойынша жұмыс графигін баптау",
+    "noAccess": "Графикті баптауға қол жетімсіз",
+    "mySchedule": "Менің графигім",
+    "pointSchedule": "Нүкте графигі",
+    "monthGridTitle": "Ай күндері",
+    "editorTitle": "Таңдалған күндердің графигі",
+    "selectedCount": "Таңдалды: {count}",
+    "clearSelection": "Тазалау",
+    "Weekdays": {
+      "mon": "Дс",
+      "tue": "Сс",
+      "wed": "Ср",
+      "thu": "Бс",
+      "fri": "Жм",
+      "sat": "Сн",
+      "sun": "Жс"
+    },
+    "MonthNav": {
+      "prev": "Алдыңғы ай",
+      "next": "Келесі ай",
+      "today": "Бүгін"
+    },
+    "Header": {
+      "title": "Жұмыс графигі",
+      "mySchedule": "Менің графигім",
+      "pointSchedule": "Нүкте графигі",
+      "fixedBadge": "Бекітілген",
+      "mixedBadge": "Аралас",
+      "scheduleTypeFixedHint": "Нүкте графигі бекітілген, сіз оны өзгерте алмайсыз",
+      "scheduleTypeMixedHint": "Нүкте графигі аралас — шебер әр айға өз графигін өзі орнатады"
+    },
+    "save": "Сақтау",
+    "Editor": {
+      "selectDaysHint": "Графикті орнату үшін күнтізбеден күндерді таңдаңыз",
+      "dayIsClosed": "Күн демалыс деп белгіленген",
+      "makeOpen": "Жұмыс күні ету",
+      "makeClosed": "Демалыс күні ету",
+      "open": "Ашық",
+      "closed": "Жабық",
+      "workHours": "Жұмыс сағаттары",
+      "breaks": "Үзілістер",
+      "noBreaks": "Үзілістер жоқ",
+      "from": "Бастап",
+      "to": "Дейін",
+      "addBreak": "Үзіліс қосу",
+      "addWorkRange": "Интервал қосу",
+      "mixedTimesWarning": "Таңдалған күндердің уақыты әртүрлі. Өзгерістер барлық таңдалған күндерге қолданылады."
+    },
+    "Presets": {
+      "selectAll": "Барлығын таңдау",
+      "weekdays": "5/2 (Дс–Жм)",
+      "evenDays": "Жұп күндер",
+      "oddDays": "Тақ күндер",
+      "addBreakToAll": "Барлығына үзіліс"
     }
   }
 }

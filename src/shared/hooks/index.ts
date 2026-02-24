@@ -34,3 +34,6 @@ export * from "./use-services";
 
 // Хуки для debounce
 export * from "./use-debounce";
+
+// Права на редактирование графика (точка/мастер)
+export * from "./use-schedule-permissions";
