@@ -44,7 +44,10 @@ import {
   DialogFooter,
 } from "@/src/entities/dialog";
 
-import { addBookingSchema, type TAddBookingFormData } from "@/src/shared/schemas";
+import {
+  addBookingSchema,
+  type TAddBookingFormData,
+} from "@/src/shared/schemas";
 import { useTranslations } from "next-intl";
 
 import type { TimeValue } from "react-aria-components";

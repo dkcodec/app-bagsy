@@ -12,8 +12,7 @@ import {
 import { useTranslations } from "next-intl";
 
 export function MasterSelect() {
-  const { masters, selectedEmployeeId, setSelectedEmployeeId } =
-    useCalendar();
+  const { masters, selectedEmployeeId, setSelectedEmployeeId } = useCalendar();
   const t = useTranslations("Dashboard.Calendar.Header");
   return (
     <Select value={selectedEmployeeId} onValueChange={setSelectedEmployeeId}>
@@ -42,11 +41,7 @@ export function MasterSelect() {
         </SelectItem>
 
         {masters.map(master => (
-          <SelectItem
-            key={master.id}
-            value={master.id}
-            className="flex-1"
-          >
+          <SelectItem key={master.id} value={master.id} className="flex-1">
             <div className="flex items-center gap-2">
               <Avatar key={master.id} className="size-6">
                 <AvatarImage

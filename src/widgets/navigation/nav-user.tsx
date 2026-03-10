@@ -53,7 +53,9 @@ export function NavUser({ user }: { user?: IEmployeeDto }) {
               <div className="grid flex-1 text-left text-sm leading-tight">
                 {user ? (
                   <>
-                    <span className="truncate font-semibold">{user?.first_name}</span>
+                    <span className="truncate font-semibold">
+                      {user?.first_name}
+                    </span>
                     <span className="truncate text-xs">{user?.phone}</span>
                   </>
                 ) : (
@@ -89,7 +91,9 @@ export function NavUser({ user }: { user?: IEmployeeDto }) {
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{user?.first_name}</span>
+                  <span className="truncate font-semibold">
+                    {user?.first_name}
+                  </span>
                   <span className="truncate text-xs">{user?.phone}</span>
                 </div>
               </div>

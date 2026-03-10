@@ -102,13 +102,20 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
   }, [user]);
 
   const onSubmit = async (data: ProfileFormData) => {
-    const updateData: { first_name: string; last_name: string; avatar_id?: string } = {
+    const updateData: {
+      first_name: string;
+      last_name: string;
+      avatar_id?: string;
+    } = {
       first_name: data.name,
       last_name: data.surname,
     };
     if (selectedFile) {
       try {
-        updateData.avatar_id = await uploadAvatar.mutateAsync({ file: selectedFile, purpose: "avatars" });
+        updateData.avatar_id = await uploadAvatar.mutateAsync({
+          file: selectedFile,
+          purpose: "avatars",
+        });
       } catch {
         toast.error(t("uploadError"));
         return;

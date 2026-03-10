@@ -34,8 +34,7 @@ export function useInviteEmployee() {
 
   return useMutation<InviteEmployeeResponse, unknown, InviteEmployeeRequest>({
     mutationKey: ["employees", "invite"],
-    mutationFn: (data: InviteEmployeeRequest) =>
-      EmployeeService.invite(data),
+    mutationFn: (data: InviteEmployeeRequest) => EmployeeService.invite(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
     },

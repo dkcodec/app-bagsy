@@ -34,7 +34,9 @@ export function StaffContent() {
   const t = useTranslations("Staff");
 
   // Состояние фильтров
-  const [filters, setFilters] = useState<GetEmployeesParams>(DEFAULT_STAFF_FILTERS);
+  const [filters, setFilters] = useState<GetEmployeesParams>(
+    DEFAULT_STAFF_FILTERS
+  );
 
   // Управление диалогом добавления сотрудника
   const addStaffDialog = useDisclosure();

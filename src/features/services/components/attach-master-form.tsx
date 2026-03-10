@@ -130,9 +130,7 @@ export function AttachMasterForm({
       // Для STAFF и SELF_OWNER employee_id может быть свой
       const canUseSelf = isStaff || isSelfOwner;
       const employeeId =
-        canUseSelf && !data.employee_id
-          ? currentUser?.id
-          : data.employee_id;
+        canUseSelf && !data.employee_id ? currentUser?.id : data.employee_id;
 
       if (!employeeId && isEmployeeRequired) {
         toast.error(t("masterPhoneRequired"));
@@ -151,7 +149,11 @@ export function AttachMasterForm({
       });
 
       toast.success(t("success"));
-      form.reset({ employee_id: undefined, price: service.min_price || 0, service_id: service.id });
+      form.reset({
+        employee_id: undefined,
+        price: service.min_price || 0,
+        service_id: service.id,
+      });
       onSuccess?.();
     } catch (error) {
       console.error("Ошибка привязки мастера:", error);
@@ -175,8 +177,14 @@ export function AttachMasterForm({
                   {isLoadingEmployees ? (
                     <Skeleton className="h-9 w-full" />
                   ) : (
-                    <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                      <SelectTrigger data-invalid={fieldState.invalid} disabled={createMasterService.isPending}>
+                    <Select
+                      value={field.value ?? ""}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger
+                        data-invalid={fieldState.invalid}
+                        disabled={createMasterService.isPending}
+                      >
                         <SelectValue placeholder={t("selectMaster")} />
                       </SelectTrigger>
                       <SelectContent>
@@ -185,7 +193,10 @@ export function AttachMasterForm({
                           <SelectItem value={currentUser.id}>
                             <div className="flex items-center gap-2">
                               <Avatar className="size-6">
-                                <AvatarImage src={currentUser.avatar_url} alt={`${currentUser.first_name} ${currentUser.last_name}`} />
+                                <AvatarImage
+                                  src={currentUser.avatar_url}
+                                  alt={`${currentUser.first_name} ${currentUser.last_name}`}
+                                />
                                 <AvatarFallback className="text-xs">{`${currentUser.first_name[0]}${currentUser.last_name[0]}`}</AvatarFallback>
                               </Avatar>
                               <span>{t("myself")}</span>
@@ -196,10 +207,15 @@ export function AttachMasterForm({
                           <SelectItem key={master.id} value={master.id}>
                             <div className="flex items-center gap-2">
                               <Avatar className="size-6">
-                                <AvatarImage src={master.avatar_url} alt={`${master.first_name} ${master.last_name}`} />
+                                <AvatarImage
+                                  src={master.avatar_url}
+                                  alt={`${master.first_name} ${master.last_name}`}
+                                />
                                 <AvatarFallback className="text-xs">{`${master.first_name[0]}${master.last_name[0]}`}</AvatarFallback>
                               </Avatar>
-                              <span className="truncate">{master.first_name} {master.last_name}</span>
+                              <span className="truncate">
+                                {master.first_name} {master.last_name}
+                              </span>
                             </div>
                           </SelectItem>
                         ))}
@@ -225,7 +241,10 @@ export function AttachMasterForm({
                   placeholder={t("pricePlaceholder")}
                   disabled={createMasterService.isPending}
                   {...field}
-                  onChange={e => { const v = parseFloat(e.target.value); field.onChange(isNaN(v) ? 0 : v); }}
+                  onChange={e => {
+                    const v = parseFloat(e.target.value);
+                    field.onChange(isNaN(v) ? 0 : v);
+                  }}
                   value={field.value || ""}
                   min={1}
                   step={100}
@@ -238,13 +257,21 @@ export function AttachMasterForm({
 
         <div className="flex justify-end gap-2 pt-4">
           {onCancel && (
-            <Button type="button" variant="outline" onClick={onCancel} disabled={createMasterService.isPending}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              disabled={createMasterService.isPending}
+            >
               {t("cancel")}
             </Button>
           )}
           <Button type="submit" disabled={createMasterService.isPending}>
             {createMasterService.isPending ? (
-              <><Loader className="mr-2 h-4 w-4 animate-spin" />{t("attaching")}</>
+              <>
+                <Loader className="mr-2 h-4 w-4 animate-spin" />
+                {t("attaching")}
+              </>
             ) : (
               t("attach")
             )}

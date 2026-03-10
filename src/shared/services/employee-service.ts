@@ -162,10 +162,9 @@ export class EmployeeService {
 
   /** Смена роли (PATCH /api/v1/employees/{id}/role) — только owner */
   static async changeRole(id: string, role: TUserRole): Promise<void> {
-    await apiClient.patch(
-      `api/v1/employees/${encodeURIComponent(id)}/role`,
-      { role }
-    );
+    await apiClient.patch(`api/v1/employees/${encodeURIComponent(id)}/role`, {
+      role,
+    });
   }
 
   /** Смена прав доступа (PATCH /api/v1/employees/{id}/permissions) */

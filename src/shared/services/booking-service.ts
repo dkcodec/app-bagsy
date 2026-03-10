@@ -65,20 +65,12 @@ export class BookingService {
   static async createBooking(
     payload: CreateBookingRequest
   ): Promise<CreateBookingResponse> {
-    return apiClient.post<CreateBookingResponse>(
-      "api/v1/bookings",
-      payload
-    );
+    return apiClient.post<CreateBookingResponse>("api/v1/bookings", payload);
   }
 
   /** Получение доступных слотов */
-  static async getSlots(
-    payload: GetSlotsRequest
-  ): Promise<GetSlotsResponse> {
-    return apiClient.post<GetSlotsResponse>(
-      "api/v1/bookings/slots",
-      payload
-    );
+  static async getSlots(payload: GetSlotsRequest): Promise<GetSlotsResponse> {
+    return apiClient.post<GetSlotsResponse>("api/v1/bookings/slots", payload);
   }
 
   /** Подтверждение записи OTP-кодом */

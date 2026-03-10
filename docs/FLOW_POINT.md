@@ -3,12 +3,14 @@
 ## Регистрация
 
 Frontend (bagsy.kz/register?plan=point):
+
 - ФИО (required)
 - Телефон (required, маска +7)
 - Пароль (required)
 - Подтверждение OTP кода
 
 Backend автоматически создает:
+
 - ✓ User
 - ✓ Organization (tier: POINT, owner_id: user.id)
 - ✓ Employee (role: owner, **can_provide_services: false** — по умолчанию)
@@ -21,6 +23,7 @@ Backend автоматически создает:
 ## Онбординг: Создание локации
 
 Frontend форма:
+
 - Название локации (required)
 - Категория деятельности (required, select из `GET /api/v1/locations/categories`)
 - Описание (optional)
@@ -31,6 +34,7 @@ Frontend форма:
 ✅ **Для POINT: чекбокс "Я сам оказываю услуги" ПОКАЗАН**
 
 Backend создает (`POST /api/v1/locations`):
+
 - ✓ Location (organization_id, name, category_id, schedule_type, slot_duration_minutes)
 - ✓ LocationSchedule
 
@@ -43,6 +47,7 @@ Backend создает (`POST /api/v1/locations`):
 ## Онбординг: Добавление услуг
 
 Frontend форма:
+
 - Название услуги (required)
 - Цена (required, ₸)
 - Длительность (required, минуты)
@@ -51,6 +56,7 @@ Frontend форма:
 - Если owner.can_provide_services: `[ ] Я оказываю эту услугу`
 
 Backend создает (`POST /api/v1/services`):
+
 - ✓ Service (location_id, name, duration, category_id)
 - ✓ EmployeeService (service_id, employee_id=owner) — если чекбокс включен
 
@@ -61,12 +67,14 @@ Backend создает (`POST /api/v1/services`):
 ## Добавление мастеров (в ЛК)
 
 Frontend (app.bagsy.kz/staff → [Добавить сотрудника]):
+
 - ФИО (required)
 - Телефон (required)
 - Роль: `manager` | `staff`
 - Локация (select из списка локаций)
 
 Backend (`POST /api/v1/employees/invite`):
+
 - Отправляет ссылку-инвайт через WhatsApp: app.bagsy.kz/invite/{token}
 
 ---

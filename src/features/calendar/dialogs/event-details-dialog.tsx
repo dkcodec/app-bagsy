@@ -131,9 +131,7 @@ export function EventDetailsDialog({ event, children }: IProps) {
               <Text className="mt-1 size-4 shrink-0" />
               <div>
                 <p className="text-sm font-medium">{t("comment")}</p>
-                <p className="text-sm text-muted-foreground">
-                  {event.comment}
-                </p>
+                <p className="text-sm text-muted-foreground">{event.comment}</p>
               </div>
             </div>
           )}

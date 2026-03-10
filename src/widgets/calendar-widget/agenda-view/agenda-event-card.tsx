@@ -116,7 +116,9 @@ export function AgendaEventCard({
           <div className="mt-1 flex items-center gap-1">
             <User className="size-3 shrink-0" />
             <p className="text-xs text-foreground">
-              {master ? `${master.first_name} ${master.last_name}` : event.employeeName}
+              {master
+                ? `${master.first_name} ${master.last_name}`
+                : event.employeeName}
             </p>
           </div>
 

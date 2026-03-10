@@ -42,7 +42,12 @@ export function useGetUserByPhone(phone: string) {
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
 
-  return useMutation<IEmployeeDto, unknown, UpdateEmployeeProfileRequest, { previousData?: IEmployeeDto }>({
+  return useMutation<
+    IEmployeeDto,
+    unknown,
+    UpdateEmployeeProfileRequest,
+    { previousData?: IEmployeeDto }
+  >({
     mutationKey: ["me", "update"],
     mutationFn: async (data: UpdateEmployeeProfileRequest) =>
       EmployeeService.updateMe(data),

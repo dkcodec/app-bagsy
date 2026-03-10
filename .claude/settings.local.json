@@ -1,8 +1,5 @@
 {
   "permissions": {
-    "allow": [
-      "mcp__acp__Edit",
-      "Bash(npx next build)"
-    ]
+    "allow": ["mcp__acp__Edit", "Bash(npx next build)"]
   }
 }

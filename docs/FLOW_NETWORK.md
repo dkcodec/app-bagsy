@@ -3,12 +3,14 @@
 ## Регистрация
 
 Frontend (bagsy.kz/register?plan=network):
+
 - ФИО (required)
 - Телефон (required)
 - Пароль (required)
 - Подтверждение OTP кода
 
 Backend автоматически создает:
+
 - ✓ User
 - ✓ Organization (tier: NETWORK, owner_id: user.id, name: NULL)
 - ✓ Employee (role: owner, can_provide_services: false)
@@ -31,12 +33,14 @@ Backend автоматически создает:
 Frontend (app.bagsy.kz/locations → [+ Добавить локацию]):
 
 Система проверяет:
+
 ```
 if (tier == "NETWORK" && locations.count >= 1 && organization.name == NULL)
     → показать модалку "Создание сети"
 ```
 
 Модалка:
+
 ```
 ┌────────────────────────────────────────────────┐
 │ 🏢 СОЗДАНИЕ СЕТИ                               │
@@ -68,11 +72,13 @@ Frontend (app.bagsy.kz/locations) — доступно только owner:
 ## Добавление сотрудников
 
 Frontend (app.bagsy.kz/staff → [Добавить сотрудника]):
+
 - ФИО, телефон
 - Роль: `manager` (управляет локацией) | `staff` (оказывает услуги)
 - Локация (select из `GET /api/v1/locations`)
 
 Backend (`POST /api/v1/employees/invite`):
+
 - Отправляет инвайт-ссылку: app.bagsy.kz/invite/{token}
 
 ---

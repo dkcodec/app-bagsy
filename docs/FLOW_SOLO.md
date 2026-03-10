@@ -3,12 +3,14 @@
 ## Регистрация
 
 Frontend (bagsy.kz/register?plan=solo):
+
 - ФИО (required)
 - Телефон (required, маска +7)
 - Пароль (required)
 - Подтверждение OTP кода
 
 Backend автоматически создает:
+
 - ✓ User
 - ✓ Organization (tier: SOLO, owner_id: user.id, name: NULL)
 - ✓ Employee (role: owner, **can_provide_services: true**)
@@ -21,6 +23,7 @@ Backend автоматически создает:
 ## Онбординг: Создание локации
 
 Frontend форма:
+
 - Название локации (required)
 - Категория деятельности (required, select из `GET /api/v1/locations/categories`)
 - Описание (optional)
@@ -31,6 +34,7 @@ Frontend форма:
 ⚠️ **schedule_type всегда `fixed`** (расписания синхронизируются автоматически на беке)
 
 Backend создает:
+
 - ✓ Location (organization_id, name, category_id, address)
 - ✓ LocationSchedule (расписание локации)
 - ✓ EmployeeSchedule (автоматически копирует расписание на owner-employee)
@@ -42,6 +46,7 @@ Backend создает:
 ## Онбординг: Добавление услуг
 
 Frontend форма (минимум 1 услуга):
+
 - Название услуги (required)
 - Цена (required, number, ₸)
 - Длительность (required, number, минуты)
@@ -49,6 +54,7 @@ Frontend форма (минимум 1 услуга):
 - Описание (optional)
 
 Backend создает:
+
 - ✓ Service (location_id, name, price, duration, category_id)
 - ✓ EmployeeService (service_id, employee_id=owner) — привязка к owner через `POST /api/v1/employee-services`
 

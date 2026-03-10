@@ -1,9 +1,11 @@
 # Bagsy LK — Инструкции для Claude
 
 ## Проект
+
 Личный кабинет (app.bagsy.kz) для управления салонами красоты, мед центрами и любыми другими услугами с возможностью записи. Next.js 16 + React 19 + TypeScript 5 + TailwindCSS 4.
 
 ## Стиль кода
+
 - **Чем меньше строк кода тем лучше**
 - **Комментарии НЕ удалять**, а наоборот добавлять везде
 - Отвечай кратко
@@ -32,14 +34,14 @@ src/shared/providers/    — QueryProvider, ThemeProvider
 
 ## Терминология API (НОВАЯ)
 
-| Термин | Описание | Старое название |
-|---|---|---|
-| `locations` | Точки обслуживания | points |
-| `employees` | Сотрудники | staff |
-| `bookings` | Записи/бронирования | bagsies |
-| `organization_id` | UUID организации | network_code |
-| `location_id` | UUID точки | point_code |
-| `employee_id` | UUID сотрудника | master_phone |
+| Термин            | Описание            | Старое название |
+| ----------------- | ------------------- | --------------- |
+| `locations`       | Точки обслуживания  | points          |
+| `employees`       | Сотрудники          | staff           |
+| `bookings`        | Записи/бронирования | bagsies         |
+| `organization_id` | UUID организации    | network_code    |
+| `location_id`     | UUID точки          | point_code      |
+| `employee_id`     | UUID сотрудника     | master_phone    |
 
 ## Ролевая модель
 
@@ -65,6 +67,7 @@ src/shared/providers/    — QueryProvider, ThemeProvider
 ## Документация
 
 Подробная документация в `docs/`:
+
 - `PROJECT_OVERVIEW.md` — архитектура и стек
 - `API_ENDPOINTS.md` — все эндпоинты из swagger
 - `API_MIGRATION.md` — маппинг старый → новый API

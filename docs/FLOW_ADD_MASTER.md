@@ -3,14 +3,22 @@
 ## 1. Отправка инвайта (в ЛК)
 
 Frontend (app.bagsy.kz/staff → [Добавить сотрудника]):
+
 - ФИО, телефон
 - Роль: `manager` | `staff`
 - Локация (location_id) — UUID
 - `can_provide_services` — чекбокс (нужно ли привязывать к услугам)
 
 API: `POST /api/v1/employees/invite`
+
 ```json
-{ "phone": "+77001234567", "first_name": "Анна", "last_name": "Иванова", "role": "staff", "location_id": "uuid" }
+{
+  "phone": "+77001234567",
+  "first_name": "Анна",
+  "last_name": "Иванова",
+  "role": "staff",
+  "location_id": "uuid"
+}
 ```
 
 На указанный телефон через WhatsApp/SMS приходит ссылка:
@@ -21,6 +29,7 @@ API: `POST /api/v1/employees/invite`
 ## 2. Проверка инвайта
 
 `GET /api/v1/auth/verify/{token}` → ответ:
+
 ```json
 {
   "invite_valid": true,
@@ -33,6 +42,7 @@ API: `POST /api/v1/employees/invite`
 ```
 
 Дополнительные поля (от бека, уточнить):
+
 - `user_exists` — зарегистрирован ли пользователь
 - `already_linked` — привязан ли уже к другой локации
 - `organization_name`, `location_name` — для отображения в UI
@@ -42,6 +52,7 @@ API: `POST /api/v1/employees/invite`
 ## 3. Сценарии принятия инвайта
 
 ### Новый пользователь (`user_exists = false`)
+
 ```
 ┌────────────────────────────────────────────┐
 │ Приглашение в "Салон на Абая"              │
@@ -60,6 +71,7 @@ API: `POST /api/v1/employees/invite/confirm` → `{ token, password }`
 Ответ: `{ access_token, refresh_token }`
 
 ### Существующий пользователь (`user_exists = true, already_linked = false`)
+
 ```
 ┌────────────────────────────────────────────┐
 │ Приглашение в "Салон на Абая"              │
@@ -72,6 +84,7 @@ API: `POST /api/v1/employees/invite/confirm` → `{ token, password }`
 ```
 
 ### Уже привязан к другой локации (`already_linked = true`)
+
 ```
 ┌────────────────────────────────────────────┐
 │ ⚠️ Вы уже работаете в другой точке         │

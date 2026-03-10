@@ -6,23 +6,23 @@
 
 ## Стек
 
-| Технология | Версия | Назначение |
-|---|---|---|
-| Next.js | 16 | App Router, SSR |
-| React | 19 | UI |
-| TypeScript | 5 | Типизация |
-| TailwindCSS | 4 | Стили |
-| TanStack Query | 5 | Серверный стейт |
-| Zustand | 5 | Локальный стейт (календарь) |
-| Zod | 4 | Валидация форм |
-| react-hook-form | 7 | Формы |
-| shadcn/ui (Radix) | — | UI-компоненты |
-| next-intl | 4 | i18n (ru, kz) |
-| next-themes | — | Тема (light/dark) |
-| Serwist | 9 | PWA + Service Worker |
-| date-fns | 4 | Даты |
-| Leaflet | — | Карты (выбор адреса) |
-| @dnd-kit | — | Drag & Drop в календаре |
+| Технология        | Версия | Назначение                  |
+| ----------------- | ------ | --------------------------- |
+| Next.js           | 16     | App Router, SSR             |
+| React             | 19     | UI                          |
+| TypeScript        | 5      | Типизация                   |
+| TailwindCSS       | 4      | Стили                       |
+| TanStack Query    | 5      | Серверный стейт             |
+| Zustand           | 5      | Локальный стейт (календарь) |
+| Zod               | 4      | Валидация форм              |
+| react-hook-form   | 7      | Формы                       |
+| shadcn/ui (Radix) | —      | UI-компоненты               |
+| next-intl         | 4      | i18n (ru, kz)               |
+| next-themes       | —      | Тема (light/dark)           |
+| Serwist           | 9      | PWA + Service Worker        |
+| date-fns          | 4      | Даты                        |
+| Leaflet           | —      | Карты (выбор адреса)        |
+| @dnd-kit          | —      | Drag & Drop в календаре     |
 
 ---
 
@@ -72,47 +72,47 @@ src/
 
 ### API слой
 
-| Файл | Назначение |
-|---|---|
-| `src/shared/api/client.ts` | HTTP-клиент с auto-refresh 401 + proactive refresh |
-| `src/shared/services/auth-service.ts` | Авторизация |
-| `src/shared/services/calendar-service.ts` | Календарь записей |
-| `src/shared/services/employee-service.ts` | Сотрудники (`GET /api/v1/employees`) |
-| `src/shared/services/booking-service.ts` | Бронирования/записи |
-| `src/shared/services/location-service.ts` | Локации |
-| `src/shared/services/service-service.ts` | Услуги + категории |
-| `src/shared/services/master-service.ts` | Привязка сотрудников к услугам |
-| `src/shared/services/media-service.ts` | Загрузка медиа (S3 presigned URL) |
+| Файл                                      | Назначение                                         |
+| ----------------------------------------- | -------------------------------------------------- |
+| `src/shared/api/client.ts`                | HTTP-клиент с auto-refresh 401 + proactive refresh |
+| `src/shared/services/auth-service.ts`     | Авторизация                                        |
+| `src/shared/services/calendar-service.ts` | Календарь записей                                  |
+| `src/shared/services/employee-service.ts` | Сотрудники (`GET /api/v1/employees`)               |
+| `src/shared/services/booking-service.ts`  | Бронирования/записи                                |
+| `src/shared/services/location-service.ts` | Локации                                            |
+| `src/shared/services/service-service.ts`  | Услуги + категории                                 |
+| `src/shared/services/master-service.ts`   | Привязка сотрудников к услугам                     |
+| `src/shared/services/media-service.ts`    | Загрузка медиа (S3 presigned URL)                  |
 
 ### Хуки (React Query)
 
-| Файл | Хуки |
-|---|---|
-| `src/shared/hooks/use-auth.ts` | useLogin, useLogout, usePasswordReset |
-| `src/shared/hooks/use-users.ts` | useCurrentUser, useUpdateProfile |
-| `src/shared/hooks/use-calendar.ts` | useCalendar (main hook) |
-| `src/shared/hooks/user-staff.ts` | useGetEmployees, useInviteEmployee |
-| `src/shared/hooks/use-services.ts` | useLocationServices, useServiceCategories, useCreateService |
-| `src/shared/hooks/use-network-points.ts` | useLocations, useLocation, useCreateLocation, useLocationCategories |
-| `src/shared/hooks/use-bagsies.ts` | useCreateBooking, useCancelBooking |
-| `src/shared/hooks/use-master-services.ts` | useCreateMasterService |
+| Файл                                      | Хуки                                                                |
+| ----------------------------------------- | ------------------------------------------------------------------- |
+| `src/shared/hooks/use-auth.ts`            | useLogin, useLogout, usePasswordReset                               |
+| `src/shared/hooks/use-users.ts`           | useCurrentUser, useUpdateProfile                                    |
+| `src/shared/hooks/use-calendar.ts`        | useCalendar (main hook)                                             |
+| `src/shared/hooks/user-staff.ts`          | useGetEmployees, useInviteEmployee                                  |
+| `src/shared/hooks/use-services.ts`        | useLocationServices, useServiceCategories, useCreateService         |
+| `src/shared/hooks/use-network-points.ts`  | useLocations, useLocation, useCreateLocation, useLocationCategories |
+| `src/shared/hooks/use-bagsies.ts`         | useCreateBooking, useCancelBooking                                  |
+| `src/shared/hooks/use-master-services.ts` | useCreateMasterService                                              |
 
 ### Типы
 
-| Файл | Содержимое |
-|---|---|
-| `src/shared/types/user.ts` | EUserRole, IEmployeeDto, IUserDto (deprecated) |
-| `src/shared/types/calendar.ts` | IEvent, CalendarApiResponse, TCalendarView |
-| `src/shared/types/staff.ts` | IStaffDto (deprecated) |
+| Файл                           | Содержимое                                     |
+| ------------------------------ | ---------------------------------------------- |
+| `src/shared/types/user.ts`     | EUserRole, IEmployeeDto, IUserDto (deprecated) |
+| `src/shared/types/calendar.ts` | IEvent, CalendarApiResponse, TCalendarView     |
+| `src/shared/types/staff.ts`    | IStaffDto (deprecated)                         |
 
 ### Утилиты
 
-| Файл | Назначение |
-|---|---|
-| `src/shared/utils/cookies.ts` | setAuthTokens, getAccessToken, clearAuthTokens |
-| `src/shared/utils/jwt.ts` | decodeJwt (client-side) |
-| `src/shared/utils/calendar-api-mapper.ts` | API → IEvent маппинг |
-| `src/shared/utils/formater.ts` | parseTimestamp, formatTimestamp, toTimestampWithTz |
+| Файл                                      | Назначение                                         |
+| ----------------------------------------- | -------------------------------------------------- |
+| `src/shared/utils/cookies.ts`             | setAuthTokens, getAccessToken, clearAuthTokens     |
+| `src/shared/utils/jwt.ts`                 | decodeJwt (client-side)                            |
+| `src/shared/utils/calendar-api-mapper.ts` | API → IEvent маппинг                               |
+| `src/shared/utils/formater.ts`            | parseTimestamp, formatTimestamp, toTimestampWithTz |
 
 ---
 
@@ -129,13 +129,14 @@ src/
 
 ## Ролевая модель
 
-| Роль | Описание |
-|---|---|
-| `owner` | Владелец организации |
-| `manager` | Менеджер локации |
-| `staff` | Мастер/сотрудник |
+| Роль      | Описание             |
+| --------- | -------------------- |
+| `owner`   | Владелец организации |
+| `manager` | Менеджер локации     |
+| `staff`   | Мастер/сотрудник     |
 
 Дополнительно используются **атрибуты** (ABAC):
+
 - `can_provide_services` — может оказывать услуги (у owner в SOLO плане = true)
 - `can_manage_location_schedule` — может управлять расписанием локации
 
@@ -143,12 +144,12 @@ src/
 
 ## Терминология (актуальная)
 
-| Термин | Описание |
-|---|---|
+| Термин                     | Описание                  |
+| -------------------------- | ------------------------- |
 | `location` / `location_id` | Точка обслуживания (UUID) |
-| `employee` / `employee_id` | Сотрудник (UUID) |
-| `booking` | Запись/бронирование |
-| `organization_id` | UUID организации |
+| `employee` / `employee_id` | Сотрудник (UUID)          |
+| `booking`                  | Запись/бронирование       |
+| `organization_id`          | UUID организации          |
 
 ---
 
@@ -163,8 +164,8 @@ src/
 
 ## Окружение
 
-| Переменная | Назначение |
-|---|---|
-| `NEXT_PUBLIC_API_URL` | Базовый URL API |
-| `NEXT_PUBLIC_PHONE_NUMBER` | Телефон поддержки |
-| `NEXT_PUBLIC_DOMAIN` | Домен (для ссылок на terms/privacy) |
+| Переменная                 | Назначение                          |
+| -------------------------- | ----------------------------------- |
+| `NEXT_PUBLIC_API_URL`      | Базовый URL API                     |
+| `NEXT_PUBLIC_PHONE_NUMBER` | Телефон поддержки                   |
+| `NEXT_PUBLIC_DOMAIN`       | Домен (для ссылок на terms/privacy) |
