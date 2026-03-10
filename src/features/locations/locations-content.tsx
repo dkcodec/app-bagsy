@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { usePointsPage } from "@/src/shared/hooks/use-network-points";
+import { useLocationsPage } from "@/src/shared/hooks/use-network-locations";
 import {
   Table,
   TableBody,
@@ -18,28 +18,29 @@ import {
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ErrorMessage } from "./components/error-message";
-import { PointsTableHeader } from "./components/table-header";
-import { PointsTableRow } from "./components/table-row";
-import { AddPointDialog } from "./components/add-point-dialog";
+import { LocationsTableHeader } from "./components/table-header";
+import { LocationsTableRow } from "./components/table-row";
+import { AddPointDialog } from "./components/add-location-dialog";
 import { useCurrentUser } from "@/src/shared/hooks/use-users";
 import { EUserRole } from "@/src/shared/types/user";
 
 /**
  * Компонент таблицы точек обслуживания
  */
-export function PointsContent() {
-  const t = useTranslations("Points");
+export function LocationsContent() {
+  const t = useTranslations("Locations");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { data: currentUser } = useCurrentUser();
 
   // Получение данных
-  const { data, isLoading, error } = usePointsPage();
+  const { data, isLoading, error } = useLocationsPage();
 
+  // Для Owner: блокируем кнопку добавления если уже есть точка (для Solo плана)
   const disableAddButton =
     isLoading ||
-    (currentUser?.role === EUserRole.SELF_OWNER &&
-      data?.points?.length &&
-      data.points.length > 0);
+    (currentUser?.role === EUserRole.OWNER &&
+      data?.locations?.length &&
+      data.locations.length > 0);
 
   // Определение колонок таблицы
   const tableColumns = [
@@ -79,7 +80,7 @@ export function PointsContent() {
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <PointsTableHeader columns={tableColumns} />
+                    <LocationsTableHeader columns={tableColumns} />
                   </TableHeader>
                   <TableBody>
                     {isLoading ? (
@@ -92,7 +93,7 @@ export function PointsContent() {
                           )
                         )}
                       </TableRow>
-                    ) : !data?.points || data.points.length === 0 ? (
+                    ) : !data?.locations || data.locations.length === 0 ? (
                       <TableRow>
                         <TableCell
                           colSpan={6}
@@ -102,8 +103,8 @@ export function PointsContent() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      data.points.map(point => (
-                        <PointsTableRow key={point.code} point={point} />
+                      data.locations.map(location => (
+                        <LocationsTableRow key={location.id} point={location} />
                       ))
                     )}
                   </TableBody>
@@ -114,7 +115,7 @@ export function PointsContent() {
         </CardContent>
       </Card>
 
-      {/* Диалог добавления точки */}
+      {/* Диалог добавления локации */}
       <AddPointDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} />
     </div>
   );

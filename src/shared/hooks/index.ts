@@ -27,7 +27,7 @@ export * from "./use-calendar";
 export * from "./use-bagsies";
 
 // Хуки для точек сети
-export * from "./use-network-points";
+export * from "./use-network-locations";
 
 // Хуки для услуг
 export * from "./use-services";

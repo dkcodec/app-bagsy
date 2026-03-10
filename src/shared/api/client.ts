@@ -71,7 +71,22 @@ export class HttpClient {
     });
 
     // Получаем токен (приоритет: переданный колбэк, затем из cookies)
-    const token = this.getAuthToken?.() || (await getAccessToken());
+    let token = this.getAuthToken?.() || (await getAccessToken());
+
+    // Если access_token отсутствует, но refresh_token есть — проактивно обновляем
+    // Без этого запрос уйдёт без Authorization, бэк вернёт 400 (не 401) и refresh не сработает
+    if (!token && !isRetry) {
+      const refreshToken = await getRefreshToken();
+      if (refreshToken) {
+        try {
+          await this.refreshTokenIfNeeded();
+          token = this.getAuthToken?.() || (await getAccessToken());
+        } catch {
+          // Если refresh не удался — продолжаем без токена, пусть бэк вернёт ошибку
+        }
+      }
+    }
+
     if (token && !headers.has("Authorization")) {
       headers.set("Authorization", `Bearer ${token}`);
     }
@@ -159,11 +174,12 @@ export class HttpClient {
         throw new Error("Refresh token not found");
       }
 
-      const url = this.buildUrl("v1/auth/refresh");
+      const url = this.buildUrl("api/v1/auth/refresh");
       const response = await fetch(url, {
         method: "POST",
         headers: {
           Accept: "application/json",
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           refresh_token: refreshToken,

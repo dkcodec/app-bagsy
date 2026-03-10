@@ -14,7 +14,7 @@ import {
   Button,
   Input,
 } from "@/src/entities";
-import { IUserDto } from "@/src/shared/types/user";
+import { IEmployeeDto } from "@/src/shared/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useEffect, useRef, useState } from "react";
@@ -31,7 +31,7 @@ import { formatRole } from "@/src/shared/utils/format-role";
 import { formatDateOnly } from "@/src/shared/utils/formater";
 
 interface ProfileDisplayProps {
-  user?: IUserDto;
+  user?: IEmployeeDto;
   isLoading?: boolean;
 }
 
@@ -64,7 +64,7 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
   }, [selectedFile]);
   // Генерируем инициалы для аватара
   const initials = user
-    ? `${user.name.charAt(0)}${user.surname.charAt(0)}`.toUpperCase()
+    ? `${user.first_name.charAt(0)}${user.last_name.charAt(0)}`.toUpperCase()
     : "";
 
   // Определяем статус пользователя
@@ -88,27 +88,27 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      name: user?.name ?? "",
-      surname: user?.surname ?? "",
+      name: user?.first_name ?? "",
+      surname: user?.last_name ?? "",
     },
   });
 
   useEffect(() => {
     if (user)
       reset({
-        name: user.name,
-        surname: user.surname,
+        name: user.first_name,
+        surname: user.last_name,
       });
   }, [user]);
 
   const onSubmit = async (data: ProfileFormData) => {
-    const updateData: { name: string; surname: string; avatar_id?: string } = {
-      name: data.name,
-      surname: data.surname,
+    const updateData: { first_name: string; last_name: string; avatar_id?: string } = {
+      first_name: data.name,
+      last_name: data.surname,
     };
     if (selectedFile) {
       try {
-        updateData.avatar_id = await uploadAvatar.mutateAsync(selectedFile);
+        updateData.avatar_id = await uploadAvatar.mutateAsync({ file: selectedFile, purpose: "avatars" });
       } catch {
         toast.error(t("uploadError"));
         return;
@@ -200,7 +200,7 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
                 <Avatar className="h-16 w-16 rounded-2xl">
                   <AvatarImage
                     src={user?.avatar_url}
-                    alt={user?.name ?? "avatar"}
+                    alt={user?.first_name ?? "avatar"}
                   />
                   <AvatarFallback className="text-lg font-semibold rounded-2xl">
                     {isLoading ? (
@@ -241,7 +241,7 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
                         id="name"
                         className="w-full bg-transparent outline-hidden border-b border-muted-foreground/40 focus:border-primary transition-colors"
                         {...register("name")}
-                        placeholder={user?.name ?? t("name")}
+                        placeholder={user?.first_name ?? t("name")}
                         disabled={isSubmitting}
                       />
                       {errors.name && (
@@ -256,7 +256,7 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
                         id="surname"
                         className="w-full bg-transparent outline-hidden border-b border-muted-foreground/40 focus:border-primary transition-colors"
                         {...register("surname")}
-                        placeholder={user?.surname ?? t("surname")}
+                        placeholder={user?.last_name ?? t("surname")}
                         disabled={isSubmitting}
                       />
                       {errors.surname && (
@@ -267,7 +267,7 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
                     </div>
                   </div>
                 ) : (
-                  `${user?.name ?? ""} ${user?.surname ?? ""}`.trim()
+                  `${user?.first_name ?? ""} ${user?.last_name ?? ""}`.trim()
                 )}
               </h3>
               <div className="text-sm text-muted-foreground">
@@ -302,13 +302,13 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
 
             <div className="space-y-2">
               <h4 className="text-sm font-medium text-muted-foreground">
-                {t("pointCode")}
+                {t("locationId")}
               </h4>
               <div className="text-sm">
                 {isLoading ? (
                   <Skeleton className="h-4 w-16" />
                 ) : (
-                  (user?.point_code ?? "-")
+                  (user?.location_id ?? "-")
                 )}
               </div>
             </div>
@@ -321,7 +321,7 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
                 {isLoading ? (
                   <Skeleton className="h-4 w-16" />
                 ) : (
-                  (user?.network_code ?? "-")
+                  (user?.organization_id ?? "-")
                 )}
               </div>
             </div>
@@ -351,7 +351,7 @@ export function ProfileDisplay({ user, isLoading }: ProfileDisplayProps) {
                   <Skeleton className="h-4 w-24" />
                 ) : (
                   formatDateOnly(
-                    user?.updated_at ?? "",
+                    user?.created_at ?? "",
                     locale === "kz" ? "kk-KZ" : "ru-RU"
                   )
                 )}

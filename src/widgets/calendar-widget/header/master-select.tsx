@@ -12,11 +12,11 @@ import {
 import { useTranslations } from "next-intl";
 
 export function MasterSelect() {
-  const { masters, selectedMasterPhone, setSelectedMasterPhone } =
+  const { masters, selectedEmployeeId, setSelectedEmployeeId } =
     useCalendar();
   const t = useTranslations("Dashboard.Calendar.Header");
   return (
-    <Select value={selectedMasterPhone} onValueChange={setSelectedMasterPhone}>
+    <Select value={selectedEmployeeId} onValueChange={setSelectedEmployeeId}>
       <SelectTrigger className="flex-1 md:w-48">
         <SelectValue />
       </SelectTrigger>
@@ -26,13 +26,13 @@ export function MasterSelect() {
           <div className="flex items-center gap-1">
             <AvatarGroup max={2}>
               {masters.map(master => (
-                <Avatar key={master.phone} className="size-6 text-xxs">
+                <Avatar key={master.id} className="size-6 text-xxs">
                   <AvatarImage
                     src={undefined}
-                    alt={`${master.name} ${master.surname}`}
+                    alt={`${master.first_name} ${master.last_name}`}
                   />
                   <AvatarFallback className="text-xxs">
-                    {`${master.name[0]}${master.surname[0]}`}
+                    {`${master.first_name[0]}${master.last_name[0]}`}
                   </AvatarFallback>
                 </Avatar>
               ))}
@@ -43,22 +43,22 @@ export function MasterSelect() {
 
         {masters.map(master => (
           <SelectItem
-            key={master.phone}
-            value={master.phone}
+            key={master.id}
+            value={master.id}
             className="flex-1"
           >
             <div className="flex items-center gap-2">
-              <Avatar key={master.phone} className="size-6">
+              <Avatar key={master.id} className="size-6">
                 <AvatarImage
                   src={undefined}
-                  alt={`${master.name} ${master.surname}`}
+                  alt={`${master.first_name} ${master.last_name}`}
                 />
                 <AvatarFallback className="text-xxs">
-                  {`${master.name[0]}${master.surname[0]}`}
+                  {`${master.first_name[0]}${master.last_name[0]}`}
                 </AvatarFallback>
               </Avatar>
 
-              <p className="truncate">{`${master.name} ${master.surname}`}</p>
+              <p className="truncate">{`${master.first_name} ${master.last_name}`}</p>
             </div>
           </SelectItem>
         ))}

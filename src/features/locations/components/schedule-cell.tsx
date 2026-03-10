@@ -13,7 +13,7 @@ import { formatScheduleTime } from "@/src/shared/utils/formater";
 import type { ISchedule } from "@/src/shared/types/user";
 
 /**
- * Интерфейс для расписания точки
+ * Интерфейс для расписания локации
  */
 interface ScheduleCellProps {
   schedule: ISchedule[];
@@ -48,11 +48,11 @@ const WEEK_DAYS_FOR_UI = [
 ];
 
 /**
- * Компонент для отображения расписания точки
+ * Компонент для отображения расписания локации
  * Показывает компактную сводку в таблице и полное расписание в Popover
  */
 export function ScheduleCell({ schedule }: ScheduleCellProps) {
-  const t = useTranslations("Points.schedule");
+  const t = useTranslations("Locations.schedule");
   const tDays = useTranslations("Dashboard.Settings");
   const [isOpen, setIsOpen] = useState(false);
 

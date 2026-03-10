@@ -3,27 +3,26 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   MasterService,
-  type CreateMasterServiceRequestDto,
-  type CreateMasterServiceResponseDto,
+  type CreateEmployeeServiceRequest,
+  type CreateEmployeeServiceResponse,
 } from "../services/master-service";
 
 /**
- * Хук для создания связи мастер-услуга
+ * Хук для привязки сотрудника к услуге POST /api/v1/employee-services
  * Инвалидирует кэш списка услуг после успешного создания
  */
 export function useCreateMasterService() {
   const queryClient = useQueryClient();
 
   return useMutation<
-    CreateMasterServiceResponseDto,
+    CreateEmployeeServiceResponse,
     unknown,
-    CreateMasterServiceRequestDto
+    CreateEmployeeServiceRequest
   >({
-    mutationKey: ["master-services", "create"],
-    mutationFn: (data: CreateMasterServiceRequestDto) =>
+    mutationKey: ["employee-services", "create"],
+    mutationFn: (data: CreateEmployeeServiceRequest) =>
       MasterService.createMasterService(data),
     onSuccess: () => {
-      // Инвалидируем кэш услуг для обновления данных в таблице
       queryClient.invalidateQueries({ queryKey: ["services", "point"] });
     },
   });

@@ -23,24 +23,27 @@ import {
   SelectValue,
 } from "@/src/entities/select";
 import { PhoneInput, PhoneInputValue } from "@/src/widgets/forms";
-import { useRegisterStaff } from "@/src/shared/hooks/user-staff";
+import { useInviteEmployee } from "@/src/shared/hooks/user-staff";
 import { Loader } from "lucide-react";
 import { toast } from "sonner";
-import { EUserRole, TUserRole } from "@/src/shared/types/user";
+import { EUserRole } from "@/src/shared/types/user";
 import { useCurrentUser } from "@/src/shared/hooks/use-users";
-import { useNetworkPoints } from "@/src/shared/hooks/use-network-points";
+import { useLocations } from "@/src/shared/hooks/use-network-locations";
 
 /**
- * Схема валидации для регистрации сотрудника
+ * Схема валидации для приглашения сотрудника
  * Принимает список доступных ролей в зависимости от прав текущего пользователя
  */
-const createRegisterStaffSchema = (
+const createInviteStaffSchema = (
   t: (key: string) => string,
   availableRoles: EUserRole[]
 ) =>
   z.object({
-    name: z.string().min(2, t("errors.nameMin")).max(50, t("errors.nameMax")),
-    surname: z
+    first_name: z
+      .string()
+      .min(2, t("errors.nameMin"))
+      .max(50, t("errors.nameMax")),
+    last_name: z
       .string()
       .min(2, t("errors.surnameMin"))
       .max(50, t("errors.surnameMax")),
@@ -51,15 +54,11 @@ const createRegisterStaffSchema = (
     role: z.enum(availableRoles as [string, ...string[]], {
       message: t("errors.roleRequired"),
     }),
-    point_code: z
-      .string()
-      .min(1, t("errors.pointCodeRequired"))
-      .max(50, t("errors.pointCodeMax")),
+    // location_id — UUID локации, к которой привязывается сотрудник
+    location_id: z.string().min(1, t("errors.pointCodeRequired")),
   });
 
-type RegisterStaffFormData = z.infer<
-  ReturnType<typeof createRegisterStaffSchema>
->;
+type InviteStaffFormData = z.infer<ReturnType<typeof createInviteStaffSchema>>;
 
 interface RegisterStaffFormProps {
   onSuccess?: () => void;
@@ -67,71 +66,65 @@ interface RegisterStaffFormProps {
 }
 
 /**
- * Форма регистрации нового сотрудника
- * Использует двухэтапный процесс: создает неактивного пользователя
- * и отправляет ссылку для завершения регистрации
+ * Форма приглашения нового сотрудника
+ * Отправляет инвайт через POST /api/v1/employees/invite
  */
 export function RegisterStaffForm({
   onSuccess,
   onCancel,
 }: RegisterStaffFormProps) {
   const t = useTranslations("Staff.RegisterForm");
-  const registerStaffMutation = useRegisterStaff();
+  const inviteEmployeeMutation = useInviteEmployee();
   const { data: currentUser } = useCurrentUser();
-  const { data: networkPoints } = useNetworkPoints(currentUser?.network_code);
+  const { data: locationsData } = useLocations();
 
-  // Для manager — только его точка, для ролей выше — список из API
+  // Для manager — только его точка, для Owner — список из API
   const pointOptions = useMemo(() => {
-    if (currentUser?.role === EUserRole.MANAGER && currentUser.point_code) {
-      return [{ code: currentUser.point_code, name: currentUser.point_code }];
+    const userLocationId = currentUser?.location_id;
+    if (currentUser?.role === EUserRole.MANAGER && userLocationId) {
+      return [{ id: userLocationId, name: userLocationId }];
     }
     return (
-      networkPoints?.points.map(p => ({
-        code: p.code,
-        name: p.name || p.code,
+      locationsData?.locations.map(l => ({
+        id: l.id,
+        name: l.name || l.id,
       })) ?? []
     );
-  }, [currentUser?.role, currentUser?.point_code, networkPoints?.points]);
+  }, [currentUser?.role, currentUser?.location_id, locationsData?.locations]);
 
-  // Определяем доступные роли в зависимости от прав текущего пользователя
+  // Доступные роли: Manager и Staff
   const availableRoles = useMemo(() => {
-    const baseRoles = [EUserRole.MANAGER, EUserRole.STAFF];
-    // Админ может создавать net_manager
-    if (currentUser?.role === EUserRole.ADMIN) {
-      return [...baseRoles, EUserRole.NET_MANAGER];
-    }
-    return baseRoles;
-  }, [currentUser?.role]);
+    return [EUserRole.MANAGER, EUserRole.STAFF];
+  }, []);
 
   // Создаем схему с переводами и доступными ролями
-  const schema = createRegisterStaffSchema(t, availableRoles);
+  const schema = createInviteStaffSchema(t, availableRoles);
 
-  const form = useForm<RegisterStaffFormData>({
+  const form = useForm<InviteStaffFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      name: "",
-      surname: "",
+      first_name: "",
+      last_name: "",
       phone: "",
       role: undefined,
-      point_code: "",
+      location_id: "",
     },
   });
 
-  const onSubmit = async (data: RegisterStaffFormData) => {
+  const onSubmit = async (data: InviteStaffFormData) => {
     try {
-      // Явно указываем тип role для совместимости с RegisterStaffRequest
-      await registerStaffMutation.mutateAsync({
-        ...data,
-        role: data.role as Exclude<
-          TUserRole,
-          EUserRole.ADMIN | EUserRole.SELF_OWNER
-        >,
+      await inviteEmployeeMutation.mutateAsync({
+        first_name: data.first_name,
+        last_name: data.last_name,
+        phone: data.phone,
+        role: data.role as "manager" | "staff",
+        location_id: data.location_id,
       });
       toast.success(t("success"));
       form.reset();
       onSuccess?.();
     } catch (error) {
-      console.error("Ошибка регистрации сотрудника:", error);
+      console.error("Ошибка приглашения сотрудника:", error);
       toast.error(t("errors.submitError"));
     }
   };
@@ -143,14 +136,14 @@ export function RegisterStaffForm({
           {/* Имя */}
           <FormField
             control={form.control}
-            name="name"
+            name="first_name"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("name")}</FormLabel>
                 <FormControl>
                   <Input
                     placeholder={t("namePlaceholder")}
-                    disabled={registerStaffMutation.isPending}
+                    disabled={inviteEmployeeMutation.isPending}
                     {...field}
                   />
                 </FormControl>
@@ -162,14 +155,14 @@ export function RegisterStaffForm({
           {/* Фамилия */}
           <FormField
             control={form.control}
-            name="surname"
+            name="last_name"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("surname")}</FormLabel>
                 <FormControl>
                   <Input
                     placeholder={t("surnamePlaceholder")}
-                    disabled={registerStaffMutation.isPending}
+                    disabled={inviteEmployeeMutation.isPending}
                     {...field}
                   />
                 </FormControl>
@@ -192,7 +185,7 @@ export function RegisterStaffForm({
                     value={field.value as PhoneInputValue}
                     onChange={field.onChange}
                     defaultCountryCode="KZ"
-                    disabled={registerStaffMutation.isPending}
+                    disabled={inviteEmployeeMutation.isPending}
                     placeholder={t("phonePlaceholder")}
                   />
                 </FormControl>
@@ -211,7 +204,7 @@ export function RegisterStaffForm({
                 <Select
                   onValueChange={field.onChange}
                   value={field.value}
-                  disabled={registerStaffMutation.isPending}
+                  disabled={inviteEmployeeMutation.isPending}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -225,11 +218,6 @@ export function RegisterStaffForm({
                     <SelectItem value={EUserRole.MANAGER}>
                       {t("roles.manager")}
                     </SelectItem>
-                    {availableRoles.includes(EUserRole.NET_MANAGER) && (
-                      <SelectItem value={EUserRole.NET_MANAGER}>
-                        {t("roles.net_manager")}
-                      </SelectItem>
-                    )}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -238,26 +226,26 @@ export function RegisterStaffForm({
           />
         </div>
 
-        {/* Код точки */}
+        {/* Точка (location) */}
         <FormField
           control={form.control}
-          name="point_code"
+          name="location_id"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("pointCode")}</FormLabel>
+              <FormLabel>{t("locationId")}</FormLabel>
               <Select
                 onValueChange={field.onChange}
                 value={field.value}
-                disabled={registerStaffMutation.isPending}
+                disabled={inviteEmployeeMutation.isPending}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder={t("pointCodePlaceholder")} />
+                    <SelectValue placeholder={t("locationIdPlaceholder")} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
                   {pointOptions.map(point => (
-                    <SelectItem key={point.code} value={point.code}>
+                    <SelectItem key={point.id} value={point.id}>
                       {point.name}
                     </SelectItem>
                   ))}
@@ -275,13 +263,13 @@ export function RegisterStaffForm({
               type="button"
               variant="outline"
               onClick={onCancel}
-              disabled={registerStaffMutation.isPending}
+              disabled={inviteEmployeeMutation.isPending}
             >
               {t("cancel")}
             </Button>
           )}
-          <Button type="submit" disabled={registerStaffMutation.isPending}>
-            {registerStaffMutation.isPending ? (
+          <Button type="submit" disabled={inviteEmployeeMutation.isPending}>
+            {inviteEmployeeMutation.isPending ? (
               <>
                 <Loader className="mr-2 size-4 animate-spin" />
                 {t("submitting")}

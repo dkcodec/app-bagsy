@@ -8,8 +8,8 @@ import type {
   TVisibleHours,
   TWorkingHours,
 } from "@/src/shared/types/calendar";
-import { IUserDto } from "@/src/shared/types/user";
-import { PointService } from "@/src/shared/services/point-service";
+import { IEmployeeDto } from "@/src/shared/types/user";
+import { LocationService } from "@/src/shared/services/location-service";
 import { parseScheduleTime } from "@/src/shared/utils/datetime";
 
 const WORKING_HOURS: TWorkingHours = {
@@ -42,7 +42,7 @@ function emptyWorkingHours(): TWorkingHours {
 }
 
 /** Маппинг ISchedule[] (open/close) в TWorkingHours. Экспорт для calendar-settings. */
-export function mapPointScheduleToWorkingHours(
+export function mapLocationScheduleToWorkingHours(
   schedule: Array<{
     all_day: boolean;
     open: string;
@@ -87,31 +87,31 @@ function deriveVisibleHoursFromWorkingHours(
 export type CalendarState = {
   selectedDate: Date;
   setSelectedDate: (date: Date | undefined) => void;
-  selectedMasterPhone: IUserDto["phone"] | "all";
-  setSelectedMasterPhone: (masterPhone: IUserDto["phone"] | "all") => void;
+  selectedEmployeeId: IEmployeeDto["id"] | "all";
+  setSelectedEmployeeId: (employeeId: IEmployeeDto["id"] | "all") => void;
   badgeVariant: TBadgeVariant;
   setBadgeVariant: (variant: TBadgeVariant) => void;
-  masters: IUserDto[];
-  setMasters: (masters: IUserDto[]) => void;
+  masters: IEmployeeDto[];
+  setMasters: (masters: IEmployeeDto[]) => void;
   workingHours: TWorkingHours;
   setWorkingHours: (
     updater: TWorkingHours | ((prev: TWorkingHours) => TWorkingHours)
   ) => void;
-  loadWorkingHours: (pointCode: string | undefined) => Promise<void>;
+  loadWorkingHours: (locationId: string | undefined) => Promise<void>;
   visibleHours: TVisibleHours;
   setVisibleHours: (
     updater: TVisibleHours | ((prev: TVisibleHours) => TVisibleHours)
   ) => void;
   /**
    * Если true — visibleHours ещё не задавались пользователем,
-   * и их можно автоподстроить под workingHours точки.
+   * и их можно автоподстроить под workingHours локации.
    */
   isVisibleHoursAuto: boolean;
   events: IEvent[];
   setLocalEvents: (updater: IEvent[] | ((prev: IEvent[]) => IEvent[])) => void;
-  /** Код точки: selectedPointCode || currentUser.point_code. Для выборов услуги в форме записи. */
-  pointCode: string | undefined;
-  setPointCode: (v: string | undefined) => void;
+  /** UUID локации: selectedLocationId || currentUser.location_id. Для выбора услуги в форме записи. */
+  locationId: string | undefined;
+  setLocationId: (v: string | undefined) => void;
 };
 
 export const useCalendarStore = create<CalendarState>()(
@@ -124,14 +124,14 @@ export const useCalendarStore = create<CalendarState>()(
         if (isSameDay(current, date)) return;
         set({ selectedDate: date });
       },
-      selectedMasterPhone: "all",
-      setSelectedMasterPhone: (masterPhone: IUserDto["phone"] | "all") =>
-        set({ selectedMasterPhone: masterPhone }),
+      selectedEmployeeId: "all",
+      setSelectedEmployeeId: (employeeId: IEmployeeDto["id"] | "all") =>
+        set({ selectedEmployeeId: employeeId }),
       badgeVariant: "colored",
       setBadgeVariant: (variant: TBadgeVariant) =>
         set({ badgeVariant: variant }),
       masters: [],
-      setMasters: (masters: IUserDto[]) => set({ masters }),
+      setMasters: (masters: IEmployeeDto[]) => set({ masters }),
       workingHours: WORKING_HOURS,
       setWorkingHours: (
         updater: TWorkingHours | ((prev: TWorkingHours) => TWorkingHours)
@@ -144,19 +144,16 @@ export const useCalendarStore = create<CalendarState>()(
                 )
               : updater,
         })),
-      loadWorkingHours: async (pointCode: string | undefined) => {
-        if (!pointCode) return;
-        const point = await PointService.getPoint(pointCode);
-        const workingHours = mapPointScheduleToWorkingHours(point.schedule);
-        const nextVisibleHours =
-          deriveVisibleHoursFromWorkingHours(workingHours);
-
-        set(state => ({
-          workingHours,
-          ...(state.isVisibleHoursAuto && nextVisibleHours
-            ? { visibleHours: nextVisibleHours }
-            : {}),
-        }));
+      loadWorkingHours: async (locationId: string | undefined) => {
+        if (!locationId) return;
+        try {
+          const location = await LocationService.getLocation(locationId);
+          // TODO: schedule данные пока не приходят из GET /api/v1/locations/{id}
+          // Когда бэк добавит schedule — парсить и маппить как раньше
+          void location;
+        } catch {
+          // Используем дефолтные рабочие часы при ошибке
+        }
       },
       visibleHours: VISIBLE_HOURS,
       setVisibleHours: (
@@ -180,8 +177,8 @@ export const useCalendarStore = create<CalendarState>()(
               ? (updater as (prev: IEvent[]) => IEvent[])(state.events)
               : updater,
         })),
-      pointCode: undefined,
-      setPointCode: (v: string | undefined) => set({ pointCode: v }),
+      locationId: undefined,
+      setLocationId: (v: string | undefined) => set({ locationId: v }),
     }),
     {
       name: "calendar-store",

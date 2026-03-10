@@ -31,7 +31,7 @@ export function AddressSearch({
   disabled = false,
   className,
 }: AddressSearchProps) {
-  const t = useTranslations("Points.addPointForm.address");
+  const t = useTranslations("Locations.addPointForm.address");
   const [searchQuery, setSearchQuery] = useState(value);
   const [isOpen, setIsOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);

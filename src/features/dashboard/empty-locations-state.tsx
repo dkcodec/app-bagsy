@@ -16,8 +16,8 @@ import { useRouter } from "next/navigation";
  * Компонент для отображения состояния отсутствия точек обслуживания
  * Показывается когда у пользователя нет точек обслуживания
  */
-export function EmptyPointsState() {
-  const t = useTranslations("Dashboard.emptyPoints");
+export function EmptyLocationsState() {
+  const t = useTranslations("Dashboard.emptyLocations");
   const router = useRouter();
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] p-4">
@@ -41,7 +41,7 @@ export function EmptyPointsState() {
           </div>
         </CardHeader>
         <CardContent className="flex justify-center pt-2">
-          <Button size="lg" onClick={() => router.push("/points")}>
+          <Button size="lg" onClick={() => router.push("/locations")}>
             <Plus className="mr-2 h-4 w-4" />
             {t("addPointButton")}
           </Button>

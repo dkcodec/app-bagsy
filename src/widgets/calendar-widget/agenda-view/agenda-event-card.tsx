@@ -67,7 +67,7 @@ export function AgendaEventCard({
 
   const startDate = parseISO(event.startDate);
   const endDate = parseISO(event.endDate);
-  const master = masters.find(master => master.phone === event.masterPhone);
+  const master = masters.find(m => m.id === event.employeeId);
 
   const color = (
     badgeVariant === "dot" ? `${event.color}-dot` : event.color
@@ -116,7 +116,7 @@ export function AgendaEventCard({
           <div className="mt-1 flex items-center gap-1">
             <User className="size-3 shrink-0" />
             <p className="text-xs text-foreground">
-              {`${master?.name} ${master?.surname}` || event.masterPhone}
+              {master ? `${master.first_name} ${master.last_name}` : event.employeeName}
             </p>
           </div>
 

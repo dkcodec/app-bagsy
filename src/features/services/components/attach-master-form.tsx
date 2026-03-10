@@ -26,19 +26,19 @@ import { Loader } from "lucide-react";
 import { toast } from "sonner";
 import { useCreateMasterService } from "@/src/shared/hooks/use-master-services";
 import { useCurrentUser } from "@/src/shared/hooks/use-users";
-import { useGetStaff } from "@/src/shared/hooks/user-staff";
+import { useGetEmployees } from "@/src/shared/hooks/user-staff";
 import { EUserRole, type TUserRole } from "@/src/shared/types/user";
-import { GetStaffParams } from "@/src/shared/services/staff-service";
+import type { GetEmployeesParams } from "@/src/shared/services/employee-service";
 import { IServiceDto } from "@/src/shared/services/service-service";
 import { Avatar, AvatarFallback, AvatarImage } from "@/src/entities/avatar";
 import { useMemo } from "react";
 
 /**
- * Схема валидации для полной формы привязки мастера к услуге
+ * Схема валидации для привязки сотрудника к услуге
  */
 const createAttachMasterFormSchema = (
   t: (key: string) => string,
-  isMasterPhoneRequired: boolean
+  isEmployeeRequired: boolean
 ) => {
   const baseSchema = z.object({
     price: z
@@ -48,14 +48,14 @@ const createAttachMasterFormSchema = (
     service_id: z.string().min(1, t("serviceIdRequired")),
   });
 
-  if (isMasterPhoneRequired) {
+  if (isEmployeeRequired) {
     return baseSchema.extend({
-      master_phone: z.string().min(1, t("masterPhoneRequired")),
+      employee_id: z.string().min(1, t("masterPhoneRequired")),
     });
   }
 
   return baseSchema.extend({
-    master_phone: z.string().optional(),
+    employee_id: z.string().optional(),
   });
 };
 
@@ -66,8 +66,8 @@ type AttachMasterFormData = z.infer<
 interface AttachMasterFormProps {
   /** Услуга, к которой привязывается мастер */
   service: IServiceDto;
-  /** Код точки для загрузки списка мастеров */
-  pointCode?: string;
+  /** UUID локации для загрузки списка мастеров */
+  locationId?: string;
   /** Колбэк при успешной привязке */
   onSuccess?: () => void;
   /** Колбэк при отмене */
@@ -75,12 +75,11 @@ interface AttachMasterFormProps {
 }
 
 /**
- * Полная форма для привязки мастера к услуге
- * Используется в диалоге для расширенных возможностей
+ * Полная форма для привязки сотрудника к услуге (POST /api/v1/employee-services)
  */
 export function AttachMasterForm({
   service,
-  pointCode,
+  locationId,
   onSuccess,
   onCancel,
 }: AttachMasterFormProps) {
@@ -88,51 +87,39 @@ export function AttachMasterForm({
   const { data: currentUser } = useCurrentUser();
   const createMasterService = useCreateMasterService();
 
-  // Определяем, нужно ли поле выбора мастера
   const isStaff = currentUser?.role === EUserRole.STAFF;
-  const isSelfOwner = currentUser?.role === EUserRole.SELF_OWNER;
+  const isSelfOwner = currentUser?.role === EUserRole.OWNER;
   const showMasterSelect = !isStaff;
-  const isMasterPhoneRequired =
+  const isEmployeeRequired =
     currentUser?.role === EUserRole.MANAGER ||
-    currentUser?.role === EUserRole.NET_MANAGER;
+    currentUser?.role === EUserRole.OWNER;
 
-  // Параметры для загрузки списка мастеров
-  const staffParams = useMemo<GetStaffParams | undefined>(() => {
-    if (!currentUser || !showMasterSelect || !pointCode) {
-      return undefined;
-    }
+  // Параметры для загрузки списка сотрудников
+  const employeesParams = useMemo<GetEmployeesParams | undefined>(() => {
+    if (!currentUser || !showMasterSelect || !locationId) return undefined;
 
-    const params: GetStaffParams = {
+    const params: GetEmployeesParams = {
       role: [EUserRole.STAFF, EUserRole.MANAGER] as TUserRole[],
     };
 
     if (currentUser.role === EUserRole.MANAGER) {
-      params.point_code = currentUser.point_code;
-    } else if (
-      currentUser.role === EUserRole.NET_MANAGER ||
-      currentUser.role === EUserRole.SELF_OWNER
-    ) {
-      if (pointCode) {
-        params.point_code = pointCode;
-      } else {
-        params.network_code = currentUser.network_code;
-      }
+      params.location_id = currentUser.location_id;
+    } else if (currentUser.role === EUserRole.OWNER && locationId) {
+      params.location_id = locationId;
     }
 
     return params;
-  }, [currentUser, showMasterSelect, pointCode]);
+  }, [currentUser, showMasterSelect, locationId]);
 
-  // Загружаем список мастеров
-  const { data: staffData, isLoading: isLoadingStaff } =
-    useGetStaff(staffParams);
+  const { data: employeesData, isLoading: isLoadingEmployees } =
+    useGetEmployees(employeesParams);
 
-  // Создаем схему валидации
-  const schema = createAttachMasterFormSchema(t, isMasterPhoneRequired);
+  const schema = createAttachMasterFormSchema(t, isEmployeeRequired);
 
   const form = useForm<AttachMasterFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      master_phone: undefined,
+      employee_id: undefined,
       price: service.min_price || 0,
       service_id: service.id,
     },
@@ -140,30 +127,31 @@ export function AttachMasterForm({
 
   const onSubmit = async (data: AttachMasterFormData) => {
     try {
-      // Для STAFF и SELF_OWNER master_phone опционален
-      const canUseOwnPhone = isStaff || isSelfOwner;
-      const masterPhone =
-        canUseOwnPhone && !data.master_phone
-          ? currentUser?.phone
-          : data.master_phone;
+      // Для STAFF и SELF_OWNER employee_id может быть свой
+      const canUseSelf = isStaff || isSelfOwner;
+      const employeeId =
+        canUseSelf && !data.employee_id
+          ? currentUser?.id
+          : data.employee_id;
 
-      if (!masterPhone && isMasterPhoneRequired) {
+      if (!employeeId && isEmployeeRequired) {
+        toast.error(t("masterPhoneRequired"));
+        return;
+      }
+
+      if (!employeeId) {
         toast.error(t("masterPhoneRequired"));
         return;
       }
 
       await createMasterService.mutateAsync({
         service_id: data.service_id,
-        price: data.price,
-        ...(masterPhone && { master_phone: masterPhone }),
+        price: String(data.price),
+        employee_id: employeeId,
       });
 
       toast.success(t("success"));
-      form.reset({
-        master_phone: undefined,
-        price: service.min_price || 0,
-        service_id: service.id,
-      });
+      form.reset({ employee_id: undefined, price: service.min_price || 0, service_id: service.id });
       onSuccess?.();
     } catch (error) {
       console.error("Ошибка привязки мастера:", error);
@@ -171,66 +159,47 @@ export function AttachMasterForm({
     }
   };
 
-  const masters = staffData?.users || [];
+  const masters = employeesData?.employees || [];
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* Выбор мастера (скрыто для STAFF) */}
         {showMasterSelect && (
           <FormField
             control={form.control}
-            name="master_phone"
+            name="employee_id"
             render={({ field, fieldState }) => (
               <FormItem>
                 <FormLabel>{t("master")}</FormLabel>
                 <FormControl>
-                  {isLoadingStaff ? (
+                  {isLoadingEmployees ? (
                     <Skeleton className="h-9 w-full" />
                   ) : (
-                    <Select
-                      value={field.value ?? ""}
-                      onValueChange={field.onChange}
-                    >
-                      <SelectTrigger
-                        data-invalid={fieldState.invalid}
-                        disabled={createMasterService.isPending}
-                      >
+                    <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                      <SelectTrigger data-invalid={fieldState.invalid} disabled={createMasterService.isPending}>
                         <SelectValue placeholder={t("selectMaster")} />
                       </SelectTrigger>
                       <SelectContent>
-                        {/* Опция "Себя" для SELF_OWNER */}
+                        {/* Опция "Себя" для Owner */}
                         {isSelfOwner && currentUser && (
-                          <SelectItem value={currentUser.phone}>
+                          <SelectItem value={currentUser.id}>
                             <div className="flex items-center gap-2">
                               <Avatar className="size-6">
-                                <AvatarImage
-                                  src={currentUser.avatar_url}
-                                  alt={`${currentUser.name} ${currentUser.surname}`}
-                                />
-                                <AvatarFallback className="text-xs">
-                                  {`${currentUser.name[0]}${currentUser.surname[0]}`}
-                                </AvatarFallback>
+                                <AvatarImage src={currentUser.avatar_url} alt={`${currentUser.first_name} ${currentUser.last_name}`} />
+                                <AvatarFallback className="text-xs">{`${currentUser.first_name[0]}${currentUser.last_name[0]}`}</AvatarFallback>
                               </Avatar>
                               <span>{t("myself")}</span>
                             </div>
                           </SelectItem>
                         )}
                         {masters.map(master => (
-                          <SelectItem key={master.phone} value={master.phone}>
+                          <SelectItem key={master.id} value={master.id}>
                             <div className="flex items-center gap-2">
                               <Avatar className="size-6">
-                                <AvatarImage
-                                  src={master.avatar_url}
-                                  alt={`${master.name} ${master.surname}`}
-                                />
-                                <AvatarFallback className="text-xs">
-                                  {`${master.name[0]}${master.surname[0]}`}
-                                </AvatarFallback>
+                                <AvatarImage src={master.avatar_url} alt={`${master.first_name} ${master.last_name}`} />
+                                <AvatarFallback className="text-xs">{`${master.first_name[0]}${master.last_name[0]}`}</AvatarFallback>
                               </Avatar>
-                              <span className="truncate">
-                                {master.name} {master.surname}
-                              </span>
+                              <span className="truncate">{master.first_name} {master.last_name}</span>
                             </div>
                           </SelectItem>
                         ))}
@@ -244,7 +213,6 @@ export function AttachMasterForm({
           />
         )}
 
-        {/* Поле цены */}
         <FormField
           control={form.control}
           name="price"
@@ -257,10 +225,7 @@ export function AttachMasterForm({
                   placeholder={t("pricePlaceholder")}
                   disabled={createMasterService.isPending}
                   {...field}
-                  onChange={e => {
-                    const value = parseFloat(e.target.value);
-                    field.onChange(isNaN(value) ? 0 : value);
-                  }}
+                  onChange={e => { const v = parseFloat(e.target.value); field.onChange(isNaN(v) ? 0 : v); }}
                   value={field.value || ""}
                   min={1}
                   step={100}
@@ -271,24 +236,15 @@ export function AttachMasterForm({
           )}
         />
 
-        {/* Кнопки действий */}
         <div className="flex justify-end gap-2 pt-4">
           {onCancel && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-              disabled={createMasterService.isPending}
-            >
+            <Button type="button" variant="outline" onClick={onCancel} disabled={createMasterService.isPending}>
               {t("cancel")}
             </Button>
           )}
           <Button type="submit" disabled={createMasterService.isPending}>
             {createMasterService.isPending ? (
-              <>
-                <Loader className="mr-2 h-4 w-4 animate-spin" />
-                {t("attaching")}
-              </>
+              <><Loader className="mr-2 h-4 w-4 animate-spin" />{t("attaching")}</>
             ) : (
               t("attach")
             )}

@@ -20,14 +20,14 @@ export const eventSchema = z.object({
 
 export type TEventFormData = z.infer<typeof eventSchema>;
 
-/** Схема для создания записи POST /api/v1/bagsies/master */
-export const addBagsieSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  surname: z.string().min(1, "Surname is required"),
-  client_phone: z.string().min(1, "Phone is required"),
+/** Схема для создания записи POST /api/v1/bookings */
+export const addBookingSchema = z.object({
+  first_name: z.string().min(1, "First name is required"),
+  last_name: z.string().min(1, "Last name is required"),
+  phone: z.string().min(1, "Phone is required"),
   comment: z.string().optional(),
-  /** Для STAFF не в форме — подставляется phone текущего пользователя. Для manager+ — выбор из /staff. */
-  master_phone: z.string().optional(),
+  /** Для STAFF не в форме — подставляется id текущего пользователя. Для manager+ — выбор из employees. */
+  employee_id: z.string().optional(),
   service_id: z.string().min(1, "Service is required"),
   startDate: z
     .date()
@@ -35,4 +35,9 @@ export const addBagsieSchema = z.object({
   startTime: z.object({ hour: z.number(), minute: z.number() }),
 });
 
-export type TAddBagsieFormData = z.infer<typeof addBagsieSchema>;
+export type TAddBookingFormData = z.infer<typeof addBookingSchema>;
+
+/** @deprecated Используй addBookingSchema */
+export const addBagsieSchema = addBookingSchema;
+/** @deprecated Используй TAddBookingFormData */
+export type TAddBagsieFormData = TAddBookingFormData;

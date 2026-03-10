@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "@/src/entities/dialog";
 import { useTranslations } from "next-intl";
-import { AddPointForm } from "./add-point-form";
+import { AddLocationForm } from "./add-location-form";
 
 interface AddPointDialogProps {
   open: boolean;
@@ -17,11 +17,11 @@ interface AddPointDialogProps {
 }
 
 /**
- * Диалог для добавления новой точки обслуживания
+ * Диалог для добавления новой локации обслуживания
  * Содержит форму с валидацией и компонентом редактирования расписания
  */
 export function AddPointDialog({ open, onOpenChange }: AddPointDialogProps) {
-  const t = useTranslations("Points.addPointDialog");
+  const t = useTranslations("Locations.addPointDialog");
 
   const handleSuccess = () => {
     onOpenChange(false);
@@ -38,7 +38,7 @@ export function AddPointDialog({ open, onOpenChange }: AddPointDialogProps) {
           <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
-        <AddPointForm onSuccess={handleSuccess} onCancel={handleCancel} />
+        <AddLocationForm onSuccess={handleSuccess} onCancel={handleCancel} />
       </DialogContent>
     </Dialog>
   );

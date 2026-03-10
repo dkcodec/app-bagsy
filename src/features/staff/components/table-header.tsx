@@ -1,5 +1,5 @@
 import { TableHead, TableRow } from "@/src/entities";
-import { GetStaffParams } from "@/src/shared/services/staff-service";
+import type { GetEmployeesParams } from "@/src/shared/services/employee-service";
 import { SortIcon } from "./sort-icon";
 import { useTranslations } from "next-intl";
 
@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
  * Интерфейс для колонки таблицы
  */
 interface TableColumn {
-  field: GetStaffParams["order_by"];
+  field: GetEmployeesParams["order_by"];
   labelKey: string;
   sortable?: boolean;
 }
@@ -17,9 +17,9 @@ interface TableColumn {
  */
 interface TableHeaderProps {
   columns: TableColumn[];
-  orderBy?: GetStaffParams["order_by"];
+  orderBy?: GetEmployeesParams["order_by"];
   sortOrder?: "asc" | "desc";
-  onSort: (field: GetStaffParams["order_by"]) => void;
+  onSort: (field: GetEmployeesParams["order_by"]) => void;
 }
 
 export function StaffTableHeader({

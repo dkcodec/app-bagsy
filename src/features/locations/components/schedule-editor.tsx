@@ -48,7 +48,7 @@ interface ScheduleEditorProps {
 }
 
 /**
- * Компонент для редактирования расписания точки обслуживания
+ * Компонент для редактирования расписания локации обслуживания
  * Позволяет настроить расписание для каждого дня недели
  */
 export function ScheduleEditor({
@@ -57,7 +57,7 @@ export function ScheduleEditor({
   isMobile = false,
   title,
 }: ScheduleEditorProps) {
-  const t = useTranslations("Points.addPointForm.schedule");
+  const t = useTranslations("Locations.addPointForm.schedule");
   const tDays = useTranslations("Dashboard.Settings");
 
   // Преобразуем массив расписания в объект для удобства работы

@@ -1,12 +1,12 @@
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
-import { GetStaffParams } from "@/src/shared/services/staff-service";
+import type { GetEmployeesParams } from "@/src/shared/services/employee-service";
 
 /**
  * Компонент иконки сортировки для заголовков таблицы
  */
 interface SortIconProps {
-  field: GetStaffParams["order_by"];
-  currentField?: GetStaffParams["order_by"];
+  field: GetEmployeesParams["order_by"];
+  currentField?: GetEmployeesParams["order_by"];
   sortOrder?: "asc" | "desc";
 }
 

@@ -42,7 +42,7 @@ export function AddressMap({
   address,
   className,
 }: AddressMapProps) {
-  const t = useTranslations("Points.addPointForm.address");
+  const t = useTranslations("Locations.addPointForm.address");
   const [isClient, setIsClient] = useState(false);
 
   // Проверяем, что мы на клиенте (после гидратации)
