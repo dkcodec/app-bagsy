@@ -8,7 +8,7 @@ interface ErrorMessageProps {
 }
 
 export function ErrorMessage({ error }: ErrorMessageProps) {
-  const t = useTranslations("Points");
+  const t = useTranslations("Locations");
 
   return (
     <div className="text-center text-destructive py-8">

@@ -18,8 +18,8 @@ interface AttachMasterDialogProps {
   onOpenChange: (open: boolean) => void;
   /** Услуга, к которой привязывается мастер */
   service: IServiceDto;
-  /** Код точки для загрузки списка мастеров */
-  pointCode?: string;
+  /** UUID локации для загрузки списка мастеров */
+  locationId?: string;
 }
 
 /**
@@ -30,7 +30,7 @@ export function AttachMasterDialog({
   open,
   onOpenChange,
   service,
-  pointCode,
+  locationId,
 }: AttachMasterDialogProps) {
   const t = useTranslations("Services.attachMaster");
 
@@ -53,7 +53,7 @@ export function AttachMasterDialog({
         </DialogHeader>
         <AttachMasterForm
           service={service}
-          pointCode={pointCode}
+          locationId={locationId}
           onSuccess={handleSuccess}
           onCancel={handleCancel}
         />

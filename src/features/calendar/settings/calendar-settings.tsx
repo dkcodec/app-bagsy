@@ -14,7 +14,7 @@ import { Save, Settings } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/src/entities/button";
 import { useCalendar } from "@/src/features/calendar/calendar-context";
-import { mapPointScheduleToWorkingHours } from "@/src/features/calendar/calendar-context/store";
+import { mapLocationScheduleToWorkingHours } from "@/src/features/calendar/calendar-context/store";
 import { useIsMobile } from "@/src/shared/hooks/use-mobile";
 import {
   useCurrentUser,
@@ -26,7 +26,7 @@ import {
 } from "@/src/shared/utils/formater";
 import { ChangeBadgeVariantInput } from "./change-badge-variant-input";
 import { ChangeVisibleHoursInput } from "./change-visible-hours-input";
-import { ScheduleEditor } from "@/src/features/points/components/schedule-editor";
+import { ScheduleEditor } from "@/src/features/locations/components/schedule-editor";
 import type { TBadgeVariant, TVisibleHours } from "@/src/shared/types/calendar";
 import type { ISchedule } from "@/src/shared/types/user";
 import { toast } from "sonner";
@@ -49,9 +49,10 @@ export function CalendarSettings() {
     useState<TVisibleHours | null>(null);
 
   // При открытии диалога — подставляем расписание пользователя
+  // TODO: schedule пока не приходит из GET /api/v1/employees/me, ждём эндпоинт
   useEffect(() => {
-    if (isOpen) setTempSchedule(currentUser?.schedule ?? []);
-  }, [isOpen, currentUser?.schedule]);
+    if (isOpen) setTempSchedule([]);
+  }, [isOpen]);
 
   // Обработчик сохранения: расписание в API, badge/visible — в контекст
   const handleSave = useCallback(async () => {
@@ -60,7 +61,8 @@ export function CalendarSettings() {
     if (tempVisibleHours) setVisibleHours(tempVisibleHours);
 
     // 2. Сохраняем расписание в API
-    const toSave = tempSchedule ?? currentUser?.schedule ?? [];
+    // TODO: schedule пока не приходит из employees/me, используем tempSchedule
+    const toSave = tempSchedule ?? [];
     const isValid =
       toSave.length >= 1 && toSave.some(s => s.all_day || (s.open && s.close));
     if (!isValid) {
@@ -91,7 +93,7 @@ export function CalendarSettings() {
 
     try {
       await updateScheduleMutation.mutateAsync({ schedule });
-      setWorkingHours(mapPointScheduleToWorkingHours(toSave));
+      setWorkingHours(mapLocationScheduleToWorkingHours(toSave));
       toast.success(t("scheduleSaved"));
       setIsOpen(false);
       setTempSchedule(null);
@@ -104,7 +106,6 @@ export function CalendarSettings() {
     tempBadgeVariant,
     tempVisibleHours,
     tempSchedule,
-    currentUser?.schedule,
     t,
     setBadgeVariant,
     setVisibleHours,
@@ -154,7 +155,7 @@ export function CalendarSettings() {
         {/* Содержимое: расписание (API) + badge + видимые часы */}
         <div className={`space-y-6 ${isMobile ? "py-2" : "py-4"}`}>
           <ScheduleEditor
-            value={tempSchedule ?? currentUser?.schedule ?? []}
+            value={tempSchedule ?? []}
             onChange={s => setTempSchedule(s)}
             isMobile={isMobile}
             title={t("myScheduleTitle")}

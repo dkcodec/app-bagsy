@@ -13,12 +13,12 @@ interface TableColumn {
 /**
  * Компонент заголовка таблицы точек
  */
-interface PointsTableHeaderProps {
+interface LocationsTableHeaderProps {
   columns: TableColumn[];
 }
 
-export function PointsTableHeader({ columns }: PointsTableHeaderProps) {
-  const t = useTranslations("Points");
+export function LocationsTableHeader({ columns }: LocationsTableHeaderProps) {
+  const t = useTranslations("Locations");
 
   return (
     <TableRow>

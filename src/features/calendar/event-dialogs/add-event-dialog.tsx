@@ -5,8 +5,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
-import { useDisclosure, useCreateBagsie } from "@/src/shared/hooks";
-import { usePointServices } from "@/src/shared/hooks/use-services";
+import { useDisclosure, useCreateBooking } from "@/src/shared/hooks";
+import { useLocationServices } from "@/src/shared/hooks/use-services";
 import { useCurrentUser } from "@/src/shared/hooks/use-users";
 import { useCalendar } from "@/src/features/calendar/calendar-context";
 import { toTimestampWithTz } from "@/src/shared/utils/formater";
@@ -44,7 +44,10 @@ import {
   DialogFooter,
 } from "@/src/entities/dialog";
 
-import { addBagsieSchema, type TAddBagsieFormData } from "@/src/shared/schemas";
+import {
+  addBookingSchema,
+  type TAddBookingFormData,
+} from "@/src/shared/schemas";
 import { useTranslations } from "next-intl";
 
 import type { TimeValue } from "react-aria-components";
@@ -57,36 +60,40 @@ interface IProps {
 }
 
 export function AddEventDialog({ children, startDate, startTime }: IProps) {
-  const { masters, pointCode } = useCalendar();
+  const { masters, locationId } = useCalendar();
   const { data: currentUser } = useCurrentUser();
   const { data: servicesData, isLoading: isLoadingServices } =
-    usePointServices(pointCode);
+    useLocationServices(locationId);
   const t = useTranslations("Dashboard.Calendar.AddEventDialog");
-  const createBagsie = useCreateBagsie();
+  const createBooking = useCreateBooking();
 
   const { isOpen, onClose, onToggle } = useDisclosure();
   const isStaff = currentUser?.role === EUserRole.STAFF;
-  // manager и выше: выбор мастера из /staff; STAFF: только свой номер (поле скрыто)
+  // manager и выше: выбор мастера из employees; для STAFF — только свой id (поле скрыто)
   const showMasterSelect = !isStaff && masters.length > 0;
 
-  const form = useForm<TAddBagsieFormData>({
-    resolver: zodResolver(addBagsieSchema),
+  const form = useForm<TAddBookingFormData>({
+    resolver: zodResolver(addBookingSchema),
     defaultValues: {
-      name: "",
-      surname: "",
-      client_phone: "",
+      first_name: "",
+      last_name: "",
+      phone: "",
       comment: "",
-      master_phone: showMasterSelect ? "" : undefined,
+      employee_id: showMasterSelect ? "" : undefined,
       service_id: "",
       startDate: startDate ?? new Date(),
       startTime: startTime ?? { hour: 10, minute: 0 },
     },
   });
 
-  const onSubmit = async (values: TAddBagsieFormData) => {
-    const masterPhone = isStaff ? currentUser?.phone : values.master_phone;
-    if (!masterPhone) {
+  const onSubmit = async (values: TAddBookingFormData) => {
+    const employeeId = isStaff ? currentUser?.id : values.employee_id;
+    if (!employeeId) {
       toast.error(t("staffDescription") ?? "Выберите мастера");
+      return;
+    }
+    if (!locationId) {
+      toast.error("Выберите точку");
       return;
     }
     const d = new Date(values.startDate);
@@ -94,14 +101,15 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
     const start_at = toTimestampWithTz(d);
 
     try {
-      await createBagsie.mutateAsync({
-        client_phone: values.client_phone,
+      await createBooking.mutateAsync({
+        phone: values.phone,
+        first_name: values.first_name,
+        last_name: values.last_name,
         comment: values.comment ?? "",
-        master_phone: masterPhone,
-        name: values.name,
+        employee_id: employeeId,
+        location_id: locationId,
         service_id: values.service_id,
         start_at,
-        surname: values.surname,
       });
       onClose();
       form.reset();
@@ -131,11 +139,11 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
             onSubmit={form.handleSubmit(onSubmit)}
             className="grid sm:grid-cols-2 gap-4 py-4 px-1 max-h-[400px] md:max-h-none overflow-y-auto"
           >
-            {/* Мастер: для manager+ — выбор из /staff; для STAFF — только свой номер (readonly/скрыто) */}
+            {/* Мастер: для manager+ — выбор из employees; для STAFF — только свой id (скрыто) */}
             {showMasterSelect && (
               <FormField
                 control={form.control}
-                name="master_phone"
+                name="employee_id"
                 render={({ field, fieldState }) => (
                   <FormItem>
                     <FormLabel>{t("staff")}</FormLabel>
@@ -150,22 +158,22 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
                         <SelectContent>
                           {masters.map(master => (
                             <SelectItem
-                              key={master.phone}
-                              value={master.phone}
+                              key={master.id}
+                              value={master.id}
                               className="flex-1"
                             >
                               <div className="flex items-center gap-2">
                                 <Avatar className="size-6">
                                   <AvatarImage
-                                    src={undefined}
-                                    alt={`${master.name} ${master.surname}`}
+                                    src={master.avatar_url}
+                                    alt={`${master.first_name} ${master.last_name}`}
                                   />
                                   <AvatarFallback className="text-xxs">
-                                    {`${master.name[0]}${master.surname[0]}`}
+                                    {`${master.first_name[0]}${master.last_name[0]}`}
                                   </AvatarFallback>
                                 </Avatar>
                                 <p className="truncate">
-                                  {master.name} {master.surname}
+                                  {master.first_name} {master.last_name}
                                 </p>
                               </div>
                             </SelectItem>
@@ -179,7 +187,7 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
               />
             )}
 
-            {/* Услуга: select из /services по pointCode */}
+            {/* Услуга: select из /services по locationId */}
             <FormField
               control={form.control}
               name="service_id"
@@ -193,12 +201,12 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
                       <Select
                         value={field.value}
                         onValueChange={field.onChange}
-                        disabled={!pointCode}
+                        disabled={!locationId}
                       >
                         <SelectTrigger data-invalid={fieldState.invalid}>
                           <SelectValue
                             placeholder={
-                              pointCode
+                              locationId
                                 ? t("serviceDescription")
                                 : "Сначала выберите точку"
                             }
@@ -224,7 +232,7 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
             <div className="grid grid-cols-1 gap-2">
               <FormField
                 control={form.control}
-                name="name"
+                name="first_name"
                 render={({ field, fieldState }) => (
                   <FormItem>
                     <FormLabel>{t("firstName")}</FormLabel>
@@ -241,7 +249,7 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
               />
               <FormField
                 control={form.control}
-                name="surname"
+                name="last_name"
                 render={({ field, fieldState }) => (
                   <FormItem>
                     <FormLabel>{t("lastName")}</FormLabel>
@@ -258,7 +266,7 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
               />
               <FormField
                 control={form.control}
-                name="client_phone"
+                name="phone"
                 render={({ field, fieldState }) => (
                   <FormItem>
                     <FormLabel>{t("phone")}</FormLabel>

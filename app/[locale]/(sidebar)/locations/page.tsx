@@ -1,6 +1,6 @@
 "use client";
 
-import { PointsHeader, PointsContent } from "@/src/features/points";
+import { LocationsHeader, LocationsContent } from "@/src/features/locations";
 import { useCurrentUser } from "@/src/shared/hooks/use-users";
 import { EUserRole } from "@/src/shared/types/user";
 import { useTranslations } from "next-intl";
@@ -11,9 +11,9 @@ import { Loader } from "lucide-react";
  * Страница точек обслуживания
  * Доступна только для ролей MANAGER и выше
  */
-export default function PointsPage() {
+export default function LocationsPage() {
   const { data: currentUser, isLoading } = useCurrentUser();
-  const t = useTranslations("Points");
+  const t = useTranslations("Locations");
 
   // Проверка загрузки пользователя
   if (isLoading) {
@@ -25,17 +25,16 @@ export default function PointsPage() {
   }
 
   // Проверка доступа
+  // Доступ: Owner и Manager
   const hasAccess =
     currentUser &&
-    (currentUser.role === EUserRole.MANAGER ||
-      currentUser.role === EUserRole.SELF_OWNER ||
-      currentUser.role === EUserRole.NET_MANAGER ||
-      currentUser.role === EUserRole.ADMIN);
+    (currentUser.role === EUserRole.OWNER ||
+      currentUser.role === EUserRole.MANAGER);
 
   if (!hasAccess) {
     return (
       <>
-        <PointsHeader />
+        <LocationsHeader />
         <div className="flex flex-col md:p-4">
           <Card className="border-none">
             <CardContent className="p-6">
@@ -56,8 +55,8 @@ export default function PointsPage() {
 
   return (
     <>
-      <PointsHeader />
-      <PointsContent />
+      <LocationsHeader />
+      <LocationsContent />
     </>
   );
 }

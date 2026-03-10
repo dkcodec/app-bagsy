@@ -1,36 +1,35 @@
 import { TableCell, TableRow, Badge } from "@/src/entities";
-import { IPointDto } from "@/src/shared/services/point-service";
+import { ILocationDto } from "@/src/shared/services/location-service";
 import { formatDate } from "@/src/shared/utils/formater";
 import { useTranslations, useLocale } from "next-intl";
-import { ScheduleCell } from "./schedule-cell";
 
 /**
  * Компонент строки таблицы точек
  */
-interface PointsTableRowProps {
-  point: IPointDto;
+interface LocationsTableRowProps {
+  point: ILocationDto;
 }
 
-export function PointsTableRow({ point }: PointsTableRowProps) {
-  const t = useTranslations("Points");
+export function LocationsTableRow({ point }: LocationsTableRowProps) {
+  const t = useTranslations("Locations");
   const locale = useLocale();
 
   // Маппинг локали для форматирования даты
   const dateLocale = locale === "kz" ? "kk-KZ" : "ru-RU";
 
   // Форматируем адрес
-  const address = `${point.address.street}, ${point.address.city}`;
+  const address = point.address
+    ? `${point.address.street}, ${point.address.city}`
+    : "";
 
   return (
     <TableRow>
       <TableCell className="font-medium">
-        {point.code.slice(0, 4)}...{point.code.slice(-11)}
+        {point.id.slice(0, 4)}...{point.id.slice(-4)}
       </TableCell>
       <TableCell>{point.name}</TableCell>
       <TableCell className="text-sm">{address}</TableCell>
-      <TableCell>
-        <ScheduleCell schedule={point.schedule} />
-      </TableCell>
+      <TableCell className="text-sm">{point.schedule_type || "—"}</TableCell>
       <TableCell>
         <Badge variant={point.active ? "default" : "outline"}>
           {point.active ? t("active") : t("inactive")}

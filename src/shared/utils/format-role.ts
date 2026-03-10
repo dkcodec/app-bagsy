@@ -8,11 +8,9 @@ export type TRoleLocale = "ru" | "kz";
  * Соответствует Staff.roles в messages/ru.json и messages/kz.json.
  */
 const ROLE_LABELS: Record<TUserRole, { ru: string; kz: string }> = {
-  staff: { ru: "Сотрудник", kz: "Қызметкер" },
+  owner: { ru: "Владелец", kz: "Иесі" },
   manager: { ru: "Менеджер", kz: "Менеджер" },
-  net_manager: { ru: "Сетевой менеджер", kz: "Желі менеджері" },
-  self_owner: { ru: "Самозанятый", kz: "Өзінше жұмысшы" },
-  admin: { ru: "Администратор", kz: "Администратор" },
+  staff: { ru: "Сотрудник", kz: "Қызметкер" },
 };
 
 /**

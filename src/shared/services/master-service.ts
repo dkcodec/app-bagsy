@@ -1,40 +1,45 @@
 import { apiClient } from "../api";
 
 /**
- * Тело запроса для создания связи мастер-услуга
+ * Тело запроса POST /api/v1/employee-services
+ * Привязка сотрудника к услуге с индивидуальной ценой
  */
-export interface CreateMasterServiceRequestDto {
-  /** Номер телефона мастера. Опционален для STAFF и SELF_OWNER */
-  master_phone?: string;
-  /** Цена услуги для мастера (в тенге) */
-  price: number;
-  /** ID услуги */
+export interface CreateEmployeeServiceRequest {
+  /** UUID сотрудника */
+  employee_id: string;
+  /** Цена услуги (строка, в тенге) */
+  price: string;
+  /** UUID услуги */
   service_id: string;
 }
 
+/** @deprecated Используй CreateEmployeeServiceRequest */
+export type CreateMasterServiceRequestDto = CreateEmployeeServiceRequest;
+
 /**
- * Ответ API при создании связи мастер-услуга
+ * Ответ API при создании связи сотрудник-услуга
  */
-export interface CreateMasterServiceResponseDto {
-  /** ID созданной связи */
+export interface CreateEmployeeServiceResponse {
+  /** UUID созданной связи */
   id: string;
 }
 
+/** @deprecated Используй CreateEmployeeServiceResponse */
+export type CreateMasterServiceResponseDto = CreateEmployeeServiceResponse;
+
 /**
- * Сервис для работы со связями мастер-услуга
- * Инкапсулирует эндпоинты и маппинг данных
+ * Сервис для работы со связями сотрудник-услуга
  */
 export class MasterService {
   /**
-   * Создание связи между мастером и услугой с указанной ценой
-   * @param data Данные для создания связи
-   * @returns ID созданной связи
+   * Привязка сотрудника к услуге с индивидуальной ценой
+   * POST /api/v1/employee-services
    */
   static async createMasterService(
-    data: CreateMasterServiceRequestDto
-  ): Promise<CreateMasterServiceResponseDto> {
-    return apiClient.post<CreateMasterServiceResponseDto>(
-      "v1/master-services",
+    data: CreateEmployeeServiceRequest
+  ): Promise<CreateEmployeeServiceResponse> {
+    return apiClient.post<CreateEmployeeServiceResponse>(
+      "api/v1/employee-services",
       data
     );
   }

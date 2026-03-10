@@ -276,7 +276,7 @@ export const CalendarDayView = memo(function CalendarDayView({
               <div className="space-y-6 pb-4">
                 {currentEvents.map(event => {
                   const master = masters.find(
-                    master => master.phone === event.masterPhone
+                    master => master.id === event.employeeId
                   );
 
                   return (
@@ -289,7 +289,7 @@ export const CalendarDayView = memo(function CalendarDayView({
                         <div className="flex items-center gap-1.5 text-muted-foreground">
                           <User className="size-3.5" />
                           <span className="text-sm">
-                            {master.name} {master.surname}
+                            {master.first_name} {master.last_name}
                           </span>
                         </div>
                       )}

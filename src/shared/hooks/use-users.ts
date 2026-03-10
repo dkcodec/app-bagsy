@@ -1,30 +1,31 @@
 "use client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { EmployeeService } from "../services/employee-service";
 import { UserService } from "../services/user-service";
-import { nowTimestampWithTz } from "../utils/formater";
 import type {
-  UpdateProfileRequest,
+  IEmployeeDto,
+  UpdateEmployeeProfileRequest,
   UpdateScheduleRequest,
-  IUserDto,
 } from "../types/user";
 
 /**
- * Получение текущего пользователя
+ * Получение текущего сотрудника (GET /api/v1/employees/me)
  */
 export function useCurrentUser() {
   return useQuery({
     queryKey: ["me"],
-    queryFn: () => UserService.getMe(),
-    staleTime: 30 * 60 * 1000, // 30 минут - пользователь не меняется часто
-    gcTime: 60 * 60 * 1000, // 1 час в кеше
+    queryFn: () => EmployeeService.getMe(),
+    staleTime: 30 * 60 * 1000, // 30 минут
+    gcTime: 60 * 60 * 1000,
     retry: 1,
-    refetchOnWindowFocus: false, // не перезапрашивать при фокусе окна
-    refetchOnMount: false, // не перезапрашивать при монтировании если есть кеш
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 }
 
 /**
  * Получение информации о пользователе по номеру телефона
+ * TODO: ждём новый эндпоинт от бэка
  */
 export function useGetUserByPhone(phone: string) {
   return useQuery({
@@ -35,54 +36,41 @@ export function useGetUserByPhone(phone: string) {
 }
 
 /**
- * Хук для обновления профиля пользователя
+ * Хук для обновления профиля сотрудника (PUT /api/v1/employees/me)
  * Включает оптимистичные обновления и инвалидацию кэша
  */
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
 
-  return useMutation<IUserDto, unknown, UpdateProfileRequest>({
+  return useMutation<
+    IEmployeeDto,
+    unknown,
+    UpdateEmployeeProfileRequest,
+    { previousData?: IEmployeeDto }
+  >({
     mutationKey: ["me", "update"],
-    mutationFn: async (data: UpdateProfileRequest) =>
-      UserService.updateMe(data),
+    mutationFn: async (data: UpdateEmployeeProfileRequest) =>
+      EmployeeService.updateMe(data),
     onMutate: async newData => {
-      // Отменяем исходящие запросы
       await queryClient.cancelQueries({ queryKey: ["me"] });
+      const previousData = queryClient.getQueryData<IEmployeeDto>(["me"]);
 
-      // Сохраняем предыдущие данные для отката
-      const previousData = queryClient.getQueryData(["me"]);
-
-      // Оптимистично обновляем данные только если они есть
-      if (
-        previousData &&
-        typeof previousData === "object" &&
-        "data" in previousData &&
-        (previousData as { data: IUserDto }).data
-      ) {
-        const prevUser = (previousData as { data: IUserDto }).data;
-        queryClient.setQueryData(["me"], {
+      // Оптимистично обновляем данные
+      if (previousData) {
+        queryClient.setQueryData<IEmployeeDto>(["me"], {
           ...previousData,
-          data: {
-            ...prevUser,
-            ...newData,
-            updated_at: nowTimestampWithTz(),
-          },
+          ...newData,
         });
       }
 
       return { previousData };
     },
-    onError: (err, newData, context) => {
-      // Откатываем изменения при ошибке
-      if (context && typeof context === "object" && "previousData" in context) {
-        const prevData = (context as { previousData?: unknown }).previousData;
-        if (prevData) {
-          queryClient.setQueryData(["me"], prevData);
-        }
+    onError: (_err, _newData, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(["me"], context.previousData);
       }
     },
     onSettled: () => {
-      // Инвалидируем кэш для получения актуальных данных
       queryClient.invalidateQueries({ queryKey: ["me"] });
     },
   });
@@ -90,6 +78,7 @@ export function useUpdateProfile() {
 
 /**
  * Хук обновления расписания. PUT v1/users/me/schedule, инвалидация ["me"].
+ * TODO: ждём новый эндпоинт от бэка
  */
 export function useUpdateSchedule() {
   const queryClient = useQueryClient();
@@ -106,6 +95,7 @@ export function useUpdateSchedule() {
 
 /**
  * Хук удаления аватара. DELETE v1/users/me/avatar, инвалидация ["me"].
+ * TODO: ждём новый эндпоинт от бэка
  */
 export function useDeleteAvatar() {
   const queryClient = useQueryClient();

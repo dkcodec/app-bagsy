@@ -4,13 +4,16 @@ import {
   AuthService,
   type LoginRequestDto,
   type LoginResponseDto,
-  type RegisterRequestDto,
-  type RegisterResponseDto,
-  type PasswordChangeRequestDto,
-  type PasswordChangeResponseDto,
-  PasswordChangeRequestRequestDto,
-  PasswordChangeRequestResponseDto,
+  type PasswordResetRequestDto,
+  type PasswordResetResponseDto,
+  type PasswordResetConfirmRequestDto,
+  type PasswordResetConfirmResponseDto,
 } from "../services";
+import {
+  EmployeeService,
+  type ConfirmInviteRequest,
+  type ConfirmInviteResponse,
+} from "../services/employee-service";
 import { setAuthTokens, clearAuthTokens } from "../utils/cookies";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -18,7 +21,6 @@ import { useTranslations } from "next-intl";
 
 /**
  * Мутация для логина пользователя
- * Возвращает статус и метод mutateAsync
  */
 export function useLogin() {
   const queryClient = useQueryClient();
@@ -46,24 +48,26 @@ export function useLogout() {
 }
 
 /**
- * Мутация для регистрации пароля пользователя
- * Возвращает статус и метод mutateAsync
+ * Мутация для подтверждения инвайта сотрудника (установка пароля)
+ * Заменяет старый useRegisterConfirm
  */
-export function useRegisterConfirm() {
+export function useConfirmInvite() {
   const router = useRouter();
-  return useMutation<RegisterResponseDto, unknown, RegisterRequestDto>({
-    mutationKey: ["auth", "register"],
-    mutationFn: (payload: RegisterRequestDto) =>
-      AuthService.registerConfirm(payload),
+  return useMutation<ConfirmInviteResponse, unknown, ConfirmInviteRequest>({
+    mutationKey: ["auth", "confirmInvite"],
+    mutationFn: (payload: ConfirmInviteRequest) =>
+      EmployeeService.confirmInvite(payload),
     onSuccess: () => {
       router.push("/login");
     },
   });
 }
 
+/** @deprecated Используй useConfirmInvite */
+export const useRegisterConfirm = useConfirmInvite;
+
 /**
  * Мутация для обновления токена доступа
- * Возвращает статус и метод mutateAsync
  */
 export function useRefreshToken() {
   return useMutation<LoginResponseDto, unknown, void>({
@@ -75,16 +79,17 @@ export function useRefreshToken() {
   });
 }
 
-export function usePasswordChangeRequest() {
+/** Запрос на сброс пароля (отправляет ссылку) */
+export function usePasswordReset() {
   const t = useTranslations("Auth.PasswordChangeRequest");
   return useMutation<
-    PasswordChangeRequestResponseDto,
+    PasswordResetResponseDto,
     unknown,
-    PasswordChangeRequestRequestDto
+    PasswordResetRequestDto
   >({
-    mutationKey: ["auth", "passwordChangeRequest"],
-    mutationFn: (payload: PasswordChangeRequestRequestDto) =>
-      AuthService.passwordChangeRequest(payload),
+    mutationKey: ["auth", "passwordReset"],
+    mutationFn: (payload: PasswordResetRequestDto) =>
+      AuthService.passwordReset(payload),
     onSuccess: () => {
       toast.success(t("passwordChangeRequestSuccess"));
     },
@@ -94,18 +99,22 @@ export function usePasswordChangeRequest() {
   });
 }
 
-export function usePasswordChange() {
+/** @deprecated Используй usePasswordReset */
+export const usePasswordChangeRequest = usePasswordReset;
+
+/** Подтверждение сброса пароля (установка нового) */
+export function usePasswordResetConfirm() {
   const t = useTranslations("Auth.PasswordChange");
   const router = useRouter();
   const queryClient = useQueryClient();
   return useMutation<
-    PasswordChangeResponseDto,
+    PasswordResetConfirmResponseDto,
     unknown,
-    PasswordChangeRequestDto
+    PasswordResetConfirmRequestDto
   >({
-    mutationKey: ["auth", "passwordChange"],
-    mutationFn: (payload: PasswordChangeRequestDto) =>
-      AuthService.passwordChange(payload),
+    mutationKey: ["auth", "passwordResetConfirm"],
+    mutationFn: (payload: PasswordResetConfirmRequestDto) =>
+      AuthService.passwordResetConfirm(payload),
     onSuccess: async () => {
       await clearAuthTokens();
       queryClient.invalidateQueries({ queryKey: ["me"] });
@@ -117,3 +126,6 @@ export function usePasswordChange() {
     },
   });
 }
+
+/** @deprecated Используй usePasswordResetConfirm */
+export const usePasswordChange = usePasswordResetConfirm;

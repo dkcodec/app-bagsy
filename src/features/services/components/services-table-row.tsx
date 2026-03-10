@@ -1,6 +1,5 @@
-import { TableCell, TableRow, Badge } from "@/src/entities";
+import { TableCell, TableRow } from "@/src/entities";
 import { IServiceDto } from "@/src/shared/services/service-service";
-import { useTranslations } from "next-intl";
 import { AttachMasterPopover } from "./attach-master-popover";
 import { useState } from "react";
 import { AttachMasterDialog } from "./attach-master-dialog";
@@ -10,15 +9,14 @@ import { AttachMasterDialog } from "./attach-master-dialog";
  */
 interface ServicesTableRowProps {
   service: IServiceDto;
-  /** Код точки для загрузки списка мастеров */
-  pointCode?: string;
+  /** UUID локации для загрузки списка мастеров */
+  locationId?: string;
 }
 
 export function ServicesTableRow({
   service,
-  pointCode,
+  locationId,
 }: ServicesTableRowProps) {
-  const t = useTranslations("Services");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Форматируем цену
@@ -62,7 +60,7 @@ export function ServicesTableRow({
         <TableCell>
           {formatPrice(service.min_price, service.max_price)}
         </TableCell>
-        {/* 
+        {/*
         <TableCell>
           <Badge variant={service.active ? "default" : "outline"}>
             {service.active ? t("active") : t("inactive")}
@@ -73,7 +71,7 @@ export function ServicesTableRow({
         <TableCell>
           <AttachMasterPopover
             service={service}
-            pointCode={pointCode}
+            locationId={locationId}
             onOpenDialog={() => setIsDialogOpen(true)}
           />
         </TableCell>
@@ -84,7 +82,7 @@ export function ServicesTableRow({
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         service={service}
-        pointCode={pointCode}
+        locationId={locationId}
       />
     </>
   );

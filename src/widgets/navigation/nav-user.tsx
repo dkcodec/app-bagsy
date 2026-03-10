@@ -20,10 +20,10 @@ import {
 import { useLogout } from "@/src/shared/hooks/use-auth";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import type { IUserDto } from "@/src/shared/types/user";
+import type { IEmployeeDto } from "@/src/shared/types/user";
 import { Skeleton } from "@/src/entities/skeleton";
 
-export function NavUser({ user }: { user?: IUserDto }) {
+export function NavUser({ user }: { user?: IEmployeeDto }) {
   const { isMobile } = useSidebar();
   const t = useTranslations("Sidebar.User");
 
@@ -43,17 +43,19 @@ export function NavUser({ user }: { user?: IUserDto }) {
                 {user?.avatar_url ? (
                   <AvatarImage
                     src={user?.avatar_url}
-                    alt={user?.name ?? "avatar"}
+                    alt={user?.first_name ?? "avatar"}
                   />
                 ) : null}
                 <AvatarFallback className="rounded-lg">
-                  {`${user?.name?.[0].toUpperCase() || ""}${user?.surname?.[0].toUpperCase() || ""}`}
+                  {`${user?.first_name?.[0].toUpperCase() || ""}${user?.last_name?.[0].toUpperCase() || ""}`}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 {user ? (
                   <>
-                    <span className="truncate font-semibold">{user?.name}</span>
+                    <span className="truncate font-semibold">
+                      {user?.first_name}
+                    </span>
                     <span className="truncate text-xs">{user?.phone}</span>
                   </>
                 ) : (
@@ -81,15 +83,17 @@ export function NavUser({ user }: { user?: IUserDto }) {
                   {user?.avatar_url ? (
                     <AvatarImage
                       src={user?.avatar_url}
-                      alt={user?.name ?? "avatar"}
+                      alt={user?.first_name ?? "avatar"}
                     />
                   ) : null}
                   <AvatarFallback className="rounded-lg">
-                    {`${user?.name?.[0].toUpperCase()}${user?.surname?.[0].toUpperCase()}`}
+                    {`${user?.first_name?.[0].toUpperCase()}${user?.last_name?.[0].toUpperCase()}`}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{user?.name}</span>
+                  <span className="truncate font-semibold">
+                    {user?.first_name}
+                  </span>
                   <span className="truncate text-xs">{user?.phone}</span>
                 </div>
               </div>

@@ -10,8 +10,8 @@ import {
   SelectValue,
   Button,
 } from "@/src/entities";
-import { GetStaffParams } from "@/src/shared/services/staff-service";
-import { EUserRole } from "@/src/shared/types/user";
+import type { GetEmployeesParams } from "@/src/shared/services/employee-service";
+import type { TUserRole } from "@/src/shared/types/user";
 import { useCurrentUser } from "@/src/shared/hooks/use-users";
 import { useDebounceCallback } from "@/src/shared/hooks/use-debounce";
 import { useTranslations } from "next-intl";
@@ -21,8 +21,8 @@ import { DEFAULT_STAFF_FILTERS } from "./constants";
  * Интерфейс для фильтров сотрудников
  */
 export interface StaffFiltersProps {
-  filters: GetStaffParams;
-  onFiltersChange: (filters: GetStaffParams) => void;
+  filters: GetEmployeesParams;
+  onFiltersChange: (filters: GetEmployeesParams) => void;
 }
 
 /**
@@ -31,26 +31,24 @@ export interface StaffFiltersProps {
 export function StaffFilters({ filters, onFiltersChange }: StaffFiltersProps) {
   const t = useTranslations("Staff.filters");
   const tRoles = useTranslations("Staff.roles");
-  const { data: user } = useCurrentUser();
 
-  const [localPointCode, setLocalPointCode] = useState(
-    filters.point_code || ""
+  const [localLocationId, setLocalLocationId] = useState(
+    filters.location_id || ""
   );
-  const [localNetworkCode, setLocalNetworkCode] = useState(
-    filters.network_code || ""
-  );
-  const [localPhone, setLocalPhone] = useState(filters.phone || "");
+  const [localPhone, setLocalPhone] = useState(filters.phone_search || "");
 
   // Проверка наличия активных фильтров
   const hasActiveFilters = Boolean(
-    filters.point_code ||
-      filters.network_code ||
+    filters.location_id ||
       (filters.role && filters.role.length > 0) ||
-      (filters.phone && filters.phone.trim())
+      (filters.phone_search && filters.phone_search.trim())
   );
 
   // Обработка изменения фильтров
-  const handleFilterChange = (key: keyof GetStaffParams, value: any) => {
+  const handleFilterChange = <K extends keyof GetEmployeesParams>(
+    key: K,
+    value: GetEmployeesParams[K]
+  ) => {
     onFiltersChange({
       ...filters,
       [key]: value,
@@ -62,22 +60,20 @@ export function StaffFilters({ filters, onFiltersChange }: StaffFiltersProps) {
   const handleClearFilters = () => {
     onFiltersChange({
       ...DEFAULT_STAFF_FILTERS,
-      point_code: undefined,
-      network_code: undefined,
+      location_id: undefined,
       role: undefined,
-      phone: undefined,
+      phone_search: undefined,
     });
-    setLocalPointCode("");
-    setLocalNetworkCode("");
+    setLocalLocationId("");
     setLocalPhone("");
   };
 
-  // Debounce для кода точки (применяется через 500мс после остановки ввода)
+  // Debounce для ID локации (применяется через 500мс после остановки ввода)
   useDebounceCallback(
-    localPointCode,
-    debouncedPointCode => {
-      const pointCodeValue = debouncedPointCode.trim();
-      handleFilterChange("point_code", pointCodeValue || undefined);
+    localLocationId,
+    debouncedLocationId => {
+      const locationIdValue = debouncedLocationId.trim();
+      handleFilterChange("location_id", locationIdValue || undefined);
     },
     500
   );
@@ -87,17 +83,7 @@ export function StaffFilters({ filters, onFiltersChange }: StaffFiltersProps) {
     localPhone,
     debouncedPhone => {
       const phoneValue = debouncedPhone.trim();
-      handleFilterChange("phone", phoneValue || undefined);
-    },
-    500
-  );
-
-  // Debounce для кода сети (применяется через 500мс после остановки ввода)
-  useDebounceCallback(
-    localNetworkCode,
-    debouncedNetworkCode => {
-      const networkCodeValue = debouncedNetworkCode.trim();
-      handleFilterChange("network_code", networkCodeValue || undefined);
+      handleFilterChange("phone_search", phoneValue || undefined);
     },
     500
   );
@@ -105,31 +91,17 @@ export function StaffFilters({ filters, onFiltersChange }: StaffFiltersProps) {
   return (
     <div className="flex flex-col gap-4 p-4">
       <div className="flex flex-wrap items-end gap-4">
-        {/* Фильтр по коду точки */}
+        {/* Фильтр по UUID локации */}
         <div className="flex-1 min-w-[150px]">
           <label className="text-sm font-medium mb-1 block">
-            {t("pointCode")}
+            {t("locationId")}
           </label>
           <Input
-            placeholder={t("pointCodePlaceholder")}
-            value={localPointCode}
-            onChange={e => setLocalPointCode(e.target.value)}
+            placeholder={t("locationIdPlaceholder")}
+            value={localLocationId}
+            onChange={e => setLocalLocationId(e.target.value)}
           />
         </div>
-
-        {/* Фильтр по коду сети */}
-        {user?.role === EUserRole.ADMIN && (
-          <div className="flex-1 min-w-[150px]">
-            <label className="text-sm font-medium mb-1 block">
-              {t("networkCode")}
-            </label>
-            <Input
-              placeholder={t("networkCodePlaceholder")}
-              value={localNetworkCode}
-              onChange={e => setLocalNetworkCode(e.target.value)}
-            />
-          </div>
-        )}
 
         {/* Фильтр по ролям */}
         <div className="flex-1 min-w-[150px]">
@@ -140,7 +112,7 @@ export function StaffFilters({ filters, onFiltersChange }: StaffFiltersProps) {
               // Если выбрано "all" или пустое значение - убираем фильтр по роли
               handleFilterChange(
                 "role",
-                value && value !== "all" ? [value] : undefined
+                value && value !== "all" ? [value as TUserRole] : undefined
               );
             }}
           >
@@ -149,12 +121,9 @@ export function StaffFilters({ filters, onFiltersChange }: StaffFiltersProps) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("allRoles")}</SelectItem>
-              <SelectItem value="staff">{tRoles("staff")}</SelectItem>
+              <SelectItem value="owner">{tRoles("owner")}</SelectItem>
               <SelectItem value="manager">{tRoles("manager")}</SelectItem>
-              <SelectItem value="net_manager">
-                {tRoles("net_manager")}
-              </SelectItem>
-              <SelectItem value="self_owner">{tRoles("self_owner")}</SelectItem>
+              <SelectItem value="staff">{tRoles("staff")}</SelectItem>
             </SelectContent>
           </Select>
         </div>

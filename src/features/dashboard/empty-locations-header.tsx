@@ -3,8 +3,8 @@ import { SidebarTrigger } from "@/src/entities/sidebar";
 import { Separator } from "@/src/entities/separator";
 import { useTranslations } from "next-intl";
 
-export const EmptyPointsHeader: React.FC = () => {
-  const t = useTranslations("Dashboard.emptyPoints");
+export const EmptyLocationsHeader: React.FC = () => {
+  const t = useTranslations("Dashboard.emptyLocations");
   return (
     <header className="flex h-16 shrink-0 items-center bg-background gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 sticky top-0 left-0 right-0 z-20">
       <div className="flex items-center gap-2 px-4 w-full">
@@ -16,4 +16,4 @@ export const EmptyPointsHeader: React.FC = () => {
   );
 };
 
-export default EmptyPointsHeader;
+export default EmptyLocationsHeader;

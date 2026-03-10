@@ -1,11 +1,11 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { IUserDto } from "@/src/shared/types/user";
+import type { IEmployeeDto } from "@/src/shared/types/user";
 import { Separator, SidebarTrigger } from "@/src/entities";
 
 interface ProfileHeaderProps {
-  user?: IUserDto;
+  user?: IEmployeeDto;
 }
 
 /**
@@ -21,7 +21,7 @@ export function ProfileHeader({ user }: ProfileHeaderProps) {
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-4" />
         <h1 className="text-2xl font-bold tracking-tight">
-          {user?.name ?? t("title")}
+          {user?.first_name ?? t("title")}
         </h1>
       </div>
     </header>

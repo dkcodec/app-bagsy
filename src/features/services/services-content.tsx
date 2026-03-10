@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { usePointServices } from "@/src/shared/hooks/use-services";
-import { useNetworkPoints } from "@/src/shared/hooks/use-network-points";
+import { useLocationServices } from "@/src/shared/hooks/use-services";
+import { useLocations } from "@/src/shared/hooks/use-network-locations";
 import { useCurrentUser } from "@/src/shared/hooks/use-users";
 import { EUserRole } from "@/src/shared/types/user";
 import {
@@ -23,70 +23,63 @@ import { useTranslations } from "next-intl";
 import { ErrorMessage } from "./components/error-message";
 import { ServicesTableHeader } from "./components/services-table-header";
 import { ServicesTableRow } from "./components/services-table-row";
-import { PointSelect } from "./components/point-select";
+import { LocationSelect } from "./components/location-select";
 import { AddServiceDialog } from "./components/add-service-dialog";
 
 /**
- * Компонент таблицы услуг точки обслуживания
+ * Компонент таблицы услуг локации обслуживания
  */
 export function ServicesContent() {
   const t = useTranslations("Services");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { data: currentUser } = useCurrentUser();
 
-  // Определяем, нужно ли загружать точки сети
-  const shouldLoadPoints =
-    currentUser &&
-    (currentUser.role === EUserRole.SELF_OWNER ||
-      currentUser.role === EUserRole.NET_MANAGER ||
-      currentUser.role === EUserRole.ADMIN);
+  // Определяем, нужно ли загружать локации сети (только для Owner)
+  const shouldLoadLocations =
+    currentUser && currentUser.role === EUserRole.OWNER;
 
-  // Загружаем точки сети для self_owner/net_manager
-  // Для ADMIN используем usePointsPage если нужно, но пока используем useNetworkPoints
-  const { data: networkPointsData } = useNetworkPoints(
-    currentUser?.network_code
-  );
+  // Загружаем локации организации для Owner
+  const { data: locationsData } = useLocations();
 
-  // Вычисляем selectedPointCode
-  const selectedPointCode = useMemo(() => {
-    // Для MANAGER используем point_code из currentUser
+  // Вычисляем selectedLocationId
+  const selectedLocationId = useMemo(() => {
+    // Для MANAGER используем location_id из currentUser
     if (currentUser?.role === EUserRole.MANAGER) {
-      return currentUser.point_code;
+      return currentUser.location_id;
     }
 
-    // Для SELF_OWNER/NET_MANAGER используем первую точку из сети
+    // Для Owner используем первую локацию из списка
     if (
-      shouldLoadPoints &&
-      networkPointsData &&
-      networkPointsData.points.length > 0
+      shouldLoadLocations &&
+      locationsData &&
+      locationsData.locations.length > 0
     ) {
-      return networkPointsData.points[0].code;
+      return locationsData.locations[0].id;
     }
 
-    // Для ADMIN пока возвращаем undefined (можно расширить логику позже)
     return undefined;
-  }, [currentUser, networkPointsData, shouldLoadPoints]);
+  }, [currentUser, locationsData, shouldLoadLocations]);
 
-  // Локальное состояние для выбранной точки (для селектора)
-  const [localSelectedPointCode, setLocalSelectedPointCode] = useState<
+  // Локальное состояние для выбранной локации (для селектора)
+  const [localSelectedLocationId, setLocalSelectedLocationId] = useState<
     string | undefined
-  >(selectedPointCode);
+  >(selectedLocationId);
 
   // Синхронизируем локальное состояние с вычисленным значением
   useEffect(() => {
-    if (selectedPointCode) {
-      setLocalSelectedPointCode(selectedPointCode);
+    if (selectedLocationId) {
+      setLocalSelectedLocationId(selectedLocationId);
     }
-  }, [selectedPointCode]);
+  }, [selectedLocationId]);
 
   // Используем локальное состояние для запросов (если есть селектор) или вычисленное значение
-  const pointCodeForQuery =
-    shouldLoadPoints && localSelectedPointCode
-      ? localSelectedPointCode
-      : selectedPointCode;
+  const locationIdForQuery =
+    shouldLoadLocations && localSelectedLocationId
+      ? localSelectedLocationId
+      : selectedLocationId;
 
   // Получение данных услуг
-  const { data, isLoading, error } = usePointServices(pointCodeForQuery);
+  const { data, isLoading, error } = useLocationServices(locationIdForQuery);
 
   // Определение колонок таблицы
   const tableColumns = [
@@ -101,13 +94,12 @@ export function ServicesContent() {
 
   return (
     <div className="flex flex-col md:p-4">
-      {/* Селектор точки (только для self_owner/net_manager/admin) */}
-      {shouldLoadPoints && (
+      {/* Селектор локации (только для owner) */}
+      {shouldLoadLocations && (
         <div className="p-4">
-          <PointSelect
-            value={localSelectedPointCode}
-            onValueChange={setLocalSelectedPointCode}
-            networkCode={currentUser?.network_code}
+          <LocationSelect
+            value={localSelectedLocationId}
+            onValueChange={setLocalSelectedLocationId}
           />
         </div>
       )}
@@ -120,7 +112,7 @@ export function ServicesContent() {
             onClick={() => setIsDialogOpen(true)}
             size="sm"
             className="flex items-center gap-2"
-            disabled={!pointCodeForQuery}
+            disabled={!locationIdForQuery}
           >
             <Plus className="h-4 w-4" />
             {t("addService")}
@@ -164,7 +156,7 @@ export function ServicesContent() {
                         <ServicesTableRow
                           key={service.id}
                           service={service}
-                          pointCode={pointCodeForQuery}
+                          locationId={locationIdForQuery}
                         />
                       ))
                     )}
@@ -180,7 +172,7 @@ export function ServicesContent() {
       <AddServiceDialog
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
-        pointCode={pointCodeForQuery}
+        locationId={locationIdForQuery}
       />
     </div>
   );

@@ -21,7 +21,7 @@ export default async function InvitePage({
   let tokenData;
   try {
     tokenData = await AuthService.verifyAuthToken(token);
-  } catch (error) {
+  } catch {
     // Если токен невалиден (401) или произошла ошибка - показываем not-found
     notFound();
   }

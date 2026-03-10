@@ -13,7 +13,7 @@
       "clients": "Клиенттері",
       "services": "Қызметтер",
       "staff": "Жұмысшылар",
-      "points": "Орындар",
+      "locations": "Локациялар",
       "analytics": "Аналитика",
       "settings": "Параметрлер"
     },
@@ -38,7 +38,7 @@
       "welcome": "Кош келдіңіз!",
       "panel": "Панель {name}"
     },
-    "emptyPoints": {
+    "emptyLocations": {
       "title": "Қызмет көрсету нүктелері жоқ",
       "description": "Сізде әлі қызмет көрсету нүктелері жоқ. Күнтізбемен жұмыс істеу үшін бірінші нүктені қосыңыз.",
       "addPointButton": "Нүкте қосу"
@@ -120,10 +120,19 @@
       },
       "EventDetailsDialog": {
         "edit": "Өңдеу",
+        "cancel": "Жазбаны болдырмау",
+        "cancelConfirm": "Бұл жазбаны болдырмағыңыз келетініне сенімдісіз бе?",
+        "cancelReason": "Болдырмау себебі",
+        "cancelReasonPlaceholder": "Себебін көрсетіңіз (міндетті емес)",
+        "cancelSuccess": "Жазба болдырмалды",
+        "cancelError": "Жазбаны болдырмау мүмкін болмады",
+        "cancelling": "Болдырмау...",
         "responsible": "Қызметкер",
         "startDate": "Басталу күні және уақыты",
         "endDate": "Аяқталу күні және уақыты",
-        "comment": "Пікір"
+        "comment": "Пікір",
+        "client": "Клиент",
+        "status": "Күйі"
       },
       "DayCell": {
         "more": "тағы"
@@ -213,8 +222,8 @@
       "active": "Белсенді",
       "role": "Рөл",
       "inactive": "Белсенді емес",
-      "pointCode": "Нүкте коды",
-      "networkCode": "Желі коды",
+      "locationId": "Локация",
+      "networkCode": "Ұйым",
       "createdAt": "Жасалған күні",
       "updatedAt": "Соңғы жаңарту",
       "editProfile": "Профильді өңдеу",
@@ -241,7 +250,7 @@
     "addStaff": "Жұмысшы қосу",
     "searchPlaceholder": "Аты, телефон, рөл бойынша іздеу...",
     "networkCode": "Желі коды",
-    "pointCode": "Нүкте коды",
+    "locationId": "Локация",
     "role": "Рөл",
     "name": "Аты",
     "surname": "Тегі",
@@ -260,9 +269,9 @@
     "errorLoadingData": "Деректерді жүктеу қатесі",
     "unknownError": "Белгісіз қате",
     "filters": {
-      "pointCode": "Нүкте коды",
-      "pointCodePlaceholder": "Нүкте кодын енгізіңіз",
-      "networkCode": "Желі коды",
+      "locationId": "Локация",
+      "locationIdPlaceholder": "Локация UUID енгізіңіз",
+      "networkCode": "Ұйым",
       "networkCodePlaceholder": "Желі кодын енгізіңіз",
       "role": "Рөл",
       "rolePlaceholder": "Рөлді таңдаңыз",
@@ -274,12 +283,9 @@
       "phones": "Телефондар"
     },
     "roles": {
-      "staff": "Қызметкер",
+      "owner": "Иесі",
       "manager": "Менеджер",
-      "net_manager": "Желі менеджері",
-      "self_owner": "Иесі",
-      "admin": "Әкімші",
-      "worker": "Жұмысшы"
+      "staff": "Қызметкер"
     },
     "pagination": {
       "showing": "Көрсетілген",
@@ -299,16 +305,15 @@
       "phonePlaceholder": "Телефон нөмірін енгізіңіз",
       "role": "Рөл",
       "rolePlaceholder": "Рөлді таңдаңыз",
-      "pointCode": "Нүкте коды",
-      "pointCodePlaceholder": "Нүкте кодын енгізіңіз",
+      "locationId": "Локация",
+      "locationIdPlaceholder": "Локацияны таңдаңыз",
       "submit": "Жұмысшы қосу",
       "submitting": "Қосуда...",
       "cancel": "Болдырмау",
       "success": "Жұмысшы сәтті қосылды. Тіркелгіні аяқтау үшін сізге телефон нөміріне сілтеме жіберілді.",
       "roles": {
         "staff": "Жұмысшы",
-        "manager": "Менеджер",
-        "net_manager": "Желі менеджері"
+        "manager": "Менеджер"
       },
       "errors": {
         "nameMin": "Аты кемінде 2 таңбадан тұруы керек",
@@ -318,13 +323,12 @@
         "phoneRequired": "Телефон нөмірін енгізіңіз",
         "phoneInvalid": "Дұрыс емес телефон нөмірі",
         "roleRequired": "Рөлді таңдаңыз",
-        "pointCodeRequired": "Нүкте кодын енгізіңіз",
-        "pointCodeMax": "Нүкте коды кемінде 50 таңбадан тұруы керек",
+        "pointCodeRequired": "Локацияны таңдаңыз",
         "submitError": "Жұмысшы қосу қатесі"
       }
     }
   },
-  "Points": {
+  "Locations": {
     "title": "Қызмет көрсету нүктелері",
     "tableTitle": "Қызмет көрсету нүктелері",
     "code": "Код",
@@ -353,8 +357,28 @@
     "addPointForm": {
       "name": "Атауы",
       "description": "Сипаттама",
+      "phone": "Байланыс нөмірі",
       "categoryId": "Категория",
       "categoryIdPlaceholder": "Категорияны таңдаңыз",
+      "scheduleType": "Кесте түрі",
+      "scheduleTypePlaceholder": "Түрін таңдаңыз",
+      "scheduleTypes": {
+        "mixed": {
+          "label": "Аралас",
+          "description": "Нүктенің өз кестесі, шеберлердің — өздерінікі",
+          "hint": "Әр шебер нүкте кестесінен бөлек өз жұмыс кестесін реттей алады"
+        },
+        "fixed": {
+          "label": "Тұрақты",
+          "description": "Барлық шеберлер нүкте кестесі бойынша жұмыс істейді",
+          "hint": "Шеберлер өз кестесін өзгерте алмайды — ол нүкте кестесімен бірдей болады"
+        }
+      },
+      "soloScheduleNote": "сіздің кестеңіз бен нүкте кестесі автоматты түрде синхрондалады",
+      "slotDuration": "Слот ұзақтығы",
+      "slotDurationPlaceholder": "Ұзақтығын таңдаңыз",
+      "slotDurationHint": "Жазылу мүмкін болатын аралықтар. Мысалы, әр 30 минут немесе әр 5 минут сайын",
+      "minutes": "мин",
       "address": {
         "title": "Мекенжай",
         "autocomplete": "Мекенжайды таңдаңыз, қала және көше автоматты түрде толтырылады, бірақ сіз оларды өзгерте аласыз",
@@ -367,13 +391,10 @@
         "mapNoLocation": "Картада көрсету үшін мекенжайды таңдаңыз",
         "city": "Қала",
         "street": "Көше",
-        "latitude": "Ендік",
-        "longitude": "Бойлық"
-      },
-      "schedule": {
-        "title": "Кесте",
-        "allDay": "Күні бойы",
-        "comment": "Түсініктеме"
+        "building": "Ғимарат / корпус",
+        "buildingPlaceholder": "Үй нөмірі, корпус",
+        "details": "Қосымша ақпарат",
+        "detailsPlaceholder": "Қабат, кеңсе, кіреберіс және т.б."
       },
       "submit": "Құру",
       "submitting": "Құрылуда...",
@@ -383,17 +404,16 @@
         "nameMin": "Атауы кемінде 2 таңбадан тұруы керек",
         "nameMax": "Атауы 100 таңбадан аспауы керек",
         "descriptionMax": "Сипаттама 500 таңбадан аспауы керек",
+        "phoneRequired": "Телефонды көрсетіңіз",
         "categoryIdRequired": "Категорияны таңдау қажет",
+        "scheduleTypeRequired": "Кесте түрін таңдаңыз",
+        "slotDurationMin": "Кемінде 5 минут",
+        "slotDurationMax": "Ең көбі 480 минут",
         "cityMin": "Қала атауы кемінде 2 таңбадан тұруы керек",
         "cityMax": "Қала атауы 100 таңбадан аспауы керек",
         "streetMin": "Көше атауы кемінде 2 таңбадан тұруы керек",
         "streetMax": "Көше атауы 200 таңбадан аспауы керек",
-        "latitudeMin": "Ендік -90-дан кем болмауы керек",
-        "latitudeMax": "Ендік 90-дан аспауы керек",
-        "longitudeMin": "Бойлық -180-ден кем болмауы керек",
-        "longitudeMax": "Бойлық 180-ден аспауы керек",
         "addressRequired": "Іздеуден мекенжайды таңдау қажет",
-        "scheduleMin": "Кемінде бір күнге кестені көрсету қажет",
         "networkCodeRequired": "Желі кодын анықтау мүмкін болмады",
         "submitError": "Нүктені құру кезінде қате"
       }
@@ -418,9 +438,9 @@
       "status": "Күйі",
       "masters": "Шеберлер"
     },
-    "pointSelect": {
-      "label": "Қызмет көрсету нүктесі",
-      "placeholder": "Нүктені таңдаңыз"
+    "locationSelect": {
+      "label": "Локация",
+      "placeholder": "Локацияны таңдаңыз"
     },
     "addServiceDialog": {
       "title": "Қызмет қосу",
@@ -466,7 +486,7 @@
         "durationMustBePositive": "Ұзақтық оң сан болуы керек",
         "colorRequired": "Түсті таңдаңыз",
         "colorMax": "Түс 50 таңбадан аспауы керек",
-        "pointCodeRequired": "Нүкте кодын анықтау мүмкін болмады",
+        "pointCodeRequired": "Локацияны анықтау мүмкін болмады",
         "submitError": "Қызмет құру кезінде қате"
       }
     },

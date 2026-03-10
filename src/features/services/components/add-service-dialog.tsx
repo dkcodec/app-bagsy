@@ -13,7 +13,8 @@ import { AddServiceForm } from "./add-service-form";
 interface AddServiceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  pointCode: string | undefined;
+  /** UUID локации */
+  locationId: string | undefined;
 }
 
 /**
@@ -23,7 +24,7 @@ interface AddServiceDialogProps {
 export function AddServiceDialog({
   open,
   onOpenChange,
-  pointCode,
+  locationId,
 }: AddServiceDialogProps) {
   const t = useTranslations("Services.addServiceDialog");
 
@@ -45,7 +46,7 @@ export function AddServiceDialog({
         <AddServiceForm
           onSuccess={handleSuccess}
           onCancel={handleCancel}
-          pointCode={pointCode}
+          locationId={locationId}
         />
       </DialogContent>
     </Dialog>

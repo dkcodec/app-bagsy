@@ -60,7 +60,7 @@ export function EditEventDialog({ children, event }: IProps) {
   const form = useForm<TEventFormData>({
     resolver: zodResolver(eventSchema),
     defaultValues: {
-      user: event.masterPhone,
+      user: event.employeeId,
       title: event.title,
       comment: event.comment,
       startDate: parseTimestamp(event.startDate),
@@ -78,7 +78,7 @@ export function EditEventDialog({ children, event }: IProps) {
   });
 
   const onSubmit = (values: TEventFormData) => {
-    const master = masters.find(master => master.phone === values.user);
+    const master = masters.find(m => m.id === values.user);
 
     if (!master) throw new Error("Master not found");
 
@@ -90,7 +90,7 @@ export function EditEventDialog({ children, event }: IProps) {
 
     updateEvent({
       ...event,
-      masterPhone: master.phone,
+      employeeId: master.id,
       title: values.title,
       color: values.color,
       comment: values.comment ?? "",
@@ -135,23 +135,23 @@ export function EditEventDialog({ children, event }: IProps) {
                       <SelectContent>
                         {masters.map(master => (
                           <SelectItem
-                            key={master.phone}
-                            value={master.phone}
+                            key={master.id}
+                            value={master.id}
                             className="flex-1"
                           >
                             <div className="flex items-center gap-2">
-                              <Avatar key={master.phone} className="size-6">
+                              <Avatar key={master.id} className="size-6">
                                 <AvatarImage
                                   src={undefined}
-                                  alt={`${master.name} ${master.surname}`}
+                                  alt={`${master.first_name} ${master.last_name}`}
                                 />
                                 <AvatarFallback className="text-xxs">
-                                  {`${master.name[0]}${master.surname[0]}`}
+                                  {`${master.first_name[0]}${master.last_name[0]}`}
                                 </AvatarFallback>
                               </Avatar>
 
                               <p className="truncate">
-                                {master.name} {master.surname}
+                                {master.first_name} {master.last_name}
                               </p>
                             </div>
                           </SelectItem>

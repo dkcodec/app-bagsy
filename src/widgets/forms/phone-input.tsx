@@ -192,7 +192,7 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
           type="button"
           variant="outline"
           className={cn(
-            "rounded-e-none rounded-s-md border-r-0 px-3 text-sm bg-transparen",
+            "rounded-e-none rounded-s-md border-r-0 px-3 text-sm bg-transparent hover:bg-accent/9",
             "h-9",
             classNameInput
           )}
@@ -235,7 +235,7 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
                         "flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm",
                         c.code === country.code
                           ? "bg-transparent  text-accent-foreground"
-                          : "hover:bg-accent hover:text-accent-foreground"
+                          : "hover:bg-accent/9 hover:text-accent-foreground"
                       )}
                       onClick={() => {
                         changeCountry(c);

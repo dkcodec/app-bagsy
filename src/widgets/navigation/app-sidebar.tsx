@@ -57,23 +57,13 @@ const navData: { navMain: NavItem[] } = {
       name: "staff",
       url: "/staff",
       icon: Users,
-      allowedRoles: [
-        EUserRole.ADMIN,
-        EUserRole.NET_MANAGER,
-        EUserRole.SELF_OWNER,
-        EUserRole.MANAGER,
-      ],
+      allowedRoles: [EUserRole.OWNER, EUserRole.MANAGER],
     },
     {
-      name: "points",
-      url: "/points",
+      name: "locations",
+      url: "/locations",
       icon: BriefcaseBusiness,
-      allowedRoles: [
-        EUserRole.ADMIN,
-        EUserRole.NET_MANAGER,
-        EUserRole.SELF_OWNER,
-        EUserRole.MANAGER,
-      ],
+      allowedRoles: [EUserRole.OWNER, EUserRole.MANAGER],
     },
     // {
     //   name: "analytics",

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useGetStaff } from "@/src/shared/hooks/user-staff";
-import { GetStaffParams } from "@/src/shared/services/staff-service";
+import { useGetEmployees } from "@/src/shared/hooks/user-staff";
+import type { GetEmployeesParams } from "@/src/shared/services/employee-service";
 import {
   Table,
   TableBody,
@@ -34,16 +34,18 @@ export function StaffContent() {
   const t = useTranslations("Staff");
 
   // Состояние фильтров
-  const [filters, setFilters] = useState<GetStaffParams>(DEFAULT_STAFF_FILTERS);
+  const [filters, setFilters] = useState<GetEmployeesParams>(
+    DEFAULT_STAFF_FILTERS
+  );
 
   // Управление диалогом добавления сотрудника
   const addStaffDialog = useDisclosure();
 
   // Получение данных
-  const { data, isLoading, error } = useGetStaff(filters);
+  const { data, isLoading, error } = useGetEmployees(filters);
 
   // Обработка изменения сортировки
-  const handleSort = (field: GetStaffParams["order_by"]) => {
+  const handleSort = (field: GetEmployeesParams["order_by"]) => {
     if (!field) return;
 
     setFilters(prev => ({
@@ -51,7 +53,7 @@ export function StaffContent() {
       order_by: field,
       sort_order:
         prev.order_by === field && prev.sort_order === "asc" ? "desc" : "asc",
-      offset: 0, // Сбрасываем пагинацию при изменении сортировки
+      offset: 0,
     }));
   };
 
@@ -86,12 +88,10 @@ export function StaffContent() {
 
   // Определение колонок таблицы
   const tableColumns = [
-    { field: "name" as const, labelKey: "name", sortable: true },
-    { field: "surname" as const, labelKey: "surname", sortable: true },
+    { field: "first_name" as const, labelKey: "name", sortable: true },
+    { field: undefined, labelKey: "surname", sortable: false },
     { field: "phone" as const, labelKey: "phone", sortable: true },
-    { field: undefined, labelKey: "role", sortable: false },
-    { field: "point_code" as const, labelKey: "pointCode", sortable: true },
-    { field: "network_code" as const, labelKey: "networkCode", sortable: true },
+    { field: "role" as const, labelKey: "role", sortable: true },
     { field: undefined, labelKey: "status", sortable: false },
     { field: "created_at" as const, labelKey: "createdAt", sortable: true },
   ];
@@ -141,18 +141,18 @@ export function StaffContent() {
                     />
                   </TableHeader>
                   <TableBody>
-                    {!data?.users || data.users.length === 0 ? (
+                    {!data?.employees || data.employees.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={8}
+                          colSpan={tableColumns.length}
                           className="text-center py-8 text-muted-foreground"
                         >
                           {t("noData")}
                         </TableCell>
                       </TableRow>
                     ) : (
-                      data.users.map(user => (
-                        <StaffTableRow key={user.phone} user={user} />
+                      data.employees.map(employee => (
+                        <StaffTableRow key={employee.phone} user={employee} />
                       ))
                     )}
                   </TableBody>
