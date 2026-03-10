@@ -118,6 +118,7 @@ export function ServicesContent() {
             {t("addService")}
           </Button>
         </CardHeader>
+
         <CardContent>
           {/* Состояние загрузки */}
           {error ? (
