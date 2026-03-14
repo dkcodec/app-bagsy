@@ -7,6 +7,7 @@ import {
   Settings,
   Users,
   BriefcaseBusiness,
+  Clock,
 } from "lucide-react";
 
 import { NavUser } from "./nav-user";
@@ -42,6 +43,11 @@ const navData: { navMain: NavItem[] } = {
       url: "/",
       icon: Calendar,
       isActive: true,
+    },
+    {
+      name: "schedule",
+      url: "/schedule",
+      icon: Clock,
     },
     // {
     //   name: "clients",

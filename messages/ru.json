@@ -10,6 +10,7 @@
     "sidebarDescription": "Отображает боковое меню.",
     "Main": {
       "calendar": "Календарь",
+      "schedule": "Расписание",
       "clients": "Клиенты",
       "services": "Услуги",
       "staff": "Сотрудники",
@@ -511,6 +512,64 @@
       "priceMin": "Цена должна быть не менее 1",
       "serviceIdRequired": "ID услуги обязателен",
       "masterPhoneRequired": "Выберите мастера"
+    }
+  },
+  "Schedule": {
+    "title": "График",
+    "description": "Настройка графика работы по дням месяца",
+    "noAccess": "Нет доступа к настройке графика",
+    "mySchedule": "Мой график",
+    "pointSchedule": "График точки",
+    "monthGridTitle": "Дни месяца",
+    "editorTitle": "График выбранных дней",
+    "selectedCount": "Выбрано: {count}",
+    "clearSelection": "Сбросить",
+    "Weekdays": {
+      "mon": "Пн",
+      "tue": "Вт",
+      "wed": "Ср",
+      "thu": "Чт",
+      "fri": "Пт",
+      "sat": "Сб",
+      "sun": "Вс"
+    },
+    "MonthNav": {
+      "prev": "Предыдущий месяц",
+      "next": "Следующий месяц",
+      "today": "Сегодня"
+    },
+    "Header": {
+      "title": "График",
+      "mySchedule": "Мой график",
+      "pointSchedule": "График точки",
+      "fixedBadge": "Фиксированный",
+      "mixedBadge": "Смешанный",
+      "scheduleTypeFixedHint": "График точки фиксированный, вы не можете его менять",
+      "scheduleTypeMixedHint": "График точки смешанный — мастер настраивает свой график на каждый месяц"
+    },
+    "save": "Сохранить",
+    "Editor": {
+      "selectDaysHint": "Выберите дни в календаре, чтобы задать график",
+      "dayIsClosed": "День отмечен как выходной",
+      "makeOpen": "Сделать рабочим",
+      "makeClosed": "Сделать выходным",
+      "open": "Открыто",
+      "closed": "Закрыто",
+      "workHours": "Рабочие часы",
+      "breaks": "Перерывы",
+      "noBreaks": "Нет перерывов",
+      "from": "С",
+      "to": "До",
+      "addBreak": "Добавить перерыв",
+      "addWorkRange": "Добавить интервал",
+      "mixedTimesWarning": "У выбранных дней разное время. Изменения будут применены ко всем выбранным дням."
+    },
+    "Presets": {
+      "selectAll": "Выбрать все",
+      "weekdays": "5/2 (Пн–Пт)",
+      "evenDays": "Чётные",
+      "oddDays": "Нечётные",
+      "addBreakToAll": "Перерыв всем"
     }
   }
 }
