@@ -57,7 +57,7 @@ export interface ResendInviteResponse {
 export interface GetEmployeesParams {
   location_id?: string;
   role?: TUserRole[];
-  phone_search?: string;
+  search?: string;
   active?: boolean;
   limit?: number;
   offset?: number;
@@ -102,8 +102,8 @@ export class EmployeeService {
       query: {
         ...(params?.location_id && { location_id: params.location_id }),
         ...(params?.role && params.role.length > 0 && { role: params.role }),
-        ...(params?.phone_search?.trim() && {
-          phone_search: params.phone_search,
+        ...(params?.search?.trim() && {
+          search: params.search,
         }),
         ...(params?.active !== undefined && { active: params.active }),
         ...(params?.limit && { limit: params.limit }),

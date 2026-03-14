@@ -35,13 +35,13 @@ export function StaffFilters({ filters, onFiltersChange }: StaffFiltersProps) {
   const [localLocationId, setLocalLocationId] = useState(
     filters.location_id || ""
   );
-  const [localPhone, setLocalPhone] = useState(filters.phone_search || "");
+  const [localSearch, setLocalSearch] = useState(filters.search || "");
 
   // Проверка наличия активных фильтров
   const hasActiveFilters = Boolean(
     filters.location_id ||
       (filters.role && filters.role.length > 0) ||
-      (filters.phone_search && filters.phone_search.trim())
+      (filters.search && filters.search.trim())
   );
 
   // Обработка изменения фильтров
@@ -62,10 +62,10 @@ export function StaffFilters({ filters, onFiltersChange }: StaffFiltersProps) {
       ...DEFAULT_STAFF_FILTERS,
       location_id: undefined,
       role: undefined,
-      phone_search: undefined,
+      search: undefined,
     });
     setLocalLocationId("");
-    setLocalPhone("");
+    setLocalSearch("");
   };
 
   // Debounce для ID локации (применяется через 500мс после остановки ввода)
@@ -78,12 +78,12 @@ export function StaffFilters({ filters, onFiltersChange }: StaffFiltersProps) {
     500
   );
 
-  // Debounce для телефона (применяется через 500мс после остановки ввода)
+  // Debounce для поиска (применяется через 500мс после остановки ввода)
   useDebounceCallback(
-    localPhone,
-    debouncedPhone => {
-      const phoneValue = debouncedPhone.trim();
-      handleFilterChange("phone_search", phoneValue || undefined);
+    localSearch,
+    debouncedSearch => {
+      const searchValue = debouncedSearch.trim();
+      handleFilterChange("search", searchValue || undefined);
     },
     500
   );
@@ -128,13 +128,15 @@ export function StaffFilters({ filters, onFiltersChange }: StaffFiltersProps) {
           </Select>
         </div>
 
-        {/* Фильтр по телефону */}
+        {/* Фильтр по всем полям */}
         <div className="flex-1 min-w-[150px]">
-          <label className="text-sm font-medium mb-1 block">{t("phone")}</label>
+          <label className="text-sm font-medium mb-1 block">
+            {t("search")}
+          </label>
           <Input
-            placeholder={t("phonePlaceholder")}
-            value={localPhone}
-            onChange={e => setLocalPhone(e.target.value)}
+            placeholder={t("searchPlaceholder")}
+            value={localSearch}
+            onChange={e => setLocalSearch(e.target.value)}
           />
         </div>
 

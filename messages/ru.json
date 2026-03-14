@@ -277,8 +277,8 @@
       "role": "Роль",
       "rolePlaceholder": "Выберите роль",
       "allRoles": "Все роли",
-      "phone": "Телефон",
-      "phonePlaceholder": "Введите телефон",
+      "search": "Поиск",
+      "searchPlaceholder": "Введите тел. или фио",
       "clear": "Очистить",
       "phones": "Телефоны"
     },
