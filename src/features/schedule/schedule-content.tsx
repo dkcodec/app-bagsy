@@ -12,10 +12,11 @@ import {
   TabsTrigger,
 } from "@/src/entities";
 import { Card, CardContent } from "@/src/entities";
+import { useCurrentUser } from "@/src/shared/hooks/use-users";
 import { useSchedulePermissions } from "@/src/shared/hooks/use-schedule-permissions";
 import { useScheduleScope } from "./schedule-scope-context";
 import { useMonthSchedule } from "./api/use-month-schedule";
-import type { DaySchedule, MonthSchedule } from "@/src/shared/types/schedule";
+import type { DaySchedule, MonthSchedule, ScheduleUserFlags, PointScheduleContext } from "@/src/shared/types/schedule";
 import { MonthGrid } from "./ui/month-grid";
 import { ScheduleEditor } from "./ui/schedule-editor";
 import { SchedulePresets } from "./ui/schedule-presets";
@@ -36,15 +37,26 @@ export function ScheduleContent() {
   const locale = useLocale();
   const dateFnsLocale = locale === "kz" ? kk : ru;
 
-  /* Права: мок — заменить на реальные данные с API. */
-  const permissions = useSchedulePermissions({
-    userFlags: { can_work: true, can_manage_point_schedule: true },
-    pointContext: { schedule_type: "mixed" },
-  });
+  /* Текущий пользователь: id (employee) и location_id. */
+  const { data: user } = useCurrentUser();
+
+  /* Маппинг permissions API → ScheduleUserFlags. */
+  const userFlags: ScheduleUserFlags = {
+    can_work: user?.permissions.can_provide_services ?? false,
+    can_manage_point_schedule:
+      user?.permissions.can_manage_location_schedule ?? false,
+  };
+  /* TODO: schedule_type заменить когда появится API локации. */
+  const pointContext: PointScheduleContext = { schedule_type: "mixed" };
+  const permissions = useSchedulePermissions({ userFlags, pointContext });
 
   const { activeScope, setActiveScope } = useScheduleScope();
   const [currentMonth, setCurrentMonth] = useState(() => new Date());
   const [selectedDays, setSelectedDays] = useState<number[]>([]);
+
+  /* Определяем entityId по scope: staff → employee UUID, point → location UUID. */
+  const entityId =
+    activeScope === "staff" ? user?.id : user?.location_id;
 
   const {
     data: serverSchedule,
@@ -54,7 +66,7 @@ export function ScheduleContent() {
     prevMonth,
     nextMonth,
     daysInMonth,
-  } = useMonthSchedule(activeScope, currentMonth);
+  } = useMonthSchedule(activeScope, currentMonth, entityId);
 
   /* Локальный state расписания (изменения копятся здесь до нажатия "Сохранить"). */
   const [localSchedule, setLocalSchedule] =

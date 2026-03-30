@@ -1,19 +1,90 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { MonthSchedule, ScheduleScope } from "@/src/shared/types/schedule";
-import { getDaysInMonth, startOfMonth, addMonths, subMonths } from "date-fns";
+import {
+  getDaysInMonth,
+  startOfMonth,
+  addMonths,
+  subMonths,
+  format,
+} from "date-fns";
+import { ScheduleService } from "@/src/shared/services/schedule-service";
+import type {
+  MonthSchedule,
+  ScheduleScope,
+  ScheduleSlotDto,
+} from "@/src/shared/types/schedule";
 
 const QUERY_KEY_PREFIX = "month-schedule" as const;
 
-/** Пустое расписание одного дня (закрыто, без интервалов). */
-function emptyDaySchedule() {
-  return {
-    isClosed: true,
-    workRanges: [] as { start: string; end: string }[],
-    breaks: [] as { start: string; end: string }[],
-  };
+// ============================================================
+// Маппинг: API slots[] ↔ UI MonthSchedule
+// ============================================================
+
+/** Конвертирует плоский массив слотов API → MonthSchedule (Record<day, DaySchedule>). */
+function slotsToMonthSchedule(
+  slots: ScheduleSlotDto[],
+  year: number,
+  month: number
+): MonthSchedule {
+  const daysInMonth = getDaysInMonth(new Date(year, month, 1));
+  const result: MonthSchedule = {};
+
+  /* Инициализируем все дни как выходные. */
+  for (let d = 1; d <= daysInMonth; d++) {
+    result[d] = { isClosed: true, workRanges: [], breaks: [] };
+  }
+
+  /* Раскладываем слоты по дням. */
+  for (const slot of slots) {
+    const day = parseInt(slot.date.split("-")[2], 10);
+    if (!result[day]) continue;
+
+    const range = { start: slot.start_time, end: slot.end_time };
+    if (slot.type === "work") {
+      result[day].workRanges.push(range);
+      result[day].isClosed = false;
+    } else {
+      result[day].breaks.push(range);
+    }
+  }
+
+  /* Сортируем интервалы по start внутри каждого дня. */
+  for (let d = 1; d <= daysInMonth; d++) {
+    result[d].workRanges.sort((a, b) => a.start.localeCompare(b.start));
+    result[d].breaks.sort((a, b) => a.start.localeCompare(b.start));
+  }
+
+  return result;
 }
+
+/** Конвертирует MonthSchedule → плоский массив слотов для PUT API. */
+function monthScheduleToSlots(
+  schedule: MonthSchedule,
+  year: number,
+  month: number
+): Omit<ScheduleSlotDto, "id">[] {
+  const slots: Omit<ScheduleSlotDto, "id">[] = [];
+
+  for (const [dayStr, day] of Object.entries(schedule)) {
+    if (day.isClosed) continue;
+
+    const date = format(new Date(year, month, Number(dayStr)), "yyyy-MM-dd");
+
+    for (const r of day.workRanges) {
+      slots.push({ date, type: "work", start_time: r.start, end_time: r.end });
+    }
+    for (const r of day.breaks) {
+      slots.push({ date, type: "rest", start_time: r.start, end_time: r.end });
+    }
+  }
+
+  return slots;
+}
+
+// ============================================================
+// Публичные утилиты
+// ============================================================
 
 /** Строит пустой MonthSchedule для указанного месяца (дни 1..N). */
 export function buildEmptyMonthSchedule(
@@ -23,52 +94,67 @@ export function buildEmptyMonthSchedule(
   const daysInMonth = getDaysInMonth(new Date(year, month, 1));
   const result: MonthSchedule = {};
   for (let d = 1; d <= daysInMonth; d++) {
-    result[d] = emptyDaySchedule();
+    result[d] = { isClosed: true, workRanges: [], breaks: [] };
   }
   return result;
 }
 
-/** TODO: заменить на реальный API — загрузка графика точки/мастера на месяц. */
-async function fetchMonthSchedule(
-  _scope: ScheduleScope,
-  _year: number,
-  _month: number
-): Promise<MonthSchedule> {
-  await new Promise(r => setTimeout(r, 200));
-  const daysInMonth = getDaysInMonth(new Date(_year, _month, 1));
-  const result: MonthSchedule = {};
-  for (let d = 1; d <= daysInMonth; d++) {
-    result[d] = emptyDaySchedule();
-  }
-  return result;
-}
+// ============================================================
+// Хук
+// ============================================================
 
-/** TODO: заменить на реальный API — сохранение графика на месяц. */
-async function saveMonthSchedule(
-  _scope: ScheduleScope,
-  _year: number,
-  _month: number,
-  data: MonthSchedule
-): Promise<void> {
-  await new Promise(r => setTimeout(r, 300));
-  void data;
-}
-
-export function useMonthSchedule(scope: ScheduleScope, date: Date) {
+/**
+ * Загрузка и сохранение расписания на месяц.
+ * @param scope  "staff" → employee-schedules, "point" → location-schedules
+ * @param date   любой день целевого месяца
+ * @param entityId  UUID сотрудника (staff) или локации (point)
+ */
+export function useMonthSchedule(
+  scope: ScheduleScope,
+  date: Date,
+  entityId: string | undefined
+) {
   const year = date.getFullYear();
   const month = date.getMonth();
-  const queryKey = [QUERY_KEY_PREFIX, scope, year, month] as const;
+  const queryKey = [QUERY_KEY_PREFIX, scope, entityId, year, month] as const;
   const queryClient = useQueryClient();
+
+  /* Границы месяца в формате YYYY-MM-DD. */
+  const daysInMonth = getDaysInMonth(new Date(year, month, 1));
+  const startDate = format(new Date(year, month, 1), "yyyy-MM-dd");
+  const endDate = format(new Date(year, month, daysInMonth), "yyyy-MM-dd");
 
   const query = useQuery({
     queryKey,
-    queryFn: () => fetchMonthSchedule(scope, year, month),
+    queryFn: async () => {
+      const resp =
+        scope === "staff"
+          ? await ScheduleService.getEmployeeSchedule(
+              entityId!,
+              startDate,
+              endDate
+            )
+          : await ScheduleService.getLocationSchedule(
+              entityId!,
+              startDate,
+              endDate
+            );
+      return slotsToMonthSchedule(resp.slots, year, month);
+    },
     placeholderData: () => buildEmptyMonthSchedule(year, month),
+    enabled: !!entityId,
   });
 
   const mutation = useMutation({
-    mutationFn: (data: MonthSchedule) =>
-      saveMonthSchedule(scope, year, month, data),
+    mutationFn: async (data: MonthSchedule) => {
+      const slots = monthScheduleToSlots(data, year, month);
+      const body = { start: startDate, end: endDate, slots };
+      if (scope === "staff") {
+        await ScheduleService.saveEmployeeSchedule(entityId!, body);
+      } else {
+        await ScheduleService.saveLocationSchedule(entityId!, body);
+      }
+    },
     onSuccess: (_, data) => {
       queryClient.setQueryData(queryKey, data);
     },
@@ -89,6 +175,6 @@ export function useMonthSchedule(scope: ScheduleScope, date: Date) {
     month,
     prevMonth,
     nextMonth,
-    daysInMonth: getDaysInMonth(date),
+    daysInMonth,
   };
 }

@@ -6,3 +6,4 @@ export * from "./location-service";
 export * from "./service-service";
 export * from "./media-service";
 export * from "./master-service";
+export * from "./schedule-service";

@@ -35,3 +35,28 @@ export interface ScheduleUserFlags {
   can_work?: boolean;
   can_manage_point_schedule?: boolean;
 }
+
+// ============================================================
+// API DTO — эндпоинты employee-schedules / location-schedules
+// ============================================================
+
+/** Один слот расписания из API. */
+export interface ScheduleSlotDto {
+  id?: string; // есть в GET-ответе, отсутствует в PUT-запросе
+  date: string; // "YYYY-MM-DD"
+  type: "work" | "rest";
+  start_time: string; // "HH:mm"
+  end_time: string; // "HH:mm"
+}
+
+/** Ответ GET /api/v1/employee-schedules/{id} и location-schedules/{id}. */
+export interface ScheduleSlotsResponse {
+  slots: ScheduleSlotDto[];
+}
+
+/** Тело PUT /api/v1/employee-schedules/{id} и location-schedules/{id}. */
+export interface SaveScheduleSlotsRequest {
+  start: string; // "YYYY-MM-DD"
+  end: string; // "YYYY-MM-DD"
+  slots: Omit<ScheduleSlotDto, "id">[];
+}
