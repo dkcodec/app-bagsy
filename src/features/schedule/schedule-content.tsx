@@ -16,7 +16,12 @@ import { useCurrentUser } from "@/src/shared/hooks/use-users";
 import { useSchedulePermissions } from "@/src/shared/hooks/use-schedule-permissions";
 import { useScheduleScope } from "./schedule-scope-context";
 import { useMonthSchedule } from "./api/use-month-schedule";
-import type { DaySchedule, MonthSchedule, ScheduleUserFlags, PointScheduleContext } from "@/src/shared/types/schedule";
+import type {
+  DaySchedule,
+  MonthSchedule,
+  ScheduleUserFlags,
+  PointScheduleContext,
+} from "@/src/shared/types/schedule";
 import { MonthGrid } from "./ui/month-grid";
 import { ScheduleEditor } from "./ui/schedule-editor";
 import { SchedulePresets } from "./ui/schedule-presets";
@@ -55,8 +60,7 @@ export function ScheduleContent() {
   const [selectedDays, setSelectedDays] = useState<number[]>([]);
 
   /* Определяем entityId по scope: staff → employee UUID, point → location UUID. */
-  const entityId =
-    activeScope === "staff" ? user?.id : user?.location_id;
+  const entityId = activeScope === "staff" ? user?.id : user?.location_id;
 
   const {
     data: serverSchedule,

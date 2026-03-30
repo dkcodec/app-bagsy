@@ -3,7 +3,10 @@
 import { Loader2 } from "lucide-react";
 import { useCurrentUser } from "@/src/shared/hooks/use-users";
 import { useSchedulePermissions } from "@/src/shared/hooks/use-schedule-permissions";
-import type { ScheduleUserFlags, PointScheduleContext } from "@/src/shared/types/schedule";
+import type {
+  ScheduleUserFlags,
+  PointScheduleContext,
+} from "@/src/shared/types/schedule";
 import { ScheduleScopeProvider } from "./schedule-scope-context";
 import { ScheduleHeader } from "./schedule-header";
 import { ScheduleContent } from "./schedule-content";
