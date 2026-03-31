@@ -34,10 +34,10 @@ src/features/schedule/
 
 ### Определение прав (`useSchedulePermissions`)
 
-| План / Тип | Табы | point scope | staff scope |
-|---|---|---|---|
-| **Solo** | Скрыты | Полный доступ (единственный scope) | — |
-| **Fixed** (point/network) | point + staff | Редактируемый (если `can_manage_location_schedule`) | Read-only (показывает расписание точки) |
+| План / Тип                | Табы          | point scope                                         | staff scope                                 |
+| ------------------------- | ------------- | --------------------------------------------------- | ------------------------------------------- |
+| **Solo**                  | Скрыты        | Полный доступ (единственный scope)                  | —                                           |
+| **Fixed** (point/network) | point + staff | Редактируемый (если `can_manage_location_schedule`) | Read-only (показывает расписание точки)     |
 | **Mixed** (point/network) | point + staff | Редактируемый (если `can_manage_location_schedule`) | Редактируемый (если `can_provide_services`) |
 
 - Solo plan определяется по `user.organization.subscription.plan === "solo"`
@@ -50,14 +50,14 @@ src/features/schedule/
 
 ### Визуальные состояния ячеек
 
-| Состояние | Стили |
-|---|---|
-| Рабочий день (есть расписание) | `bg-accent-50/80 border-accent-200` (голубой фон) |
-| Выходной (Сб/Вс без расписания) | `bg-muted/50` (серый фон) |
-| Прошедший день | `opacity-40 pointer-events-none` |
-| Выбранный | `border-2 border-accent-500` (синяя рамка, без заливки) |
-| Сегодня | `font-semibold`, цвет accent |
-| Обычный будний без расписания | `border-border bg-card` |
+| Состояние                       | Стили                                                   |
+| ------------------------------- | ------------------------------------------------------- |
+| Рабочий день (есть расписание)  | `bg-accent-50/80 border-accent-200` (голубой фон)       |
+| Выходной (Сб/Вс без расписания) | `bg-muted/50` (серый фон)                               |
+| Прошедший день                  | `opacity-40 pointer-events-none`                        |
+| Выбранный                       | `border-2 border-accent-500` (синяя рамка, без заливки) |
+| Сегодня                         | `font-semibold`, цвет accent                            |
+| Обычный будний без расписания   | `border-border bg-card`                                 |
 
 ### Адаптивность
 
@@ -99,11 +99,11 @@ src/features/schedule/
 
 ## Пресеты (SchedulePresets)
 
-| Пресет | Логика |
-|---|---|
+| Пресет      | Логика                                      |
+| ----------- | ------------------------------------------- |
 | 5/2 (Пн–Пт) | Будни — рабочие (09–18), выходные — закрыты |
-| Чётные | Чётные дни — рабочие, нечётные — закрыты |
-| Нечётные | Нечётные дни — рабочие, чётные — закрыты |
+| Чётные      | Чётные дни — рабочие, нечётные — закрыты    |
+| Нечётные    | Нечётные дни — рабочие, чётные — закрыты    |
 
 - На мобилке — горизонтальный скролл (`overflow-x-auto flex-nowrap`)
 - На десктопе — flex-wrap + подсказка "Shift+клик для выделения диапазона"
@@ -164,6 +164,7 @@ Toast-уведомления через Sonner: `savedSuccess`, `savedError`, `d
 ## i18n ключи
 
 Namespace `Schedule`:
+
 - `pointSchedule`, `mySchedule` — табы
 - `selectedDay`, `selectedDays` — подзаголовок editor
 - `shiftHint` — подсказка Shift+клик (desktop)

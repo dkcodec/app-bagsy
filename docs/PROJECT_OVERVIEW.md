@@ -88,25 +88,25 @@ src/
 
 ### Хуки (React Query)
 
-| Файл                                      | Хуки                                                                |
-| ----------------------------------------- | ------------------------------------------------------------------- |
-| `src/shared/hooks/use-auth.ts`            | useLogin, useLogout, usePasswordReset                               |
-| `src/shared/hooks/use-users.ts`           | useCurrentUser, useUpdateProfile                                    |
-| `src/shared/hooks/use-calendar.ts`        | useCalendar (main hook)                                             |
-| `src/shared/hooks/user-staff.ts`          | useGetEmployees, useInviteEmployee                                  |
-| `src/shared/hooks/use-services.ts`        | useLocationServices, useServiceCategories, useCreateService         |
-| `src/shared/hooks/use-network-points.ts`  | useLocations, useLocation, useCreateLocation, useLocationCategories |
-| `src/shared/hooks/use-bagsies.ts`         | useCreateBooking, useCancelBooking                                  |
-| `src/shared/hooks/use-master-services.ts` | useCreateMasterService                                              |
-| `src/shared/hooks/use-schedule-permissions.ts` | useSchedulePermissions (scope, rights по plan/type)            |
+| Файл                                           | Хуки                                                                |
+| ---------------------------------------------- | ------------------------------------------------------------------- |
+| `src/shared/hooks/use-auth.ts`                 | useLogin, useLogout, usePasswordReset                               |
+| `src/shared/hooks/use-users.ts`                | useCurrentUser, useUpdateProfile                                    |
+| `src/shared/hooks/use-calendar.ts`             | useCalendar (main hook)                                             |
+| `src/shared/hooks/user-staff.ts`               | useGetEmployees, useInviteEmployee                                  |
+| `src/shared/hooks/use-services.ts`             | useLocationServices, useServiceCategories, useCreateService         |
+| `src/shared/hooks/use-network-points.ts`       | useLocations, useLocation, useCreateLocation, useLocationCategories |
+| `src/shared/hooks/use-bagsies.ts`              | useCreateBooking, useCancelBooking                                  |
+| `src/shared/hooks/use-master-services.ts`      | useCreateMasterService                                              |
+| `src/shared/hooks/use-schedule-permissions.ts` | useSchedulePermissions (scope, rights по plan/type)                 |
 
 ### Типы
 
-| Файл                           | Содержимое                                     |
-| ------------------------------ | ---------------------------------------------- |
-| `src/shared/types/user.ts`     | EUserRole, IEmployeeDto, IUserDto (deprecated) |
-| `src/shared/types/calendar.ts` | IEvent, CalendarApiResponse, TCalendarView     |
-| `src/shared/types/staff.ts`    | IStaffDto (deprecated)                         |
+| Файл                           | Содержимое                                           |
+| ------------------------------ | ---------------------------------------------------- |
+| `src/shared/types/user.ts`     | EUserRole, IEmployeeDto, IUserDto (deprecated)       |
+| `src/shared/types/calendar.ts` | IEvent, CalendarApiResponse, TCalendarView           |
+| `src/shared/types/staff.ts`    | IStaffDto (deprecated)                               |
 | `src/shared/types/schedule.ts` | ScheduleScope, DaySchedule, MonthSchedule, TimeRange |
 
 ### Утилиты
