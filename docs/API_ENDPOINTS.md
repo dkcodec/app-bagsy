@@ -201,7 +201,23 @@ Errors:   400, 401, 403, 500
 ```
 Response: {
   id, phone, first_name, last_name, avatar_url, role,
-  organization_id, location_id, active, created_at,
+  location_id, active, created_at, updated_at,
+  organization: {
+    id, name,
+    subscription: {
+      plan: "solo"|"point"|"network",
+      status: string,
+      current_period_end: string,
+      limits: {
+        locations: { used, max },
+        employees: { used, max },
+        bookings_monthly: { used, max }
+      },
+      features: {
+        multi_location, sms_notifications, custom_branding, api_access
+      }
+    }
+  },
   permissions: { can_provide_services, can_manage_location_schedule }
 }
 ```
@@ -349,19 +365,38 @@ Request: {
   slot_duration_minutes: 5|10|15|30|60,
   address: { city, street, building, details? }
 }
-Response: { id, ... }
+Response: { id, prompt_org_profile: boolean }
 Errors:   400, 401, 403, 500
+```
+
+`prompt_org_profile` — бэкенд сигнализирует что organization.name не заполнено.
+
+### `GET /api/v1/locations/slug/{slug}`
+
+Публичный эндпоинт — локация по slug + расписание на 7 дней.
+
+```
+Params:   slug (path)
+Response: ILocationDto + schedule: [{ id, date, start_time, end_time }]
+Errors:   404, 500
 ```
 
 ### 🔒 `PUT /api/v1/locations/{id}`
 
-Обновление локации.
+Обновление локации. Все поля опциональны. Только Owner.
 
 ```
 Params:   id (path, UUID)
-Request:  { name?, description?, phone?, address?, ... }
-Response: ILocationDto
+Request: {
+  name?, phone?, schedule_type?, slot_duration_minutes?,
+  latitude?, longitude?, active?,
+  address?: { city?, street?, building?, details? }
+}
+Response: 204 No Content
+Errors:   400, 401, 403, 404, 500
 ```
+
+> ⚠️ `description` пока отсутствует в swagger — будет добавлен.
 
 ### 🔒 `DELETE /api/v1/locations/{id}`
 
@@ -384,12 +419,12 @@ Response: { categories: [{ id, name, slug, sort_order }] }
 
 ## Services
 
-### 🔒 `GET /api/v1/services/{location_id}`
+### 🔒 `GET /api/v1/services/{id}`
 
-Список услуг локации.
+Список услуг локации (id = location_id).
 
 ```
-Params:   location_id (path, UUID)
+Params:   id (path, UUID локации)
 Response: { services: [{
   id, name, description, category_id, color,
   duration_minutes, min_price, max_price, sort_order, active
@@ -411,7 +446,7 @@ Response: { id, ... }
 
 ```
 Params:   id (path, UUID)
-Request:  { name?, description?, duration_minutes?, color?, ... }
+Request:  { name?, description?, duration_minutes?, color?, sort_order? }
 Response: serviceResponse
 ```
 
@@ -530,21 +565,19 @@ Params:   id (path, asset_id)
 Response: 200
 ```
 
+---
+
+## Organizations
+
 ### 🔒 `PUT /api/v1/organizations/me`
 
-Обновление профиля организации
+Обновление профиля организации (название и описание сети).
+Используется при создании сети — когда владелец решает объединить локации под одним брендом.
 
 ```
-Request:
-{
- "description": "string",
- "name": "string"
-}
-Response: 200 {
-  "description": "string",
-  "id": "string",
-  "name": "string"
-}
+Request:  { name: string, description?: string }
+Response: { id: string, name: string, description: string }
+Errors:   400, 401, 403, 404, 500
 ```
 
 ---

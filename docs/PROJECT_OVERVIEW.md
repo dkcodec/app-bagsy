@@ -23,6 +23,8 @@
 | date-fns          | 4      | Даты                        |
 | Leaflet           | —      | Карты (выбор адреса)        |
 | @dnd-kit          | —      | Drag & Drop в календаре     |
+| vaul              | —      | Bottom sheet (Drawer)       |
+| sonner            | —      | Toast-уведомления           |
 
 ---
 
@@ -51,9 +53,10 @@ src/
 │   ├── staff/                # Таблица сотрудников, RegisterStaffForm
 │   ├── locations/            # Таблица локаций, AddLocationForm, карта
 │   ├── services/             # Таблица услуг, AddServiceForm, LocationSelect
+│   ├── schedule/             # Расписание: календарь, editor, пресеты, bottom sheet
 │   └── account/              # Аккаунт: профиль, подписка, безопасность, внешний вид
 ├── entities/                 # UI-примитивы (shadcn/ui обёртки)
-│   └── *.tsx                 # Button, Dialog, Input, Table, etc.
+│   └── *.tsx                 # Button, Dialog, Drawer, Input, Table, etc.
 └── shared/                   # Общая инфраструктура
     ├── api/client.ts         # HTTP-клиент (fetch, auto-refresh 401 + proactive refresh)
     ├── services/             # API-сервисы
@@ -80,6 +83,7 @@ src/
 | `src/shared/services/location-service.ts` | Локации                                            |
 | `src/shared/services/service-service.ts`  | Услуги + категории                                 |
 | `src/shared/services/master-service.ts`   | Привязка сотрудников к услугам                     |
+| `src/shared/services/schedule-service.ts` | Расписание (employee/location schedules)           |
 | `src/shared/services/media-service.ts`    | Загрузка медиа (S3 presigned URL)                  |
 
 ### Хуки (React Query)
@@ -94,6 +98,7 @@ src/
 | `src/shared/hooks/use-network-points.ts`  | useLocations, useLocation, useCreateLocation, useLocationCategories |
 | `src/shared/hooks/use-bagsies.ts`         | useCreateBooking, useCancelBooking                                  |
 | `src/shared/hooks/use-master-services.ts` | useCreateMasterService                                              |
+| `src/shared/hooks/use-schedule-permissions.ts` | useSchedulePermissions (scope, rights по plan/type)            |
 
 ### Типы
 
@@ -102,6 +107,7 @@ src/
 | `src/shared/types/user.ts`     | EUserRole, IEmployeeDto, IUserDto (deprecated) |
 | `src/shared/types/calendar.ts` | IEvent, CalendarApiResponse, TCalendarView     |
 | `src/shared/types/staff.ts`    | IStaffDto (deprecated)                         |
+| `src/shared/types/schedule.ts` | ScheduleScope, DaySchedule, MonthSchedule, TimeRange |
 
 ### Утилиты
 

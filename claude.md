@@ -78,6 +78,7 @@ src/shared/providers/    — QueryProvider, ThemeProvider
 - `FLOW_SOLO/POINT/NETWORK.md` — пользовательские флоу
 - `FLOW_ADD_MASTER.md` — добавление мастера
 - `ACCOUNT_PAGE.md` — страница аккаунта (профиль, подписка, безопасность, внешний вид)
+- `SCHEDULE_PAGE.md` — страница расписания (календарь, editor, пресеты, права, мобилка)
 
 ## Важно
 
