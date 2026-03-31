@@ -530,6 +530,23 @@ Params:   id (path, asset_id)
 Response: 200
 ```
 
+### 🔒 `PUT /api/v1/organizations/me`
+
+Обновление профиля организации
+
+```
+Request:
+{
+ "description": "string",
+ "name": "string"
+}
+Response: 200 {
+  "description": "string",
+  "id": "string",
+  "name": "string"
+}
+```
+
 ---
 
 ## Планы подписки (захардкожены на фронте)

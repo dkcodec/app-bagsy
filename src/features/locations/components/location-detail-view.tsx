@@ -17,6 +17,7 @@ import { useLocationScheduleWeek } from "@/src/shared/hooks/use-location-schedul
 import { formatDateOnly } from "@/src/shared/utils/formater";
 import { EditLocationDialog } from "./edit-location-dialog";
 import { DeleteLocationDialog } from "./delete-location-dialog";
+import { ToggleActiveDialog } from "./toggle-active-dialog";
 import { useIsMobile } from "@/src/shared";
 
 // Карта загружается только на клиенте (Leaflet требует window)
@@ -66,6 +67,7 @@ export function LocationDetailView({
   const [showQR, setShowQR] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [toggleActiveOpen, setToggleActiveOpen] = useState(false);
 
   // Данные
   const { data: employeesData, isLoading: employeesLoading } = useGetEmployees({
@@ -124,7 +126,11 @@ export function LocationDetailView({
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <Badge variant={location.active ? "default" : "outline"}>
+            <Badge
+              variant={location.active ? "default" : "outline"}
+              className="cursor-pointer"
+              onClick={() => setToggleActiveOpen(true)}
+            >
               {location.active ? t("active") : t("inactive")}
             </Badge>
             {onAddLocation &&
@@ -328,6 +334,11 @@ export function LocationDetailView({
         location={location}
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
+      />
+      <ToggleActiveDialog
+        location={location}
+        open={toggleActiveOpen}
+        onOpenChange={setToggleActiveOpen}
       />
     </>
   );

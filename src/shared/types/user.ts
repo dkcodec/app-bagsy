@@ -56,6 +56,7 @@ export interface ISubscription {
 export interface IOrganization {
   id: string;
   name: string;
+  description?: string;
   subscription: ISubscription;
 }
 

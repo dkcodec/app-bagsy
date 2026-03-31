@@ -530,6 +530,18 @@
       "staff": "қызм.",
       "services": "қызмет"
     },
+    "toggleActive": {
+      "deactivateTitle": "Локацияны өшіру",
+      "deactivateDescription": "\"{name}\" өшіргіңіз келетініне сенімдісіз бе? Клиенттер бұл нүктеге жазыла алмайды.",
+      "deactivateConfirm": "Өшіру",
+      "deactivateSuccess": "Локация өшірілді",
+      "activateTitle": "Локацияны қосу",
+      "activateDescription": "\"{name}\" қосу керек пе? Локация жазылу үшін қайтадан қолжетімді болады.",
+      "activateConfirm": "Қосу",
+      "activateSuccess": "Локация қосылды",
+      "cancel": "Болдырмау",
+      "error": "Күйді жаңарту кезінде қате"
+    },
     "schedule": {
       "title": "Кесте",
       "allDay": "Күні бойы",
@@ -603,6 +615,24 @@
         "addressRequired": "Іздеуден мекенжайды таңдау қажет",
         "networkCodeRequired": "Желі кодын анықтау мүмкін болмады",
         "submitError": "Нүктені құру кезінде қате"
+      }
+    },
+    "organizationProfile": {
+      "title": "Желіге біріктіру керек пе?",
+      "description": "Сізде бірнеше нүкте бар — оларды желіге біріктіре аласыз. Бұл міндетті емес, бірақ барлық нүктелерді бір бренд астында басқаруға көмектеседі.",
+      "name": "Желі атауы",
+      "namePlaceholder": "Мысалы: Beauty Network",
+      "orgDescription": "Сипаттама",
+      "orgDescriptionPlaceholder": "Желіңіздің қысқаша сипаттамасы",
+      "skip": "Өткізіп жіберу",
+      "submit": "Желі құру",
+      "submitting": "Құрылуда...",
+      "success": "Желі сәтті құрылды",
+      "errors": {
+        "nameMin": "Атау кемінде 2 таңбадан тұруы керек",
+        "nameMax": "Атау 100 таңбадан аспауы керек",
+        "descriptionMax": "Сипаттама 500 таңбадан аспауы керек",
+        "submitError": "Желіні құру кезінде қате"
       }
     }
   },
