@@ -50,8 +50,10 @@ function timeToMinutes(t: string): number {
 
 /** Два диапазона пересекаются? */
 function rangesOverlap(a: TimeRange, b: TimeRange): boolean {
-  return timeToMinutes(a.start) < timeToMinutes(b.end) &&
-    timeToMinutes(b.start) < timeToMinutes(a.end);
+  return (
+    timeToMinutes(a.start) < timeToMinutes(b.end) &&
+    timeToMinutes(b.start) < timeToMinutes(a.end)
+  );
 }
 
 /** Валидация расписания. Возвращает ключ ошибки или null. */
@@ -61,16 +63,19 @@ function validateSchedule(schedule: MonthSchedule): string | null {
 
     /* end <= start */
     for (const r of day.workRanges) {
-      if (timeToMinutes(r.end) <= timeToMinutes(r.start)) return "endBeforeStart";
+      if (timeToMinutes(r.end) <= timeToMinutes(r.start))
+        return "endBeforeStart";
     }
     for (const b of day.breaks) {
-      if (timeToMinutes(b.end) <= timeToMinutes(b.start)) return "endBeforeStart";
+      if (timeToMinutes(b.end) <= timeToMinutes(b.start))
+        return "endBeforeStart";
     }
 
     /* Пересечения между рабочими интервалами */
     for (let i = 0; i < day.workRanges.length; i++) {
       for (let j = i + 1; j < day.workRanges.length; j++) {
-        if (rangesOverlap(day.workRanges[i], day.workRanges[j])) return "overlappingRanges";
+        if (rangesOverlap(day.workRanges[i], day.workRanges[j]))
+          return "overlappingRanges";
       }
     }
 
@@ -78,8 +83,8 @@ function validateSchedule(schedule: MonthSchedule): string | null {
     for (const b of day.breaks) {
       const bStart = timeToMinutes(b.start);
       const bEnd = timeToMinutes(b.end);
-      const insideWork = day.workRanges.some(r =>
-        bStart >= timeToMinutes(r.start) && bEnd <= timeToMinutes(r.end)
+      const insideWork = day.workRanges.some(
+        r => bStart >= timeToMinutes(r.start) && bEnd <= timeToMinutes(r.end)
       );
       if (!insideWork) return "breakOutsideWork";
     }

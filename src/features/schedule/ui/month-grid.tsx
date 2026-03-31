@@ -89,7 +89,15 @@ export function MonthGrid({
         onToggleDay(day);
       }
     },
-    [readOnly, onToggleDay, onRangeSelect, selectedDays, year, month, todayStart]
+    [
+      readOnly,
+      onToggleDay,
+      onRangeSelect,
+      selectedDays,
+      year,
+      month,
+      todayStart,
+    ]
   );
 
   return (
@@ -100,9 +108,7 @@ export function MonthGrid({
           key={wd}
           className={cn(
             "text-center text-xs font-medium py-1 select-none",
-            i >= 5
-              ? "text-muted-foreground/60"
-              : "text-muted-foreground"
+            i >= 5 ? "text-muted-foreground/60" : "text-muted-foreground"
           )}
         >
           {/* Мобилка: первая буква; Десктоп: полное сокращение */}
@@ -156,7 +162,8 @@ export function MonthGrid({
               isPast && "opacity-40 pointer-events-none",
 
               /* Выбранный — синяя рамка, без заливки */
-              isSelected && "border-2 border-blue-500 dark:border-blue-400 bg-transparent",
+              isSelected &&
+                "border-2 border-blue-500 dark:border-blue-400 bg-transparent",
 
               /* Есть расписание (не выбран) — голубой фон */
               hasSchedule &&
@@ -179,7 +186,9 @@ export function MonthGrid({
               isCurrentDay && "font-semibold",
 
               /* Интерактивность */
-              !isPast && !readOnly && "cursor-pointer hover:border-blue-300 dark:hover:border-blue-600",
+              !isPast &&
+                !readOnly &&
+                "cursor-pointer hover:border-blue-300 dark:hover:border-blue-600",
               (isPast || readOnly) && "cursor-default"
             )}
             onClick={e => handleClick(day, e)}
@@ -188,7 +197,12 @@ export function MonthGrid({
             aria-label={`${day}`}
           >
             {/* Номер дня */}
-            <span className={cn("leading-none", isCurrentDay && "text-blue-600 dark:text-blue-400")}>
+            <span
+              className={cn(
+                "leading-none",
+                isCurrentDay && "text-blue-600 dark:text-blue-400"
+              )}
+            >
               {day}
             </span>
 
