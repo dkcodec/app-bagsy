@@ -14,6 +14,7 @@ const PLANS = [
     trialMonths: 2,
     maxLocations: 1,
     maxStaff: 1,
+    popular: false,
     features: [
       "unlimitedBookings",
       "basicCrm",
@@ -43,6 +44,7 @@ const PLANS = [
     trialMonths: 1,
     maxLocations: Infinity,
     maxStaff: Infinity,
+    popular: false,
     features: [
       "allFromPoint",
       "multiBranch:inDevelopment",
