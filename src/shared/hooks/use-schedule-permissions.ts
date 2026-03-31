@@ -13,6 +13,8 @@ export interface UseSchedulePermissionsArgs {
   userFlags?: ScheduleUserFlags | null;
   /** Контекст точки: schedule_type (fixed | mixed). */
   pointContext?: PointScheduleContext | null;
+  /** Solo-план: владелец = единственный сотрудник, табы не нужны. */
+  isSoloPlan?: boolean;
 }
 
 export interface UseSchedulePermissionsResult {
@@ -20,8 +22,10 @@ export interface UseSchedulePermissionsResult {
   canEditPointSchedule: boolean;
   /** Можно ли редактировать свой (мастерский) график. */
   canEditOwnSchedule: boolean;
-  /** Фиксированный график точки: мастер видит график точки и не может его менять (если нет can_manage_point_schedule). */
+  /** Фиксированный график точки: мастер видит график точки read-only. */
   isPointScheduleFixed: boolean;
+  /** Solo-план: один владелец, табы скрыты. */
+  isSoloPlan: boolean;
   /** Доступные режимы: point и/или staff. */
   scopeOptions: ScheduleScope[];
   /** Режим по умолчанию при наличии обоих. */
@@ -30,28 +34,42 @@ export interface UseSchedulePermissionsResult {
 
 /**
  * Определяет права на редактирование графика по типу точки и флагам пользователя.
- * can_manage_point_schedule + can_work → может менять и точку, и своё расписание (при mixed).
- * can_manage_point_schedule без can_work → только график точки.
- * can_work при mixed → только свой график.
+ *
+ * Solo plan → только "point" scope, табы скрыты, полный доступ.
+ * Fixed → "point" (если can_manage) + "staff" (read-only просмотр если can_work).
+ * Mixed → "point" (если can_manage) + "staff" (редактируемый если can_work).
  */
 export function useSchedulePermissions({
   userFlags,
   pointContext,
+  isSoloPlan = false,
 }: UseSchedulePermissionsArgs): UseSchedulePermissionsResult {
   return useMemo(() => {
     const scheduleType: ScheduleType = pointContext?.schedule_type ?? "mixed";
     const canWork = userFlags?.can_work ?? false;
     const canManagePoint = userFlags?.can_manage_point_schedule ?? false;
 
+    /* Solo: владелец управляет расписанием точки напрямую, табов нет. */
+    if (isSoloPlan) {
+      return {
+        canEditPointSchedule: true,
+        canEditOwnSchedule: false,
+        isPointScheduleFixed: false,
+        isSoloPlan: true,
+        scopeOptions: ["point"] as ScheduleScope[],
+        defaultScope: "point" as ScheduleScope,
+      };
+    }
+
     const isPointScheduleFixed = scheduleType === "fixed";
-    // Менять график точки может только тот, у кого есть право can_manage_point_schedule.
     const canEditPointSchedule = canManagePoint;
-    // Свой график мастер правит только при mixed и наличии can_work.
-    const canEditOwnSchedule = canWork && scheduleType === "mixed";
+    /* Свой график мастер правит только при mixed и наличии can_work. */
+    const canEditOwnSchedule = canWork && !isPointScheduleFixed;
 
     const scopeOptions: ScheduleScope[] = [];
     if (canEditPointSchedule) scopeOptions.push("point");
-    if (canEditOwnSchedule) scopeOptions.push("staff");
+    /* Staff таб виден если can_work — при fixed он будет read-only. */
+    if (canWork) scopeOptions.push("staff");
 
     const defaultScope: ScheduleScope = scopeOptions.includes("staff")
       ? "staff"
@@ -60,7 +78,8 @@ export function useSchedulePermissions({
     return {
       canEditPointSchedule,
       canEditOwnSchedule,
-      isPointScheduleFixed: isPointScheduleFixed && !canManagePoint,
+      isPointScheduleFixed,
+      isSoloPlan: false,
       scopeOptions,
       defaultScope,
     };
@@ -68,5 +87,6 @@ export function useSchedulePermissions({
     userFlags?.can_work,
     userFlags?.can_manage_point_schedule,
     pointContext?.schedule_type,
+    isSoloPlan,
   ]);
 }

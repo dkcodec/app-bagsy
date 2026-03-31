@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
-import { useTranslations } from "next-intl";
-import { ChevronLeft, ChevronRight, Loader2, Save } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   Alert,
   AlertDescription,
@@ -10,10 +10,12 @@ import {
   Tabs,
   TabsList,
   TabsTrigger,
+  Card,
+  CardContent,
 } from "@/src/entities";
-import { Card, CardContent } from "@/src/entities";
 import { useCurrentUser } from "@/src/shared/hooks/use-users";
 import { useSchedulePermissions } from "@/src/shared/hooks/use-schedule-permissions";
+import { useIsMobile } from "@/src/shared/hooks/use-mobile";
 import { useScheduleScope } from "./schedule-scope-context";
 import { useMonthSchedule } from "./api/use-month-schedule";
 import type {
@@ -25,10 +27,65 @@ import type {
 import { MonthGrid } from "./ui/month-grid";
 import { ScheduleEditor } from "./ui/schedule-editor";
 import { SchedulePresets } from "./ui/schedule-presets";
+import { ScheduleBottomSheet } from "./ui/schedule-bottom-sheet";
+import {
+  ScheduleCalendarSkeleton,
+  ScheduleEditorSkeleton,
+} from "./ui/schedule-skeleton";
 import { format } from "date-fns";
 import { ru, kk } from "date-fns/locale";
-import { useLocale } from "next-intl";
 import { getDay } from "date-fns";
+import { toast } from "sonner";
+import type { TimeRange } from "@/src/shared/types/schedule";
+
+// ============================================================
+// Валидация расписания
+// ============================================================
+
+/** Время "HH:mm" → минуты от полуночи. */
+function timeToMinutes(t: string): number {
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + m;
+}
+
+/** Два диапазона пересекаются? */
+function rangesOverlap(a: TimeRange, b: TimeRange): boolean {
+  return timeToMinutes(a.start) < timeToMinutes(b.end) &&
+    timeToMinutes(b.start) < timeToMinutes(a.end);
+}
+
+/** Валидация расписания. Возвращает ключ ошибки или null. */
+function validateSchedule(schedule: MonthSchedule): string | null {
+  for (const day of Object.values(schedule)) {
+    if (day.isClosed) continue;
+
+    /* end <= start */
+    for (const r of day.workRanges) {
+      if (timeToMinutes(r.end) <= timeToMinutes(r.start)) return "endBeforeStart";
+    }
+    for (const b of day.breaks) {
+      if (timeToMinutes(b.end) <= timeToMinutes(b.start)) return "endBeforeStart";
+    }
+
+    /* Пересечения между рабочими интервалами */
+    for (let i = 0; i < day.workRanges.length; i++) {
+      for (let j = i + 1; j < day.workRanges.length; j++) {
+        if (rangesOverlap(day.workRanges[i], day.workRanges[j])) return "overlappingRanges";
+      }
+    }
+
+    /* Перерыв вне рабочих часов */
+    for (const b of day.breaks) {
+      const bStart = timeToMinutes(b.start);
+      const bEnd = timeToMinutes(b.end);
+      const insideWork = day.workRanges.some(r =>
+        bStart >= timeToMinutes(r.start) && bEnd <= timeToMinutes(r.end)
+      );
+      if (!insideWork) return "breakOutsideWork";
+    }
+  }
+  return null;
+}
 
 /** Дефолтное расписание для нового рабочего дня. */
 const DEFAULT_OPEN_DAY: DaySchedule = {
@@ -41,6 +98,7 @@ export function ScheduleContent() {
   const t = useTranslations("Schedule");
   const locale = useLocale();
   const dateFnsLocale = locale === "kz" ? kk : ru;
+  const isMobile = useIsMobile();
 
   /* Текущий пользователь: id (employee) и location_id. */
   const { data: user } = useCurrentUser();
@@ -51,16 +109,35 @@ export function ScheduleContent() {
     can_manage_point_schedule:
       user?.permissions.can_manage_location_schedule ?? false,
   };
+
+  /* Solo plan detection. */
+  const isSoloPlan = user?.organization?.subscription?.plan === "solo";
+
   /* TODO: schedule_type заменить когда появится API локации. */
   const pointContext: PointScheduleContext = { schedule_type: "mixed" };
-  const permissions = useSchedulePermissions({ userFlags, pointContext });
+  const permissions = useSchedulePermissions({
+    userFlags,
+    pointContext,
+    isSoloPlan,
+  });
 
   const { activeScope, setActiveScope } = useScheduleScope();
   const [currentMonth, setCurrentMonth] = useState(() => new Date());
   const [selectedDays, setSelectedDays] = useState<number[]>([]);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
-  /* Определяем entityId по scope: staff → employee UUID, point → location UUID. */
-  const entityId = activeScope === "staff" ? user?.id : user?.location_id;
+  /* Для fixed + staff scope: показываем расписание точки, а не сотрудника. */
+  const isFixedStaffView =
+    activeScope === "staff" && permissions.isPointScheduleFixed;
+
+  /* Определяем entityId по scope. Fixed staff → подставляем location_id. */
+  const entityId = useMemo(() => {
+    if (isFixedStaffView) return user?.location_id;
+    return activeScope === "staff" ? user?.id : user?.location_id;
+  }, [activeScope, isFixedStaffView, user?.id, user?.location_id]);
+
+  /* Для fixed staff — scope запроса = "point" (грузим расписание точки). */
+  const fetchScope = isFixedStaffView ? "point" : activeScope;
 
   const {
     data: serverSchedule,
@@ -70,7 +147,17 @@ export function ScheduleContent() {
     prevMonth,
     nextMonth,
     daysInMonth,
-  } = useMonthSchedule(activeScope, currentMonth, entityId);
+  } = useMonthSchedule(fetchScope, currentMonth, entityId);
+
+  /* Дополнительный fetch расписания точки для mixed staff (для badge "своё"). */
+  const { data: locationScheduleData } = useMonthSchedule(
+    "point",
+    currentMonth,
+    /* Только если mixed staff scope */
+    activeScope === "staff" && !permissions.isPointScheduleFixed
+      ? user?.location_id
+      : undefined
+  );
 
   /* Локальный state расписания (изменения копятся здесь до нажатия "Сохранить"). */
   const [localSchedule, setLocalSchedule] =
@@ -87,13 +174,12 @@ export function ScheduleContent() {
       setLocalSchedule(serverSchedule);
       setIsDirty(false);
       prevServerRef.current = serverSchedule;
-      /* Очищаем сет авто-открытых дней при смене месяца / загрузке. */
       autoOpenedDaysRef.current.clear();
     }
   }, [serverSchedule]);
 
   const readOnly =
-    (activeScope === "staff" && permissions.isPointScheduleFixed) ||
+    isFixedStaffView ||
     (activeScope === "point" && !permissions.canEditPointSchedule);
 
   /* Обновить локальное расписание (без сохранения на бэк). */
@@ -108,48 +194,55 @@ export function ScheduleContent() {
     []
   );
 
-  /* Выбор / отмена дня. При выборе — авто-открытие; при deselect — откат если не менялось. */
-  const toggleDay = useCallback((day: number) => {
-    setSelectedDays(prev => {
-      const isDeselecting = prev.includes(day);
-      if (isDeselecting) {
-        /* Откат авто-открытого дня: возвращаем isClosed если пользователь не редактировал. */
-        if (autoOpenedDaysRef.current.has(day)) {
-          autoOpenedDaysRef.current.delete(day);
-          setLocalSchedule(p => ({
-            ...p,
-            [day]: { isClosed: true, workRanges: [], breaks: [] },
-          }));
+  /* Выбор / отмена дня. При выборе — авто-открытие; при deselect — откат. */
+  const toggleDay = useCallback(
+    (day: number) => {
+      setSelectedDays(prev => {
+        const isDeselecting = prev.includes(day);
+        if (isDeselecting) {
+          if (autoOpenedDaysRef.current.has(day)) {
+            autoOpenedDaysRef.current.delete(day);
+            setLocalSchedule(p => ({
+              ...p,
+              [day]: { isClosed: true, workRanges: [], breaks: [] },
+            }));
+          }
+          const next = prev.filter(d => d !== day);
+          /* На мобилке закрываем sheet если ничего не осталось */
+          if (next.length === 0 && isMobile) setSheetOpen(false);
+          return next;
         }
-        return prev.filter(d => d !== day);
-      }
-      /* Авто-открытие: если день закрыт или не существует, ставим дефолтное расписание. */
-      setLocalSchedule(p => {
-        const dayData = p[day];
-        if (!dayData || dayData.isClosed) {
-          autoOpenedDaysRef.current.add(day);
-          setIsDirty(true);
-          return { ...p, [day]: { ...DEFAULT_OPEN_DAY } };
-        }
-        return p;
+        /* Авто-открытие закрытого дня. */
+        setLocalSchedule(p => {
+          const dayData = p[day];
+          if (!dayData || dayData.isClosed) {
+            autoOpenedDaysRef.current.add(day);
+            setIsDirty(true);
+            return { ...p, [day]: { ...DEFAULT_OPEN_DAY } };
+          }
+          return p;
+        });
+        /* На мобилке открываем sheet при выборе дня */
+        if (isMobile) setSheetOpen(true);
+        return [...prev, day].sort((a, b) => a - b);
       });
-      return [...prev, day].sort((a, b) => a - b);
-    });
-  }, []);
+    },
+    [isMobile]
+  );
 
-  /* Shift+клик — диапазон. Авто-открытие для всех новых дней. */
+  /* Shift+клик — диапазон. Авто-открытие + трекинг для отката. */
   const rangeSelect = useCallback(
     (from: number, to: number) => {
       const newDays = new Set(selectedDays);
       for (let d = from; d <= to; d++) newDays.add(d);
       setSelectedDays(Array.from(newDays).sort((a, b) => a - b));
-      /* Авто-открытие всех закрытых дней в диапазоне. */
       setLocalSchedule(prev => {
         let changed = false;
         const next = { ...prev };
         for (let d = from; d <= to; d++) {
           if (next[d]?.isClosed) {
             next[d] = { ...DEFAULT_OPEN_DAY };
+            autoOpenedDaysRef.current.add(d);
             changed = true;
           }
         }
@@ -163,7 +256,6 @@ export function ScheduleContent() {
   /* Применить изменение ко всем выбранным дням (локально). */
   const applyToSelected = useCallback(
     (updater: (draft: DaySchedule) => DaySchedule) => {
-      /* Пользователь явно отредактировал — убираем из авто-открытых (не откатывать при deselect). */
       selectedDays.forEach(day => autoOpenedDaysRef.current.delete(day));
       updateLocal(prev => {
         const next = { ...prev };
@@ -195,11 +287,48 @@ export function ScheduleContent() {
     [updateLocal]
   );
 
-  /* Сохранить на бэк. */
-  const handleSave = useCallback(async () => {
-    await save(localSchedule);
+  /* Сбросить выделение + откатить все несохранённые изменения к серверному состоянию. */
+  const clearSelection = useCallback(() => {
+    setLocalSchedule(serverSchedule);
     setIsDirty(false);
-  }, [save, localSchedule]);
+    autoOpenedDaysRef.current.clear();
+    setSelectedDays([]);
+    if (isMobile) setSheetOpen(false);
+  }, [isMobile, serverSchedule]);
+
+  /* Сохранить на бэк с валидацией. */
+  const handleSave = useCallback(async () => {
+    const error = validateSchedule(localSchedule);
+    if (error) {
+      toast.error(t(`Editor.${error}`));
+      return;
+    }
+    try {
+      await save(localSchedule);
+      setIsDirty(false);
+      autoOpenedDaysRef.current.clear();
+      toast.success(t("savedSuccess"));
+    } catch {
+      toast.error(t("savedError"));
+    }
+  }, [save, localSchedule, t]);
+
+  /* Пометить выбранные дни выходными и сразу сохранить (атомарно). */
+  const handleMarkDayOff = useCallback(async () => {
+    const updated = { ...localSchedule };
+    selectedDays.forEach(day => {
+      updated[day] = { isClosed: true, workRanges: [], breaks: [] };
+    });
+    setLocalSchedule(updated);
+    try {
+      await save(updated);
+      setIsDirty(false);
+      autoOpenedDaysRef.current.clear();
+      toast.success(t("dayOffSuccess"));
+    } catch {
+      toast.error(t("savedError"));
+    }
+  }, [localSchedule, selectedDays, save, t]);
 
   /* Перейти к сегодня. */
   const goToday = useCallback(() => {
@@ -208,84 +337,105 @@ export function ScheduleContent() {
     setSelectedDays([now.getDate()]);
   }, []);
 
-  /* Вычисляем firstDayOffset для пресета 5/2. */
+  /* Смещение первого дня для пресетов. */
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
-  const firstJsDay = getDay(new Date(year, month, 1)); // 0=Вс
-  const firstDayOffset = firstJsDay === 0 ? 6 : firstJsDay - 1; // 0=Пн
+  const firstJsDay = getDay(new Date(year, month, 1));
+  const firstDayOffset = firstJsDay === 0 ? 6 : firstJsDay - 1;
 
+  /* Нет доступа */
   if (permissions.scopeOptions.length === 0) {
     return (
       <div className="p-4 text-muted-foreground text-sm">{t("noAccess")}</div>
     );
   }
 
+  /* Общий editor props */
+  const editorElement = (
+    <ScheduleEditor
+      selectedDays={selectedDays}
+      monthSchedule={localSchedule}
+      onApplyToSelected={applyToSelected}
+      readOnly={readOnly}
+      currentMonth={currentMonth}
+      locationSchedule={locationScheduleData}
+      onSave={handleSave}
+      onMarkDayOff={handleMarkDayOff}
+      isSaving={isSaving}
+      isDirty={isDirty}
+    />
+  );
+
   return (
     <div className="flex flex-col gap-4 p-4">
-      {/* Табы: мой график / график точки */}
-      {permissions.scopeOptions.length > 1 && (
+      {/* Табы: мой график / график точки (скрыты для solo) */}
+      {!permissions.isSoloPlan && permissions.scopeOptions.length > 1 && (
         <Tabs
           value={activeScope}
           onValueChange={v => setActiveScope(v as "point" | "staff")}
         >
           <TabsList>
-            <TabsTrigger value="staff">{t("mySchedule")}</TabsTrigger>
             <TabsTrigger value="point">{t("pointSchedule")}</TabsTrigger>
+            <TabsTrigger value="staff">{t("mySchedule")}</TabsTrigger>
           </TabsList>
         </Tabs>
       )}
 
-      {/* Информер при фиксированном графике точки. */}
-      {readOnly && permissions.isPointScheduleFixed && (
-        <Alert className="bg-muted/50 border-muted-foreground/20">
-          <AlertDescription>
-            {t("Header.scheduleTypeFixedHint")}
+      {/* Информер при фиксированном графике (staff tab). */}
+      {isFixedStaffView && (
+        <Alert className="bg-blue-50/50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+          <AlertDescription className="text-sm text-blue-700 dark:text-blue-400">
+            {t("fixedScheduleInfo")}
           </AlertDescription>
         </Alert>
       )}
 
       {/* Навигация по месяцам */}
       <div className="flex items-center justify-between gap-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setCurrentMonth(prevMonth)}
-          aria-label={t("MonthNav.prev")}
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </Button>
-        <div className="flex items-center gap-3">
-          <span className="text-lg font-semibold capitalize tabular-nums">
-            {format(currentMonth, "LLLL yyyy", { locale: dateFnsLocale })}
-          </span>
+        <div className="flex items-center gap-2">
           <Button
-            variant="outline"
-            size="sm"
-            onClick={goToday}
-            className="h-7 text-xs"
+            variant="ghost"
+            size="icon"
+            onClick={() => setCurrentMonth(prevMonth)}
+            aria-label={t("MonthNav.prev")}
           >
-            {t("MonthNav.today")}
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+          <div className="flex items-center gap-3">
+            <span className="text-lg font-semibold capitalize tabular-nums">
+              {format(currentMonth, "LLLL yyyy", { locale: dateFnsLocale })}
+            </span>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setCurrentMonth(nextMonth)}
+            aria-label={t("MonthNav.next")}
+          >
+            <ChevronRight className="h-5 w-5" />
           </Button>
         </div>
         <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setCurrentMonth(nextMonth)}
-          aria-label={t("MonthNav.next")}
+          variant="outline"
+          size="sm"
+          onClick={goToday}
+          className="h-7 text-xs"
         >
-          <ChevronRight className="h-5 w-5" />
+          {t("MonthNav.today")}
         </Button>
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        /* Скелетоны при загрузке */
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-4 items-start">
+          <ScheduleCalendarSkeleton />
+          {!isMobile && <ScheduleEditorSkeleton />}
         </div>
       ) : (
-        /* Двухколоночный layout на десктопе */
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-4 items-start">
+        /* Основной layout */
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-4 items-start">
           {/* Левая колонка — календарь + пресеты */}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3">
             <Card>
               <CardContent className="pt-4">
                 <MonthGrid
@@ -296,8 +446,9 @@ export function ScheduleContent() {
                   onToggleDay={toggleDay}
                   onRangeSelect={rangeSelect}
                   readOnly={readOnly}
+                  isMobile={isMobile}
                 />
-                {/* Подсказка выбора */}
+                {/* Счётчик выбранных + сброс */}
                 {selectedDays.length > 0 && (
                   <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
                     <span>
@@ -307,7 +458,7 @@ export function ScheduleContent() {
                       variant="ghost"
                       size="sm"
                       className="h-6 text-xs"
-                      onClick={() => setSelectedDays([])}
+                      onClick={clearSelection}
                     >
                       {t("clearSelection")}
                     </Button>
@@ -327,42 +478,24 @@ export function ScheduleContent() {
                 onApplyToDays={applyToDays}
                 onSelectDays={setSelectedDays}
                 readOnly={readOnly}
+                isMobile={isMobile}
+                onAfterPreset={isMobile ? () => setSheetOpen(true) : undefined}
               />
             )}
           </div>
 
-          {/* Правая колонка — редактор + кнопка сохранить */}
-          <div className="flex flex-col gap-4 lg:sticky lg:top-20">
-            <Card>
-              <CardContent className="pt-4">
-                <ScheduleEditor
-                  selectedDays={selectedDays}
-                  monthSchedule={localSchedule}
-                  onApplyToSelected={applyToSelected}
-                  readOnly={readOnly}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Кнопка сохранить */}
-            {isDirty && !readOnly && (
-              <div className="sticky bottom-4 z-10">
-                <Button
-                  onClick={handleSave}
-                  disabled={isSaving}
-                  className="w-full gap-2"
-                  size="lg"
-                >
-                  {isSaving ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Save className="h-4 w-4" />
-                  )}
-                  {t("save")}
-                </Button>
-              </div>
-            )}
-          </div>
+          {/* Правая колонка — десктоп: Card, мобилка: bottom sheet */}
+          {isMobile ? (
+            <ScheduleBottomSheet open={sheetOpen} onOpenChange={setSheetOpen}>
+              {editorElement}
+            </ScheduleBottomSheet>
+          ) : (
+            <div className="flex flex-col gap-4 sticky top-20">
+              <Card>
+                <CardContent className="pt-4">{editorElement}</CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       )}
     </div>

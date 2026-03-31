@@ -2,8 +2,8 @@
 
 import { useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { Calendar, Sun, Moon, Briefcase, Coffee } from "lucide-react";
 import { Button } from "@/src/entities";
+import { cn } from "@/src/shared/utils/styles";
 import type { DaySchedule, MonthSchedule } from "@/src/shared/types/schedule";
 
 export interface SchedulePresetsProps {
@@ -18,6 +18,10 @@ export interface SchedulePresetsProps {
   /** Колбэк для выбора дней (setSelectedDays). */
   onSelectDays: (days: number[]) => void;
   readOnly?: boolean;
+  /** Мобильный режим — горизонтальный скролл. */
+  isMobile?: boolean;
+  /** Вызывается после применения пресета (для открытия drawer на мобилке). */
+  onAfterPreset?: () => void;
 }
 
 /** Пресет: рабочий день 09:00–18:00. */
@@ -40,19 +44,32 @@ function allDays(daysInMonth: number): number[] {
 }
 
 export function SchedulePresets({
-  selectedDays,
   daysInMonth,
   firstDayOffset,
-  onApplyToSelected,
   onApplyToDays,
   onSelectDays,
   readOnly = false,
+  isMobile = false,
+  onAfterPreset,
 }: SchedulePresetsProps) {
   const t = useTranslations("Schedule.Presets");
+  const tRoot = useTranslations("Schedule");
 
-  if (readOnly) return null;
+  /* 5/2: Пн-Пт рабочие, Сб-Вс выходные. */
+  const applyWeekdays = useCallback(() => {
+    const days = allDays(daysInMonth);
+    const workDays: number[] = [];
+    days.forEach(d => {
+      const dayOfWeek = (firstDayOffset + d - 1) % 7;
+      const isWeekend = dayOfWeek >= 5;
+      onApplyToDays([d], isWeekend ? closedSchedule : workDaySchedule);
+      if (!isWeekend) workDays.push(d);
+    });
+    onSelectDays(workDays);
+    onAfterPreset?.();
+  }, [daysInMonth, firstDayOffset, onSelectDays, onApplyToDays, onAfterPreset]);
 
-  /* По чётным: чётные — рабочие, нечётные — выходные. Выбираем только рабочие. */
+  /* По чётным: чётные — рабочие, нечётные — выходные. */
   const applyEvenDays = useCallback(() => {
     const days = allDays(daysInMonth);
     const workDays = days.filter(d => d % 2 === 0);
@@ -60,9 +77,10 @@ export function SchedulePresets({
       onApplyToDays([d], d % 2 === 0 ? workDaySchedule : closedSchedule);
     });
     onSelectDays(workDays);
-  }, [daysInMonth, onSelectDays, onApplyToDays]);
+    onAfterPreset?.();
+  }, [daysInMonth, onSelectDays, onApplyToDays, onAfterPreset]);
 
-  /* По нечётным: нечётные — рабочие, чётные — выходные. Выбираем только рабочие. */
+  /* По нечётным: нечётные — рабочие, чётные — выходные. */
   const applyOddDays = useCallback(() => {
     const days = allDays(daysInMonth);
     const workDays = days.filter(d => d % 2 !== 0);
@@ -70,97 +88,55 @@ export function SchedulePresets({
       onApplyToDays([d], d % 2 !== 0 ? workDaySchedule : closedSchedule);
     });
     onSelectDays(workDays);
-  }, [daysInMonth, onSelectDays, onApplyToDays]);
+    onAfterPreset?.();
+  }, [daysInMonth, onSelectDays, onApplyToDays, onAfterPreset]);
 
-  /* 5/2: Пн-Пт рабочие, Сб-Вс выходные. Выбираем только Пн-Пт. */
-  const applyWeekdays = useCallback(() => {
-    const days = allDays(daysInMonth);
-    const workDays: number[] = [];
-    days.forEach(d => {
-      const dayOfWeek = (firstDayOffset + d - 1) % 7; // 0=Пн...6=Вс
-      const isWeekend = dayOfWeek >= 5;
-      onApplyToDays([d], isWeekend ? closedSchedule : workDaySchedule);
-      if (!isWeekend) workDays.push(d);
-    });
-    onSelectDays(workDays);
-  }, [daysInMonth, firstDayOffset, onSelectDays, onApplyToDays]);
-
-  /* Добавить перерыв всем выбранным. */
-  const addBreakToAll = useCallback(() => {
-    if (selectedDays.length === 0) return;
-    onApplyToSelected(draft => ({
-      ...draft,
-      isClosed: false,
-      workRanges: draft.workRanges?.length
-        ? draft.workRanges
-        : [{ start: "09:00", end: "18:00" }],
-      breaks: [...(draft.breaks ?? []), { start: "13:00", end: "14:00" }],
-    }));
-  }, [selectedDays, onApplyToSelected]);
-
-  /* Выбрать все дни. */
-  const selectAll = useCallback(() => {
-    onSelectDays(allDays(daysInMonth));
-  }, [daysInMonth, onSelectDays]);
+  if (readOnly) return null;
 
   return (
-    <div className="flex flex-wrap gap-2">
-      {/* Быстрый выбор всех дней */}
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="gap-1.5"
-        onClick={selectAll}
+    <div>
+      <div
+        className={cn(
+          "flex gap-2",
+          isMobile
+            ? "overflow-x-auto no-scrollbar flex-nowrap pb-1 -mx-1 px-1"
+            : "flex-wrap"
+        )}
       >
-        <Calendar className="h-3.5 w-3.5" />
-        {t("selectAll")}
-      </Button>
-      {/* 5/2 */}
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="gap-1.5"
-        onClick={applyWeekdays}
-      >
-        <Briefcase className="h-3.5 w-3.5" />
-        {t("weekdays")}
-      </Button>
-      {/* По чётным */}
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="gap-1.5"
-        onClick={applyEvenDays}
-      >
-        <Sun className="h-3.5 w-3.5" />
-        {t("evenDays")}
-      </Button>
-      {/* По нечётным */}
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="gap-1.5"
-        onClick={applyOddDays}
-      >
-        <Moon className="h-3.5 w-3.5" />
-        {t("oddDays")}
-      </Button>
-      {/* Перерыв всем выбранным */}
-      {selectedDays.length > 0 && (
         <Button
           type="button"
           variant="outline"
           size="sm"
-          className="gap-1.5"
-          onClick={addBreakToAll}
+          className={cn("gap-1.5", isMobile && "shrink-0")}
+          onClick={applyWeekdays}
         >
-          <Coffee className="h-3.5 w-3.5" />
-          {t("addBreakToAll")}
+          {t("weekdays")}
         </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className={cn("gap-1.5", isMobile && "shrink-0")}
+          onClick={applyEvenDays}
+        >
+          {t("evenDays")}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className={cn("gap-1.5", isMobile && "shrink-0")}
+          onClick={applyOddDays}
+        >
+          {t("oddDays")}
+        </Button>
+      </div>
+
+      {/* Shift hint — только десктоп */}
+      {!isMobile && (
+        <p className="text-xs text-muted-foreground mt-2">
+          {tRoot("shiftHint")}
+        </p>
       )}
     </div>
   );

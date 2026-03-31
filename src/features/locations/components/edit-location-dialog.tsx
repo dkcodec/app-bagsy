@@ -55,6 +55,14 @@ const AddressMap = dynamic(
 
 const SLOT_DURATIONS = [5, 10, 15, 30, 60] as const;
 
+/**
+ * Типы расписания:
+ * - mixed — у локации своё расписание, у мастеров своё
+ * - fixed — все мастера работают по расписанию локации
+ * Для SOLO плана всегда fixed (мастер = владелец, расписания синхронизируются на беке)
+ */
+const SCHEDULE_TYPES = ["mixed", "fixed"] as const;
+
 /** Схема валидации — те же правила что и при создании */
 const createEditSchema = (t: (key: string) => string) =>
   z.object({

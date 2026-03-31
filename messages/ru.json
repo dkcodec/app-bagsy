@@ -709,7 +709,14 @@
     "monthGridTitle": "Дни месяца",
     "editorTitle": "График выбранных дней",
     "selectedCount": "Выбрано: {count}",
+    "selectedDay": "Выбрано: 1 день — {day}",
+    "selectedDays": "Выбрано: {count} дн.",
     "clearSelection": "Сбросить",
+    "shiftHint": "Удерживайте Shift для выбора диапазона",
+    "saveCount": "Сохранить {count} дн.",
+    "dayOff": "Выходной",
+    "customBadge": "Своё",
+    "fixedScheduleInfo": "Ваша точка использует фиксированный график — все работают по одному расписанию",
     "Weekdays": {
       "mon": "Пн",
       "tue": "Вт",
@@ -748,14 +755,20 @@
       "to": "До",
       "addBreak": "Добавить перерыв",
       "addWorkRange": "Добавить интервал",
-      "mixedTimesWarning": "У выбранных дней разное время. Изменения будут применены ко всем выбранным дням."
+      "mixedTimesWarning": "У выбранных дней разное время. Изменения будут применены ко всем выбранным дням.",
+      "endBeforeStart": "Время окончания должно быть позже начала",
+      "overlappingRanges": "Рабочие интервалы не должны пересекаться",
+      "breakOutsideWork": "Перерыв должен быть внутри рабочих часов"
     },
+    "savedSuccess": "Расписание сохранено",
+    "savedError": "Ошибка сохранения расписания",
+    "dayOffSuccess": "Выходной сохранён",
     "Presets": {
-      "selectAll": "Выбрать все",
-      "weekdays": "5/2 (Пн–Пт)",
+      "allWeekdays": "Все будни",
+      "weekdays": "5/2",
       "evenDays": "Чётные",
       "oddDays": "Нечётные",
-      "addBreakToAll": "Перерыв всем"
+      "clear": "Очистить"
     }
   }
 }

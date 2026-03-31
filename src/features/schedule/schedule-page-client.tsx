@@ -1,22 +1,32 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
 import { useCurrentUser } from "@/src/shared/hooks/use-users";
+import { useLocation } from "@/src/shared/hooks/use-network-locations";
 import { useSchedulePermissions } from "@/src/shared/hooks/use-schedule-permissions";
 import type {
   ScheduleUserFlags,
   PointScheduleContext,
+  ScheduleType,
 } from "@/src/shared/types/schedule";
 import { ScheduleScopeProvider } from "./schedule-scope-context";
 import { ScheduleHeader } from "./schedule-header";
 import { ScheduleContent } from "./schedule-content";
+import {
+  ScheduleCalendarSkeleton,
+  ScheduleEditorSkeleton,
+} from "./ui/schedule-skeleton";
 
 /**
  * Клиентская обёртка страницы графика: провайдер scope и права.
- * Берёт данные текущего пользователя через useCurrentUser.
+ * Берёт данные текущего пользователя и локации для определения schedule_type.
  */
 export function SchedulePageClient() {
-  const { data: user, isLoading } = useCurrentUser();
+  const { data: user, isLoading: isUserLoading } = useCurrentUser();
+
+  /* Загружаем локацию для schedule_type. */
+  const { data: location, isLoading: isLocationLoading } = useLocation(
+    user?.location_id
+  );
 
   /* Маппинг permissions API → ScheduleUserFlags. */
   const userFlags: ScheduleUserFlags = {
@@ -25,15 +35,30 @@ export function SchedulePageClient() {
       user?.permissions.can_manage_location_schedule ?? false,
   };
 
-  /* TODO: schedule_type пока "mixed" по умолчанию; заменить когда появится API локации. */
-  const pointContext: PointScheduleContext = { schedule_type: "mixed" };
+  /* schedule_type из локации (fallback "mixed"). */
+  const pointContext: PointScheduleContext = {
+    schedule_type: (location?.schedule_type as ScheduleType) ?? "mixed",
+  };
 
-  const permissions = useSchedulePermissions({ userFlags, pointContext });
+  /* Solo plan: owner = единственный сотрудник. */
+  const isSoloPlan = user?.organization?.subscription?.plan === "solo";
 
-  if (isLoading) {
+  const permissions = useSchedulePermissions({
+    userFlags,
+    pointContext,
+    isSoloPlan,
+  });
+
+  /* Скелетон при загрузке. */
+  if (isUserLoading || isLocationLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="flex flex-col">
+        <ScheduleHeader />
+
+        <div className="gap-4 p-4 grid grid-cols-1 md:grid-cols-[1fr_280px] items-start">
+          <ScheduleCalendarSkeleton />
+          <ScheduleEditorSkeleton />
+        </div>
       </div>
     );
   }

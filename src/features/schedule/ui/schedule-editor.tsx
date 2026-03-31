@@ -1,11 +1,12 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import { useTranslations } from "next-intl";
-import { AlertTriangle, Plus, X } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
+import { AlertTriangle, Plus, Loader2, Save } from "lucide-react";
+import { format } from "date-fns";
+import { ru, kk } from "date-fns/locale";
 import { Label } from "@/src/entities/label";
-import { Button } from "@/src/entities";
-import { Separator } from "@/src/entities";
+import { Badge, Button, Separator } from "@/src/entities";
 import { TimeRangeRow } from "./time-range-row";
 import type {
   DaySchedule,
@@ -18,17 +19,56 @@ export interface ScheduleEditorProps {
   monthSchedule: MonthSchedule;
   onApplyToSelected: (updater: (draft: DaySchedule) => DaySchedule) => void;
   readOnly?: boolean;
+  /** Текущий месяц — для форматирования даты в заголовке. */
+  currentMonth: Date;
+  /** Расписание точки — для определения переопределённых дней (mixed staff). */
+  locationSchedule?: MonthSchedule | null;
+  /** Коллбэк сохранения. */
+  onSave?: () => void;
+  /** Пометить выбранные дни выходными и сразу сохранить. */
+  onMarkDayOff?: () => void;
+  isSaving?: boolean;
+  isDirty?: boolean;
 }
 
 const defaultWorkRange: TimeRange = { start: "09:00", end: "18:00" };
+
+/** Проверка: расписание сотрудника отличается от расписания точки? */
+function isCustomOverride(
+  employeeDay: DaySchedule | undefined,
+  locationDay: DaySchedule | undefined
+): boolean {
+  if (!employeeDay || !locationDay) return false;
+  return (
+    JSON.stringify({
+      c: employeeDay.isClosed,
+      w: employeeDay.workRanges,
+      b: employeeDay.breaks,
+    }) !==
+    JSON.stringify({
+      c: locationDay.isClosed,
+      w: locationDay.workRanges,
+      b: locationDay.breaks,
+    })
+  );
+}
 
 export function ScheduleEditor({
   selectedDays,
   monthSchedule,
   onApplyToSelected,
   readOnly = false,
+  currentMonth,
+  locationSchedule,
+  onSave,
+  onMarkDayOff,
+  isSaving = false,
+  isDirty = false,
 }: ScheduleEditorProps) {
   const t = useTranslations("Schedule.Editor");
+  const tRoot = useTranslations("Schedule");
+  const locale = useLocale();
+  const dateFnsLocale = locale === "kz" ? kk : ru;
 
   /* Берём первый выбранный день как репрезентативный. */
   const rep = selectedDays[0] ?? null;
@@ -39,6 +79,31 @@ export function ScheduleEditor({
         breaks: [],
       })
     : { isClosed: false, workRanges: [defaultWorkRange], breaks: [] };
+
+  /* Подзаголовок: "Выбрано: 1 день" / "Выбрано: 5 дн." */
+  const selectionSubtitle = useMemo(() => {
+    if (selectedDays.length === 0) return null;
+    return tRoot("selectedDays", { count: selectedDays.length });
+  }, [selectedDays, tRoot]);
+
+  /* Заголовок: название дня ("Вт, 31 марта") или пусто при multi-select. */
+  const selectionTitle = useMemo(() => {
+    if (selectedDays.length !== 1 || !rep) return null;
+    const date = new Date(
+      currentMonth.getFullYear(),
+      currentMonth.getMonth(),
+      rep
+    );
+    return format(date, "EEEE, d MMMM", { locale: dateFnsLocale });
+  }, [selectedDays, rep, currentMonth, dateFnsLocale]);
+
+  /* Есть ли «своё» расписание (отличается от точки)? */
+  const hasCustomOverride = useMemo(() => {
+    if (!locationSchedule || selectedDays.length === 0) return false;
+    return selectedDays.some(day =>
+      isCustomOverride(monthSchedule[day], locationSchedule[day])
+    );
+  }, [selectedDays, monthSchedule, locationSchedule]);
 
   /* Проверка: у выбранных дней разное время? */
   const hasMixedTimes = useMemo(() => {
@@ -60,7 +125,6 @@ export function ScheduleEditor({
     });
   }, [selectedDays, monthSchedule, daySchedule]);
 
-  /* Рабочие интервалы с фолбэком. */
   const workRanges = daySchedule.workRanges.length
     ? daySchedule.workRanges
     : [defaultWorkRange];
@@ -76,12 +140,7 @@ export function ScheduleEditor({
     [onApplyToSelected]
   );
 
-  /* Сделать выходным. */
-  const makeClosed = useCallback(() => {
-    onApplyToSelected(() => ({ isClosed: true, workRanges: [], breaks: [] }));
-  }, [onApplyToSelected]);
-
-  /* Открыть день (если закрыт). */
+  /* Сделать рабочим (из закрытого состояния). */
   const makeOpen = useCallback(() => {
     onApplyToSelected(() => ({
       isClosed: false,
@@ -99,133 +158,172 @@ export function ScheduleEditor({
     );
   }
 
-  /* День закрыт — показать кнопку открытия. */
-  if (daySchedule.isClosed) {
-    return (
-      <div className="flex flex-col items-center gap-3 py-6">
-        <p className="text-sm text-muted-foreground">{t("dayIsClosed")}</p>
-        {!readOnly && (
-          <Button variant="default" size="sm" onClick={makeOpen}>
-            {t("makeOpen")}
-          </Button>
-        )}
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-3">
-      {/* Предупреждение: у выбранных дней разное время */}
-      {hasMixedTimes && (
-        <div className="flex items-start gap-2 rounded-md bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-2.5 text-xs text-amber-700 dark:text-amber-400">
-          <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
-          <span>{t("mixedTimesWarning")}</span>
+      {/* Контекстный заголовок */}
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <p className="text-xs text-muted-foreground">{selectionSubtitle}</p>
+          {selectionTitle && (
+            <p className="text-sm font-medium mt-0.5 capitalize">
+              {selectionTitle}
+            </p>
+          )}
         </div>
+        {/* Badge "своё" для mixed staff */}
+        {hasCustomOverride && (
+          <Badge variant="outline" className="text-xs shrink-0 mt-0.5">
+            {tRoot("customBadge")}
+          </Badge>
+        )}
+      </div>
+
+      {/* День закрыт — подсказка + кнопка открытия */}
+      {daySchedule.isClosed ? (
+        <div className="flex flex-col items-center gap-2 py-4">
+          <p className="text-sm text-muted-foreground">{t("dayIsClosed")}</p>
+          {!readOnly && (
+            <Button variant="default" size="sm" onClick={makeOpen}>
+              {t("makeOpen")}
+            </Button>
+          )}
+        </div>
+      ) : (
+        <>
+          {/* Предупреждение: у выбранных дней разное время */}
+          {hasMixedTimes && (
+            <div className="flex items-start gap-2 rounded-md bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-2.5 text-xs text-amber-700 dark:text-amber-400">
+              <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+              <span>{t("mixedTimesWarning")}</span>
+            </div>
+          )}
+
+          {/* Рабочие интервалы */}
+          <div className="space-y-2">
+            <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              {t("workHours")}
+            </Label>
+            {workRanges.map((range, idx) => (
+              <TimeRangeRow
+                key={idx}
+                value={range}
+                labelFrom={t("from")}
+                labelTo={t("to")}
+                disabled={readOnly}
+                onChange={v => {
+                  const next = [...workRanges];
+                  next[idx] = v;
+                  setWorkRanges(next);
+                }}
+                onRemove={
+                  workRanges.length > 1
+                    ? () => {
+                        const next = workRanges.filter((_, i) => i !== idx);
+                        setWorkRanges(next.length ? next : [defaultWorkRange]);
+                      }
+                    : undefined
+                }
+              />
+            ))}
+            {!readOnly && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs gap-1"
+                onClick={() =>
+                  setWorkRanges([
+                    ...workRanges,
+                    { start: "12:00", end: "13:00" },
+                  ])
+                }
+              >
+                <Plus className="h-3.5 w-3.5" />
+                {t("addWorkRange")}
+              </Button>
+            )}
+          </div>
+
+          <Separator />
+
+          {/* Перерывы */}
+          <div className="space-y-2">
+            <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              {t("breaks")}
+            </Label>
+            {daySchedule.breaks.length === 0 && (
+              <p className="text-xs text-muted-foreground">{t("noBreaks")}</p>
+            )}
+            {daySchedule.breaks.map((br, idx) => (
+              <TimeRangeRow
+                key={idx}
+                value={br}
+                labelFrom={t("from")}
+                labelTo={t("to")}
+                disabled={readOnly}
+                onChange={v => {
+                  const next = [...daySchedule.breaks];
+                  next[idx] = v;
+                  setBreaks(next);
+                }}
+                onRemove={() =>
+                  setBreaks(daySchedule.breaks.filter((_, i) => i !== idx))
+                }
+              />
+            ))}
+            {!readOnly && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs gap-1"
+                onClick={() =>
+                  setBreaks([
+                    ...daySchedule.breaks,
+                    { start: "13:00", end: "14:00" },
+                  ])
+                }
+              >
+                <Plus className="h-3.5 w-3.5" />
+                {t("addBreak")}
+              </Button>
+            )}
+          </div>
+        </>
       )}
 
-      {/* Рабочие интервалы */}
-      <div className="space-y-2">
-        <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-          {t("workHours")}
-        </Label>
-        {workRanges.map((range, idx) => (
-          <TimeRangeRow
-            key={idx}
-            value={range}
-            labelFrom={t("from")}
-            labelTo={t("to")}
-            disabled={readOnly}
-            onChange={v => {
-              const next = [...workRanges];
-              next[idx] = v;
-              setWorkRanges(next);
-            }}
-            onRemove={
-              workRanges.length > 1
-                ? () => {
-                    const next = workRanges.filter((_, i) => i !== idx);
-                    setWorkRanges(next.length ? next : [defaultWorkRange]);
-                  }
-                : undefined
-            }
-          />
-        ))}
-        {!readOnly && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="h-7 text-xs gap-1"
-            onClick={() =>
-              setWorkRanges([...workRanges, { start: "12:00", end: "13:00" }])
-            }
-          >
-            <Plus className="h-3.5 w-3.5" />
-            {t("addWorkRange")}
-          </Button>
-        )}
-      </div>
-
-      <Separator />
-
-      {/* Перерывы */}
-      <div className="space-y-2">
-        <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-          {t("breaks")}
-        </Label>
-        {daySchedule.breaks.length === 0 && (
-          <p className="text-xs text-muted-foreground">{t("noBreaks")}</p>
-        )}
-        {daySchedule.breaks.map((br, idx) => (
-          <TimeRangeRow
-            key={idx}
-            value={br}
-            labelFrom={t("from")}
-            labelTo={t("to")}
-            disabled={readOnly}
-            onChange={v => {
-              const next = [...daySchedule.breaks];
-              next[idx] = v;
-              setBreaks(next);
-            }}
-            onRemove={() =>
-              setBreaks(daySchedule.breaks.filter((_, i) => i !== idx))
-            }
-          />
-        ))}
-        {!readOnly && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="h-7 text-xs gap-1"
-            onClick={() =>
-              setBreaks([
-                ...daySchedule.breaks,
-                { start: "13:00", end: "14:00" },
-              ])
-            }
-          >
-            <Plus className="h-3.5 w-3.5" />
-            {t("addBreak")}
-          </Button>
-        )}
-      </div>
-
-      {/* Кнопка "Сделать выходным" — внизу, менее приоритетная */}
+      {/* Кнопки: сохранить + выходной */}
       {!readOnly && (
         <>
           <Separator />
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="w-full text-destructive hover:text-destructive hover:bg-destructive/10 gap-1.5"
-            onClick={makeClosed}
-          >
-            <X className="h-3.5 w-3.5" />
-            {t("makeClosed")}
-          </Button>
+          <div className="flex flex-col gap-2">
+            {isDirty && onSave && (
+              <Button
+                onClick={onSave}
+                disabled={isSaving}
+                className="w-full gap-2"
+                size="lg"
+              >
+                {isSaving ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                {selectedDays.length > 1
+                  ? tRoot("saveCount", { count: selectedDays.length })
+                  : tRoot("save")}
+              </Button>
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
+              disabled={isSaving}
+              onClick={onMarkDayOff}
+            >
+              {tRoot("dayOff")}
+            </Button>
+          </div>
         </>
       )}
     </div>
