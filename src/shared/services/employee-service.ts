@@ -3,7 +3,7 @@ import type {
   IEmployeeDto,
   IEmployeePermissions,
   TUserRole,
-  UpdateEmployeeProfileRequest,
+  UpdateEmployeeAccountRequest,
 } from "../types/user";
 import type { IEmployeesResponse } from "../types/staff";
 
@@ -87,7 +87,7 @@ export class EmployeeService {
 
   /** Обновление профиля (PUT /api/v1/employees/me) */
   static async updateMe(
-    data: UpdateEmployeeProfileRequest
+    data: UpdateEmployeeAccountRequest
   ): Promise<IEmployeeDto> {
     return apiClient.put<IEmployeeDto>("api/v1/employees/me", data);
   }

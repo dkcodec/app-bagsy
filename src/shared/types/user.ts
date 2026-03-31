@@ -38,7 +38,7 @@ export interface IEmployeeDto {
 }
 
 /** Запрос обновления профиля (PUT /api/v1/employees/me) */
-export interface UpdateEmployeeProfileRequest {
+export interface UpdateEmployeeAccountRequest {
   first_name: string;
   last_name: string;
   avatar_id?: string;
@@ -83,8 +83,8 @@ export interface ISchedule {
   week_day: number;
 }
 
-/** @deprecated Используй UpdateEmployeeProfileRequest */
-export interface UpdateProfileRequest {
+/** @deprecated Используй UpdateEmployeeAccountRequest */
+export interface UpdateAccountRequest {
   avatar_id?: string;
   name: string;
   surname: string;

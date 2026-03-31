@@ -19,9 +19,9 @@
 
 ```
 app/[locale]/(auth)/     — Логин, инвайт
-app/[locale]/(sidebar)/  — Основные страницы (dashboard, staff, locations, services, settings, profile)
+app/[locale]/(sidebar)/  — Основные страницы (dashboard, staff, locations, services, settings, account)
 src/widgets/             — Составные UI (сайдбар, календарь)
-src/features/            — Бизнес-логика (auth, calendar, dashboard, staff, locations, services, profile, settings)
+src/features/            — Бизнес-логика (auth, calendar, dashboard, staff, locations, services, account, settings)
 src/entities/            — UI-примитивы (shadcn/ui обёртки)
 src/shared/api/          — HTTP-клиент (fetch, auto-refresh 401)
 src/shared/services/     — API-сервисы

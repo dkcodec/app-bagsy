@@ -36,7 +36,7 @@ app/                          # Next.js App Router (страницы)
 │   ├── staff/                # Сотрудники
 │   ├── locations/            # Локации
 │   ├── services/             # Услуги
-│   ├── profile/              # Профиль
+│   ├── account/              # Профиль
 │   └── settings/             # Настройки
 
 src/
@@ -52,7 +52,7 @@ src/
 │   ├── staff/                # Таблица сотрудников, RegisterStaffForm
 │   ├── locations/            # Таблица локаций, AddLocationForm, карта
 │   ├── services/             # Таблица услуг, AddServiceForm, LocationSelect
-│   ├── profile/              # Профиль пользователя
+│   ├── account/              # Профиль пользователя
 │   └── settings/             # Тема, локаль, push-уведомления
 ├── entities/                 # UI-примитивы (shadcn/ui обёртки)
 │   └── *.tsx                 # Button, Dialog, Input, Table, etc.

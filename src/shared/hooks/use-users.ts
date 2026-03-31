@@ -4,7 +4,7 @@ import { EmployeeService } from "../services/employee-service";
 import { UserService } from "../services/user-service";
 import type {
   IEmployeeDto,
-  UpdateEmployeeProfileRequest,
+  UpdateEmployeeAccountRequest,
   UpdateScheduleRequest,
 } from "../types/user";
 
@@ -39,17 +39,17 @@ export function useGetUserByPhone(phone: string) {
  * Хук для обновления профиля сотрудника (PUT /api/v1/employees/me)
  * Включает оптимистичные обновления и инвалидацию кэша
  */
-export function useUpdateProfile() {
+export function useUpdateAccount() {
   const queryClient = useQueryClient();
 
   return useMutation<
     IEmployeeDto,
     unknown,
-    UpdateEmployeeProfileRequest,
+    UpdateEmployeeAccountRequest,
     { previousData?: IEmployeeDto }
   >({
     mutationKey: ["me", "update"],
-    mutationFn: async (data: UpdateEmployeeProfileRequest) =>
+    mutationFn: async (data: UpdateEmployeeAccountRequest) =>
       EmployeeService.updateMe(data),
     onMutate: async newData => {
       await queryClient.cancelQueries({ queryKey: ["me"] });

@@ -4,7 +4,6 @@ import {
   ChartSpline,
   ClipboardList,
   Contact,
-  Settings,
   Users,
   BriefcaseBusiness,
   Clock,
@@ -76,11 +75,6 @@ const navData: { navMain: NavItem[] } = {
     //   url: "/analytics",
     //   icon: ChartSpline,
     // },
-    {
-      name: "settings",
-      url: "/settings",
-      icon: Settings,
-    },
   ],
 };
 
