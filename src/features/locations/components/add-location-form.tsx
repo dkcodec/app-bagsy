@@ -34,6 +34,7 @@ import { AddressSearch } from "./address-search";
 import dynamic from "next/dynamic";
 import type { INominatimResult } from "@/src/shared/services/nominatim-service";
 import { PhoneInput } from "@/src/widgets";
+import { ESubscriptionPlan } from "@/src/shared/types/user";
 
 // Динамический импорт карты с отключением SSR
 const AddressMap = dynamic(
@@ -125,7 +126,8 @@ export function AddLocationForm({ onSuccess, onCancel }: AddPointFormProps) {
   // TODO: когда бэк отдаст plan_code в employees/me или organizations/me,
   // заменить на реальную проверку (currentUser.plan_code === "solo")
   // SOLO: владелец = единственный мастер, расписания синхронизируются на беке → всегда fixed
-  const isSoloPlan = currentUser?.permissions?.can_provide_services === true;
+  const isSoloPlan =
+    currentUser?.organization.subscription.plan === ESubscriptionPlan.SOLO;
 
   const schema = createAddLocationSchema(t);
 

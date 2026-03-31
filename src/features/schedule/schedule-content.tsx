@@ -37,6 +37,7 @@ import { ru, kk } from "date-fns/locale";
 import { getDay } from "date-fns";
 import { toast } from "sonner";
 import type { TimeRange } from "@/src/shared/types/schedule";
+import { ESubscriptionPlan } from "@/src/shared/types/user";
 
 // ============================================================
 // Валидация расписания
@@ -116,7 +117,8 @@ export function ScheduleContent() {
   };
 
   /* Solo plan detection. */
-  const isSoloPlan = user?.organization?.subscription?.plan === "solo";
+  const isSoloPlan =
+    user?.organization?.subscription?.plan === ESubscriptionPlan.SOLO;
 
   /* TODO: schedule_type заменить когда появится API локации. */
   const pointContext: PointScheduleContext = { schedule_type: "mixed" };

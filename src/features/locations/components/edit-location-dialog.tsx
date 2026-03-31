@@ -38,7 +38,9 @@ import { PhoneInput } from "@/src/widgets";
 import type { ILocationDto } from "@/src/shared/services/location-service";
 import type { INominatimResult } from "@/src/shared/services/nominatim-service";
 import { useUpdateLocation } from "@/src/shared/hooks/use-network-locations";
+import { useCurrentUser } from "@/src/shared/hooks/use-users";
 import { AddressSearch } from "./address-search";
+import { ESubscriptionPlan } from "@/src/shared/types/user";
 
 // Карта — только клиент
 const AddressMap = dynamic(
@@ -73,6 +75,7 @@ const createEditSchema = (t: (key: string) => string) =>
       .optional()
       .or(z.literal("")),
     phone: z.string().min(1, t("errors.phoneRequired")),
+    schedule_type: z.string().min(1, t("errors.scheduleTypeRequired")),
     slot_duration_minutes: z
       .number()
       .int()
@@ -105,7 +108,7 @@ interface EditLocationDialogProps {
 /**
  * Диалог редактирования локации (PUT /api/v1/locations/{id})
  * Предзаполнен текущими данными, позволяет изменить: имя, описание, телефон,
- * длительность слота, адрес
+ * тип расписания (не для SOLO), длительность слота, адрес
  */
 export function EditLocationDialog({
   location,
@@ -114,7 +117,12 @@ export function EditLocationDialog({
 }: EditLocationDialogProps) {
   const tForm = useTranslations("Locations.addPointForm");
   const tEdit = useTranslations("Locations.editDialog");
+  const { data: currentUser } = useCurrentUser();
   const updateMutation = useUpdateLocation();
+
+  // SOLO: владелец = единственный мастер, расписание всегда fixed
+  const isSoloPlan =
+    currentUser?.organization.subscription.plan === ESubscriptionPlan.SOLO;
 
   const schema = createEditSchema(tForm);
 
@@ -124,6 +132,7 @@ export function EditLocationDialog({
       name: location.name,
       description: location.description || "",
       phone: location.phone,
+      schedule_type: location.schedule_type || (isSoloPlan ? "fixed" : "mixed"),
       slot_duration_minutes: location.slot_duration_minutes,
       address: {
         city: location.address.city,
@@ -144,6 +153,7 @@ export function EditLocationDialog({
           name: data.name,
           description: data.description || undefined,
           phone: data.phone,
+          schedule_type: data.schedule_type,
           slot_duration_minutes: data.slot_duration_minutes,
           latitude: data.latitude,
           longitude: data.longitude,
@@ -183,7 +193,11 @@ export function EditLocationDialog({
                   <FormItem>
                     <FormLabel>{tForm("name")}</FormLabel>
                     <FormControl>
-                      <Input disabled={isPending} {...field} />
+                      <Input
+                        placeholder={tForm("name")}
+                        disabled={isPending}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -204,35 +218,96 @@ export function EditLocationDialog({
               />
             </div>
 
-            {/* Длительность слота */}
-            <FormField
-              control={form.control}
-              name="slot_duration_minutes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{tForm("slotDuration")}</FormLabel>
-                  <Select
-                    onValueChange={v => field.onChange(parseInt(v, 10))}
-                    value={field.value?.toString()}
-                    disabled={isPending}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="w-full md:w-[200px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {SLOT_DURATIONS.map(m => (
-                        <SelectItem key={m} value={m.toString()}>
-                          {m} {tForm("minutes")}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Тип расписания + Длительность слота */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Тип расписания — для SOLO всегда fixed, селект скрыт */}
+              <FormField
+                control={form.control}
+                name="schedule_type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{tForm("scheduleType")}</FormLabel>
+                    {isSoloPlan ? (
+                      /* SOLO: тип зафиксирован, показываем только инфо */
+                      <div className="text-sm text-muted-foreground border rounded-md px-3 py-2 bg-muted/50">
+                        {tForm("scheduleTypes.fixed.label")} —{" "}
+                        {tForm("soloScheduleNote")}
+                      </div>
+                    ) : (
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        disabled={isPending}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue
+                              placeholder={tForm("scheduleTypePlaceholder")}
+                            />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {SCHEDULE_TYPES.map(type => (
+                            <SelectItem key={type} value={type}>
+                              <div>
+                                <span className="font-medium">
+                                  {tForm(`scheduleTypes.${type}.label`)}
+                                </span>
+                                <p className="text-xs text-muted-foreground">
+                                  {tForm(`scheduleTypes.${type}.description`)}
+                                </p>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {/* Подсказка под полем */}
+                    {!isSoloPlan && (
+                      <p className="text-xs text-muted-foreground">
+                        {tForm(`scheduleTypes.${field.value}.hint`)}
+                      </p>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Длительность слота */}
+              <FormField
+                control={form.control}
+                name="slot_duration_minutes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{tForm("slotDuration")}</FormLabel>
+                    <Select
+                      onValueChange={v => field.onChange(parseInt(v, 10))}
+                      value={field.value?.toString()}
+                      disabled={isPending}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue
+                            placeholder={tForm("slotDurationPlaceholder")}
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {SLOT_DURATIONS.map(m => (
+                          <SelectItem key={m} value={m.toString()}>
+                            {m} {tForm("minutes")}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      {tForm("slotDurationHint")}
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             {/* Описание */}
             <FormField
@@ -242,7 +317,12 @@ export function EditLocationDialog({
                 <FormItem>
                   <FormLabel>{tForm("description")}</FormLabel>
                   <FormControl>
-                    <Textarea disabled={isPending} rows={3} {...field} />
+                    <Textarea
+                      placeholder={tForm("description")}
+                      disabled={isPending}
+                      rows={3}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -301,8 +381,12 @@ export function EditLocationDialog({
                   />
                 )}
 
-              {/* Поля адреса */}
+              {/* Поля адреса — автозаполняются из поиска */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="col-span-2 text-sm text-muted-foreground">
+                  {tForm("address.autocomplete")}
+                </div>
+
                 <FormField
                   control={form.control}
                   name="address.city"
@@ -310,7 +394,11 @@ export function EditLocationDialog({
                     <FormItem>
                       <FormLabel>{tForm("address.city")}</FormLabel>
                       <FormControl>
-                        <Input disabled={isPending} {...field} />
+                        <Input
+                          placeholder={tForm("address.city")}
+                          disabled={isPending}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -323,7 +411,11 @@ export function EditLocationDialog({
                     <FormItem>
                       <FormLabel>{tForm("address.street")}</FormLabel>
                       <FormControl>
-                        <Input disabled={isPending} {...field} />
+                        <Input
+                          placeholder={tForm("address.street")}
+                          disabled={isPending}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

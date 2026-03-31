@@ -163,12 +163,12 @@ export function MonthGrid({
 
               /* Выбранный — синяя рамка, без заливки */
               isSelected &&
-                "border-2 border-blue-500 dark:border-blue-400 bg-transparent",
+                "border-2 border-accent-500 dark:border-accent-400 bg-transparent",
 
               /* Есть расписание (не выбран) — голубой фон */
               hasSchedule &&
                 !isSelected &&
-                "bg-blue-50/80 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800",
+                "bg-accent-50/80 border-accent-200 dark:bg-accent-950/30 dark:border-accent-800",
 
               /* Выходной (не выбран, нет расписания) — серый */
               !hasSchedule &&
@@ -188,7 +188,7 @@ export function MonthGrid({
               /* Интерактивность */
               !isPast &&
                 !readOnly &&
-                "cursor-pointer hover:border-blue-300 dark:hover:border-blue-600",
+                "cursor-pointer hover:border-accent-300 dark:hover:border-accent-600",
               (isPast || readOnly) && "cursor-default"
             )}
             onClick={e => handleClick(day, e)}
@@ -200,7 +200,7 @@ export function MonthGrid({
             <span
               className={cn(
                 "leading-none",
-                isCurrentDay && "text-blue-600 dark:text-blue-400"
+                isCurrentDay && "text-accent-600 dark:text-accent-400"
               )}
             >
               {day}
@@ -211,7 +211,7 @@ export function MonthGrid({
               <span
                 className={cn(
                   "text-[9px] md:text-[10px] leading-tight mt-0.5 truncate max-w-full",
-                  "text-blue-600/70 dark:text-blue-400/70"
+                  "text-accent-600/70 dark:text-accent-400/70"
                 )}
               >
                 {workTimeText}

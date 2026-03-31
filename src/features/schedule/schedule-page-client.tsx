@@ -15,6 +15,7 @@ import {
   ScheduleCalendarSkeleton,
   ScheduleEditorSkeleton,
 } from "./ui/schedule-skeleton";
+import { ESubscriptionPlan } from "@/src/shared/types/user";
 
 /**
  * Клиентская обёртка страницы графика: провайдер scope и права.
@@ -41,7 +42,8 @@ export function SchedulePageClient() {
   };
 
   /* Solo plan: owner = единственный сотрудник. */
-  const isSoloPlan = user?.organization?.subscription?.plan === "solo";
+  const isSoloPlan =
+    user?.organization?.subscription?.plan === ESubscriptionPlan.SOLO;
 
   const permissions = useSchedulePermissions({
     userFlags,

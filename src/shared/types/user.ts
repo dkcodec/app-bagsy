@@ -31,6 +31,13 @@ export interface ISubscriptionFeatures {
   sms_notifications: boolean;
 }
 
+export type TSubscriptionPlan = "solo" | "point" | "network";
+export enum ESubscriptionPlan {
+  SOLO = "solo",
+  POINT = "point",
+  NETWORK = "network",
+}
+
 /** Подписка организации */
 export interface ISubscription {
   plan: "solo" | "point" | "network";

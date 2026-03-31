@@ -103,11 +103,11 @@ export interface UpdateLocationRequestDto {
   name?: string;
   description?: string;
   phone?: string;
-  category_id?: string;
   latitude?: number;
   longitude?: number;
   schedule_type?: string;
   slot_duration_minutes?: number;
+  active?: boolean;
   address?: Partial<ILocationAddress>;
 }
 
