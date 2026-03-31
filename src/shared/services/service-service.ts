@@ -33,6 +33,19 @@ export interface IServiceDto {
   active: boolean;
   min_price: number;
   max_price: number;
+  sort_order: number;
+}
+
+/**
+ * Данные для обновления услуги (PUT /api/v1/services/{id})
+ * Все поля опциональны
+ */
+export interface UpdateServiceRequestDto {
+  name?: string;
+  description?: string;
+  duration_minutes?: number;
+  color?: string;
+  sort_order?: number;
 }
 
 /**
@@ -90,5 +103,26 @@ export class ServiceService {
     data: CreateServiceRequestDto
   ): Promise<IServiceDto> {
     return apiClient.post<IServiceDto>("api/v1/services", data);
+  }
+
+  /**
+   * Обновление услуги (PUT /api/v1/services/{id})
+   * Все поля опциональны
+   */
+  static async updateService(
+    id: string,
+    data: UpdateServiceRequestDto
+  ): Promise<void> {
+    return apiClient.put<void>(
+      `api/v1/services/${encodeURIComponent(id)}`,
+      data
+    );
+  }
+
+  /**
+   * Soft-delete услуги (DELETE /api/v1/services/{id})
+   */
+  static async deleteService(id: string): Promise<void> {
+    return apiClient.delete<void>(`api/v1/services/${encodeURIComponent(id)}`);
   }
 }

@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ServiceService,
   type CreateServiceRequestDto,
+  type UpdateServiceRequestDto,
   type IServiceDto,
 } from "../services/service-service";
 
@@ -54,11 +55,43 @@ export function useCreateService() {
     mutationFn: (data: CreateServiceRequestDto) =>
       ServiceService.createService(data),
     onSuccess: (_, variables) => {
-      // Инвалидируем кэш списка услуг для обновления данных
       queryClient.invalidateQueries({
         queryKey: ["services", "location", variables.location_id],
       });
-      // Также инвалидируем все запросы услуг локации (на случай если есть другие запросы)
+      queryClient.invalidateQueries({ queryKey: ["services", "location"] });
+    },
+  });
+}
+
+/**
+ * Хук для обновления услуги (PUT /api/v1/services/{id})
+ */
+export function useUpdateService() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    void,
+    unknown,
+    { id: string; data: UpdateServiceRequestDto }
+  >({
+    mutationKey: ["services", "update"],
+    mutationFn: ({ id, data }) => ServiceService.updateService(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["services", "location"] });
+    },
+  });
+}
+
+/**
+ * Хук для удаления услуги (DELETE /api/v1/services/{id})
+ */
+export function useDeleteService() {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, unknown, string>({
+    mutationKey: ["services", "delete"],
+    mutationFn: id => ServiceService.deleteService(id),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["services", "location"] });
     },
   });

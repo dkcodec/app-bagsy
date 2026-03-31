@@ -707,6 +707,47 @@
         "submitError": "Қызмет құру кезінде қате"
       }
     },
+    "serviceCount": "{count} қызмет",
+    "drawer": {
+      "detailsTab": "Мәліметтер",
+      "staffTab": "Қызметкерлер",
+      "save": "Сақтау",
+      "saving": "Сақтауда...",
+      "saveSuccess": "Қызмет жаңартылды",
+      "saveError": "Жаңарту қатесі",
+      "deleteBtn": "Жою",
+      "sortOrder": "Сұрыптау реті"
+    },
+    "actions": {
+      "edit": "Өңдеу",
+      "manageStaff": "Қызметкерлерді басқару",
+      "duplicate": "Көшірмелеу",
+      "delete": "Жою",
+      "duplicateSuccess": "Қызмет көшірмеленді",
+      "duplicateError": "Көшірмелеу қатесі"
+    },
+    "deleteDialog": {
+      "title": "Қызметті жою",
+      "description": "\"{name}\" қызметін жойғыңыз келетініне сенімдісіз бе? Бұл әрекетті қайтару мүмкін емес.",
+      "cancel": "Болдырмау",
+      "confirm": "Жою",
+      "success": "Қызмет жойылды",
+      "error": "Жою қатесі"
+    },
+    "staffTab": {
+      "assigned": "Тағайындалған",
+      "available": "Қолжетімді қызметкерлер",
+      "remove": "Алып тастау",
+      "add": "Қосу",
+      "assign": "+ Тағайындау",
+      "priceRange": "Баға диапазоны",
+      "duration": "Ұзақтығы",
+      "noStaff": "Қолжетімді қызметкерлер жоқ",
+      "notSet": "Көрсетілмеген",
+      "pricePlaceholder": "Баға",
+      "addSuccess": "Қызметкер қызметке байланыстырылды",
+      "addError": "Қызметкерді байланыстыру қатесі"
+    },
     "attachMaster": {
       "dialogTitle": "Қызметке шеберді байланыстыру",
       "dialogDescription": "Қызметке шеберді байланыстыру: {serviceName}",

@@ -707,6 +707,47 @@
         "submitError": "Ошибка при создании услуги"
       }
     },
+    "serviceCount": "{count} услуг",
+    "drawer": {
+      "detailsTab": "Детали",
+      "staffTab": "Сотрудники",
+      "save": "Сохранить",
+      "saving": "Сохранение...",
+      "saveSuccess": "Услуга обновлена",
+      "saveError": "Ошибка обновления",
+      "deleteBtn": "Удалить",
+      "sortOrder": "Порядок сортировки"
+    },
+    "actions": {
+      "edit": "Редактировать",
+      "manageStaff": "Управление сотрудниками",
+      "duplicate": "Дублировать",
+      "delete": "Удалить",
+      "duplicateSuccess": "Услуга дублирована",
+      "duplicateError": "Ошибка дублирования"
+    },
+    "deleteDialog": {
+      "title": "Удалить услугу",
+      "description": "Вы уверены, что хотите удалить услугу \"{name}\"? Это действие необратимо.",
+      "cancel": "Отмена",
+      "confirm": "Удалить",
+      "success": "Услуга удалена",
+      "error": "Ошибка удаления"
+    },
+    "staffTab": {
+      "assigned": "Назначенные",
+      "available": "Доступные сотрудники",
+      "remove": "Убрать",
+      "add": "Добавить",
+      "assign": "Назначить",
+      "priceRange": "Диапазон цен",
+      "duration": "Длительность",
+      "noStaff": "Нет доступных сотрудников",
+      "notSet": "Не указано",
+      "pricePlaceholder": "Цена",
+      "addSuccess": "Сотрудник привязан к услуге",
+      "addError": "Ошибка привязки сотрудника"
+    },
     "attachMaster": {
       "dialogTitle": "Привязать мастера к услуге",
       "dialogDescription": "Привязка мастера к услуге: {serviceName}",

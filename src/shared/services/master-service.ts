@@ -43,4 +43,15 @@ export class MasterService {
       data
     );
   }
+
+  /**
+   * Отвязка сотрудника от услуги
+   * DELETE /api/v1/employee-services/{id}
+   * TODO: эндпоинт на беке ещё не готов — подключить когда появится
+   */
+  static async removeMasterService(id: string): Promise<void> {
+    return apiClient.delete<void>(
+      `api/v1/employee-services/${encodeURIComponent(id)}`
+    );
+  }
 }

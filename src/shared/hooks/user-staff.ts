@@ -1,13 +1,24 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
+import {
+  useQuery,
+  useQueries,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   EmployeeService,
   type GetEmployeesParams,
   type InviteEmployeeRequest,
   type InviteEmployeeResponse,
 } from "../services/employee-service";
-import type { IEmployeePermissions, TUserRole } from "../types/user";
+import { EUserRole } from "../types/user";
+import type {
+  IEmployeeDto,
+  IEmployeePermissions,
+  TUserRole,
+} from "../types/user";
 
 /**
  * Хук для получения списка сотрудников (GET /api/v1/employees)
@@ -108,4 +119,66 @@ export function useTransferEmployee() {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
     },
   });
+}
+
+/** Сотрудник привязанный к услуге */
+export interface ServiceStaffMember {
+  employee: IEmployeeDto;
+  price: number;
+}
+
+/**
+ * Map serviceId → сотрудники с ценами
+ * Загружает сотрудников локации, затем для каждого — его услуги,
+ * и строит обратную map serviceId → [{employee, price}]
+ */
+export function useServiceStaffMap(locationId: string | undefined) {
+  // Загружаем ВСЕХ сотрудников локации (включая owner)
+  const { data: employeesData } = useGetEmployees(
+    locationId
+      ? {
+          location_id: locationId,
+          role: [
+            EUserRole.STAFF,
+            EUserRole.MANAGER,
+            EUserRole.OWNER,
+          ] as TUserRole[],
+        }
+      : undefined
+  );
+
+  const employees = employeesData?.employees || [];
+
+  // Параллельно загружаем услуги каждого сотрудника
+  const serviceQueries = useQueries({
+    queries: employees.map(emp => ({
+      queryKey: ["employee-services", emp.id],
+      queryFn: () => EmployeeService.getEmployeeServices(emp.id),
+      staleTime: 2 * 60 * 1000,
+      enabled: !!emp.id,
+    })),
+  });
+
+  const isLoading = !employeesData || serviceQueries.some(q => q.isLoading);
+
+  // Стабильный ключ для пересчёта — JSON всех data (размер массива не меняется)
+  const queriesDataKey = JSON.stringify(serviceQueries.map(q => q.data));
+
+  // Мемоизируем map serviceId → [{employee, price}]
+  const staffMap = useMemo(() => {
+    const map = new Map<string, ServiceStaffMember[]>();
+    if (isLoading) return map;
+
+    employees.forEach((emp, i) => {
+      const services = serviceQueries[i]?.data?.services || [];
+      for (const svc of services) {
+        if (!map.has(svc.id)) map.set(svc.id, []);
+        map.get(svc.id)!.push({ employee: emp, price: svc.price });
+      }
+    });
+    return map;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, employees, queriesDataKey]);
+
+  return { staffMap, isLoading };
 }

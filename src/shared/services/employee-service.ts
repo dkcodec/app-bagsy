@@ -50,6 +50,30 @@ export interface ResendInviteResponse {
 }
 
 // ============================================================
+// Employee services types
+// ============================================================
+
+/** Услуга сотрудника (из GET /api/v1/employees/{id}/services) */
+export interface IEmployeeServiceItem {
+  /** UUID услуги (это service.id, не employee_service.id) */
+  id: string;
+  category_id: string;
+  name: string;
+  description: string;
+  duration_minutes: number;
+  color: string;
+  sort_order: number;
+  active: boolean;
+  /** Индивидуальная цена сотрудника */
+  price: number;
+}
+
+/** Ответ GET /api/v1/employees/{id}/services */
+export interface IEmployeeServicesResponse {
+  services: IEmployeeServiceItem[];
+}
+
+// ============================================================
 // List params
 // ============================================================
 
@@ -175,6 +199,15 @@ export class EmployeeService {
     await apiClient.patch(
       `api/v1/employees/${encodeURIComponent(id)}/permissions`,
       data
+    );
+  }
+
+  /** Услуги сотрудника с ценами (GET /api/v1/employees/{id}/services) */
+  static async getEmployeeServices(
+    id: string
+  ): Promise<IEmployeeServicesResponse> {
+    return apiClient.get<IEmployeeServicesResponse>(
+      `api/v1/employees/${encodeURIComponent(id)}/services`
     );
   }
 

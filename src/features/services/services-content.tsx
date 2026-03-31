@@ -1,179 +1,155 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { useLocationServices } from "@/src/shared/hooks/use-services";
-import { useLocations } from "@/src/shared/hooks/use-network-locations";
-import { useCurrentUser } from "@/src/shared/hooks/use-users";
-import { EUserRole } from "@/src/shared/types/user";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Skeleton,
-  Button,
-} from "@/src/entities";
+import { useState, useMemo, useCallback } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
+
+import { Button } from "@/src/entities";
+import {
+  useLocationServices,
+  useServiceCategories,
+} from "@/src/shared/hooks/use-services";
+import {
+  useLocations,
+  useLocation,
+} from "@/src/shared/hooks/use-network-locations";
+import { useCurrentUser } from "@/src/shared/hooks/use-users";
+import { useServiceStaffMap } from "@/src/shared/hooks/user-staff";
+import { EUserRole } from "@/src/shared/types/user";
+
 import { ErrorMessage } from "./components/error-message";
-import { ServicesTableHeader } from "./components/services-table-header";
-import { ServicesTableRow } from "./components/services-table-row";
 import { LocationSelect } from "./components/location-select";
 import { AddServiceDialog } from "./components/add-service-dialog";
+import { ServiceList } from "./components/service-list";
+import { useIsMobile } from "@/src/shared";
 
 /**
- * Компонент таблицы услуг локации обслуживания
+ * Компонент страницы услуг — оркестратор
  */
 export function ServicesContent() {
   const t = useTranslations("Services");
+  const isMobile = useIsMobile();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { data: currentUser } = useCurrentUser();
 
-  // Определяем, нужно ли загружать локации сети (только для Owner)
-  const shouldLoadLocations =
-    currentUser && currentUser.role === EUserRole.OWNER;
+  // Показываем селектор локации только для network-плана с ролью Owner
+  const isNetwork = currentUser?.organization?.subscription?.plan === "network";
+  const isOwner = currentUser?.role === EUserRole.OWNER;
+  const showLocationSelect = isOwner && isNetwork;
 
-  // Загружаем локации организации для Owner
+  // Локация из URL query (?location=uuid)
+  const locationFromUrl = searchParams.get("location") || undefined;
+
+  // Загружаем локации для Owner
   const { data: locationsData } = useLocations();
 
-  // Вычисляем selectedLocationId
-  const selectedLocationId = useMemo(() => {
-    // Для MANAGER используем location_id из currentUser
+  // Вычисляем дефолтный locationId
+  const defaultLocationId = useMemo(() => {
     if (currentUser?.role === EUserRole.MANAGER) {
       return currentUser.location_id;
     }
-
-    // Для Owner используем первую локацию из списка
-    if (
-      shouldLoadLocations &&
-      locationsData &&
-      locationsData.locations.length > 0
-    ) {
+    if (isOwner && locationsData?.locations?.length) {
       return locationsData.locations[0].id;
     }
-
     return undefined;
-  }, [currentUser, locationsData, shouldLoadLocations]);
+  }, [currentUser, locationsData, isOwner]);
 
-  // Локальное состояние для выбранной локации (для селектора)
-  const [localSelectedLocationId, setLocalSelectedLocationId] = useState<
-    string | undefined
-  >(selectedLocationId);
-
-  // Синхронизируем локальное состояние с вычисленным значением
-  useEffect(() => {
-    if (selectedLocationId) {
-      setLocalSelectedLocationId(selectedLocationId);
+  // Для network: берём из URL, иначе дефолт
+  const locationId = useMemo(() => {
+    if (!showLocationSelect) return defaultLocationId;
+    // Проверяем что locationFromUrl валидный (есть в списке)
+    if (
+      locationFromUrl &&
+      locationsData?.locations?.some(l => l.id === locationFromUrl)
+    ) {
+      return locationFromUrl;
     }
-  }, [selectedLocationId]);
+    return defaultLocationId;
+  }, [showLocationSelect, defaultLocationId, locationFromUrl, locationsData]);
 
-  // Используем локальное состояние для запросов (если есть селектор) или вычисленное значение
-  const locationIdForQuery =
-    shouldLoadLocations && localSelectedLocationId
-      ? localSelectedLocationId
-      : selectedLocationId;
+  // Обновить URL при смене локации
+  const handleLocationChange = useCallback(
+    (value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("location", value);
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [router, pathname, searchParams]
+  );
 
-  // Получение данных услуг
-  const { data, isLoading, error } = useLocationServices(locationIdForQuery);
+  // Данные услуг
+  const { data, isLoading, error } = useLocationServices(locationId);
 
-  // Определение колонок таблицы
-  const tableColumns = [
-    { field: "name", labelKey: "table.name", sortable: false },
-    { field: "description", labelKey: "table.description", sortable: false },
-    { field: "duration", labelKey: "table.duration", sortable: false },
-    { field: "color", labelKey: "table.color", sortable: false },
-    { field: "price", labelKey: "table.price", sortable: false },
-    //{ field: "status", labelKey: "table.status", sortable: false },
-    { field: "masters", labelKey: "table.masters", sortable: false },
-  ];
+  // Категории услуг (нужны для группировки)
+  const { data: locationData } = useLocation(locationId);
+  const { data: categoriesData } = useServiceCategories(
+    locationData?.category_id
+  );
+
+  // Карта serviceId → сотрудники (для аватарок в таблице и drawer)
+  const { staffMap } = useServiceStaffMap(locationId);
+
+  if (error) return <ErrorMessage error={error} />;
+
+  const services = data?.services || [];
+  const categories = categoriesData?.categories || [];
 
   return (
-    <div className="flex flex-col md:p-4">
-      {/* Селектор локации (только для owner) */}
-      {shouldLoadLocations && (
-        <div className="p-4">
-          <LocationSelect
-            value={localSelectedLocationId}
-            onValueChange={setLocalSelectedLocationId}
-          />
+    <div className="flex flex-col gap-4 p-4">
+      {/* Заголовок: селектор + кол-во + кнопка */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-end gap-3">
+          {showLocationSelect && (
+            <LocationSelect
+              value={locationId}
+              onValueChange={handleLocationChange}
+            />
+          )}
+          {!isLoading && services.length > 0 && (
+            <span className="text-xs text-muted-foreground pb-3">
+              {t("serviceCount", { count: services.length })}
+            </span>
+          )}
         </div>
-      )}
 
-      {/* Таблица */}
-      <Card className="border-none bg-background">
-        <CardHeader className="flex flex-row justify-between items-center px-6 py-2">
-          <CardTitle>{t("tableTitle")}</CardTitle>
+        {isMobile ? (
           <Button
+            size="icon"
             onClick={() => setIsDialogOpen(true)}
-            size="sm"
-            className="flex items-center gap-2"
-            disabled={!locationIdForQuery}
+            disabled={!locationId}
           >
             <Plus className="h-4 w-4" />
+          </Button>
+        ) : (
+          <Button
+            size="sm"
+            onClick={() => setIsDialogOpen(true)}
+            disabled={!locationId}
+          >
+            <Plus className="mr-1 h-4 w-4" />
             {t("addService")}
           </Button>
-        </CardHeader>
+        )}
+      </div>
 
-        <CardContent>
-          {/* Состояние загрузки */}
-          {error ? (
-            /* Ошибка загрузки */
-            <ErrorMessage error={error} />
-          ) : (
-            <>
-              {/* Таблица */}
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <ServicesTableHeader columns={tableColumns} />
-                  </TableHeader>
-                  <TableBody>
-                    {isLoading ? (
-                      <TableRow>
-                        {Array.from({ length: tableColumns.length }).map(
-                          (_, i) => (
-                            <TableCell key={i} className="h-12 w-full">
-                              <Skeleton className="h-12 w-full" />
-                            </TableCell>
-                          )
-                        )}
-                      </TableRow>
-                    ) : !data?.services || data.services.length === 0 ? (
-                      <TableRow>
-                        <TableCell
-                          colSpan={tableColumns.length}
-                          className="text-center py-8 text-muted-foreground"
-                        >
-                          {t("noData")}
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      data.services.map(service => (
-                        <ServicesTableRow
-                          key={service.id}
-                          service={service}
-                          locationId={locationIdForQuery}
-                        />
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
+      {/* Список услуг */}
+      <ServiceList
+        services={services}
+        categories={categories}
+        locationId={locationId || ""}
+        isLoading={isLoading}
+        staffMap={staffMap}
+      />
 
-      {/* Диалог добавления услуги */}
+      {/* Диалог добавления */}
       <AddServiceDialog
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
-        locationId={locationIdForQuery}
+        locationId={locationId}
       />
     </div>
   );
