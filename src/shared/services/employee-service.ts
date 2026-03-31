@@ -50,7 +50,7 @@ export interface ResendInviteResponse {
 }
 
 // ============================================================
-// Employee services types
+// Employee services types (связь сотрудник-услуга)
 // ============================================================
 
 /** Услуга сотрудника (из GET /api/v1/employees/{id}/services) */
@@ -71,6 +71,19 @@ export interface IEmployeeServiceItem {
 /** Ответ GET /api/v1/employees/{id}/services */
 export interface IEmployeeServicesResponse {
   services: IEmployeeServiceItem[];
+}
+
+/** Запрос POST /api/v1/employee-services — привязка сотрудника к услуге */
+export interface CreateEmployeeServiceRequest {
+  employee_id: string;
+  service_id: string;
+  /** Цена в тенге (строка) */
+  price: string;
+}
+
+/** Ответ POST /api/v1/employee-services */
+export interface CreateEmployeeServiceResponse {
+  id: string;
 }
 
 // ============================================================
@@ -216,6 +229,28 @@ export class EmployeeService {
     await apiClient.post(
       `api/v1/employees/${encodeURIComponent(id)}/transfer`,
       { location_id }
+    );
+  }
+
+  // ——— Employee-Service links ———
+
+  /** Привязка сотрудника к услуге (POST /api/v1/employee-services) */
+  static async createEmployeeService(
+    data: CreateEmployeeServiceRequest
+  ): Promise<CreateEmployeeServiceResponse> {
+    return apiClient.post<CreateEmployeeServiceResponse>(
+      "api/v1/employee-services",
+      data
+    );
+  }
+
+  /**
+   * Отвязка сотрудника от услуги (DELETE /api/v1/employee-services/{id})
+   * TODO: эндпоинт на беке ещё не готов — подключить когда появится
+   */
+  static async removeEmployeeService(id: string): Promise<void> {
+    return apiClient.delete<void>(
+      `api/v1/employee-services/${encodeURIComponent(id)}`
     );
   }
 }
