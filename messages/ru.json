@@ -291,7 +291,11 @@
     "Subscription": {
       "currentPlan": "Текущий план",
       "active": "Активен",
+      "trial": "Пробный",
+      "expired": "Истёк",
+      "cancelled": "Отменён",
       "nextPayment": "Следующий платёж",
+      "usedOfMax": "{used} из {max}",
       "amount": "Сумма",
       "bookings": "Записи",
       "staffSlots": "Мастера",
@@ -481,6 +485,51 @@
     "accessDenied": "Доступ запрещен",
     "accessDeniedDescription": "У вас нет прав для просмотра списка точек",
     "addPoint": "Добавить точку",
+    "detail": {
+      "edit": "Редактировать",
+      "phone": "Телефон",
+      "scheduleType": "Тип расписания",
+      "slotDuration": "Длительность слота",
+      "minutesShort": "мин",
+      "workingHours": "Часы работы",
+      "closed": "Закрыто",
+      "staffCount": "Сотрудники",
+      "servicesCount": "Услуги",
+      "bookingLink": "Ссылка для записи",
+      "bookingLinkHint": "Поделитесь этой ссылкой с клиентами",
+      "copyLink": "Копировать",
+      "linkCopied": "Ссылка скопирована",
+      "qrCode": "QR",
+      "technicalId": "ID",
+      "createdAt": "Создано",
+      "backToAll": "Все локации",
+      "noSchedule": "Расписание не настроено",
+      "scheduleTypes": {
+        "fixed": "Фиксированное",
+        "mixed": "Смешанное"
+      },
+      "delete": "Удалить",
+      "deleteTitle": "Удалить локацию",
+      "deleteDescription": "Вы уверены, что хотите удалить локацию \"{name}\"? Это действие нельзя отменить.",
+      "deleteConfirm": "Да, удалить",
+      "deleteCancel": "Отмена",
+      "deleteSuccess": "Локация удалена",
+      "deleteError": "Ошибка при удалении локации"
+    },
+    "editDialog": {
+      "title": "Редактировать локацию",
+      "description": "Измените информацию о локации",
+      "save": "Сохранить",
+      "saving": "Сохранение...",
+      "success": "Локация обновлена",
+      "error": "Ошибка при обновлении локации"
+    },
+    "network": {
+      "locationCount": "{count} локаций",
+      "addLocation": "Добавить локацию",
+      "staff": "сотр.",
+      "services": "услуг"
+    },
     "schedule": {
       "title": "Расписание",
       "allDay": "Весь день",

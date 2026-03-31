@@ -16,6 +16,42 @@ export interface IEmployeePermissions {
   can_manage_location_schedule: boolean;
 }
 
+/** Лимит ресурса подписки */
+export interface ISubscriptionLimit {
+  used: number;
+  /** null = безлимит */
+  max: number | null;
+}
+
+/** Фичи подписки */
+export interface ISubscriptionFeatures {
+  multi_location: boolean;
+  custom_branding: boolean;
+  api_access: boolean;
+  sms_notifications: boolean;
+}
+
+/** Подписка организации */
+export interface ISubscription {
+  plan: "solo" | "point" | "network";
+  status: "trial" | "active" | "expired" | "cancelled";
+  /** ISO 8601 — конец текущего периода */
+  current_period_end: string;
+  limits: {
+    locations: ISubscriptionLimit;
+    employees: ISubscriptionLimit;
+    bookings_monthly: ISubscriptionLimit;
+  };
+  features: ISubscriptionFeatures;
+}
+
+/** Организация (вложена в ответ /employees/me) */
+export interface IOrganization {
+  id: string;
+  name: string;
+  subscription: ISubscription;
+}
+
 /**
  * Сотрудник организации (ответ GET /api/v1/employees/me и GET /api/v1/employees)
  */
@@ -26,15 +62,17 @@ export interface IEmployeeDto {
   last_name: string;
   avatar_url: string;
   role: TUserRole;
-  /** UUID организации */
-  organization_id: string;
   /** UUID текущей локации */
   location_id: string;
   active: boolean;
   /** ISO 8601 с таймзоной */
   created_at: string;
+  /** ISO 8601 с таймзоной */
+  updated_at: string;
   /** Права доступа (ABAC) */
   permissions: IEmployeePermissions;
+  /** Организация с подпиской (приходит из /employees/me) */
+  organization: IOrganization;
 }
 
 /** Запрос обновления профиля (PUT /api/v1/employees/me) */

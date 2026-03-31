@@ -150,7 +150,7 @@ export function AddLocationForm({ onSuccess, onCancel }: AddPointFormProps) {
   });
 
   const onSubmit = async (data: AddLocationFormData) => {
-    if (!currentUser?.organization_id) {
+    if (!currentUser?.organization.id) {
       toast.error(t("errors.networkCodeRequired"));
       return;
     }

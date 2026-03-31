@@ -290,7 +290,11 @@
     "Subscription": {
       "currentPlan": "Ағымдағы жоспар",
       "active": "Белсенді",
+      "trial": "Сынақ",
+      "expired": "Мерзімі өтті",
+      "cancelled": "Бас тартылды",
       "nextPayment": "Келесі төлем",
+      "usedOfMax": "{used} / {max}",
       "amount": "Сома",
       "bookings": "Жазбалар",
       "staffSlots": "Шеберлер",
@@ -481,6 +485,51 @@
     "accessDenied": "Қол жетімсіз",
     "accessDeniedDescription": "Нүктелер тізімін көруге құқығыңыз жоқ",
     "addPoint": "Нүкте қосу",
+    "detail": {
+      "edit": "Өңдеу",
+      "phone": "Телефон",
+      "scheduleType": "Кесте түрі",
+      "slotDuration": "Слот ұзақтығы",
+      "minutesShort": "мин",
+      "workingHours": "Жұмыс уақыты",
+      "closed": "Жабық",
+      "staffCount": "Қызметкерлер",
+      "servicesCount": "Қызметтер",
+      "bookingLink": "Жазылу сілтемесі",
+      "bookingLinkHint": "Бұл сілтемені клиенттермен бөлісіңіз",
+      "copyLink": "Көшіру",
+      "linkCopied": "Сілтеме көшірілді",
+      "qrCode": "QR",
+      "technicalId": "ID",
+      "createdAt": "Құрылған",
+      "backToAll": "Барлық локациялар",
+      "noSchedule": "Кесте баптаулмаған",
+      "scheduleTypes": {
+        "fixed": "Бекітілген",
+        "mixed": "Аралас"
+      },
+      "delete": "Жою",
+      "deleteTitle": "Локацияны жою",
+      "deleteDescription": "Сіз \"{name}\" локациясын жойғыңыз келетініне сенімдісіз бе? Бұл әрекетті болдырмау мүмкін емес.",
+      "deleteConfirm": "Иә, жою",
+      "deleteCancel": "Болдырмау",
+      "deleteSuccess": "Локация жойылды",
+      "deleteError": "Локацияны жою кезінде қате"
+    },
+    "editDialog": {
+      "title": "Локацияны өңдеу",
+      "description": "Локация туралы ақпаратты өзгертіңіз",
+      "save": "Сақтау",
+      "saving": "Сақтау...",
+      "success": "Локация жаңартылды",
+      "error": "Локацияны жаңарту кезінде қате"
+    },
+    "network": {
+      "locationCount": "{count} локация",
+      "addLocation": "Локация қосу",
+      "staff": "қызм.",
+      "services": "қызмет"
+    },
     "schedule": {
       "title": "Кесте",
       "allDay": "Күні бойы",

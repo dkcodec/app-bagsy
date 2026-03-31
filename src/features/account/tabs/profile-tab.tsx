@@ -348,13 +348,13 @@ export function ProfileTab({ user, isLoading }: ProfileTabProps) {
                 {t("organizationId")}
               </p>
               <p className="text-sm mt-0.5 font-mono text-muted-foreground">
-                {user?.organization_id ?? "—"}
+                {user?.organization.id ?? "—"}
               </p>
             </div>
-            {user?.organization_id && (
+            {user?.organization.id && (
               <button
                 className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
-                onClick={() => copyToClipboard(user.organization_id)}
+                onClick={() => copyToClipboard(user.organization.id)}
               >
                 <Copy className="size-3" />
                 {t("copy")}

@@ -79,13 +79,13 @@ export function AccountPage() {
           </TabsList>
 
           {/* Контент табов — ограничен по ширине для удобного чтения */}
-          <div className="w-full max-w-2xl">
+          <div className="w-full">
             <TabsContent value="profile" className="mt-0">
               <ProfileTab user={user} isLoading={isLoading} />
             </TabsContent>
 
             <TabsContent value="subscription" className="mt-0">
-              <SubscriptionTab isLoading={isLoading} />
+              <SubscriptionTab user={user} isLoading={isLoading} />
             </TabsContent>
 
             <TabsContent value="security" className="mt-0">

@@ -117,7 +117,7 @@ export function AppearanceTab() {
                 >
                   <div
                     className={cn(
-                      "w-full h-12 rounded-md mb-2 border border-border/50",
+                      "w-full h-12 rounded-md mb-2 border",
                       t_item.bg
                     )}
                   />

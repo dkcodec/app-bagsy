@@ -1,19 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { AlertTriangle, Check } from "lucide-react";
 import { Button, Skeleton, Badge } from "@/src/entities";
 import { cn } from "@/src/shared/utils/styles";
+import type { IEmployeeDto, ISubscriptionLimit } from "@/src/shared/types/user";
 
-/* Захардкоженные планы — API для подписок пока нет */
+/* Справочник планов для сравнения (цены, фичи) */
 const PLANS = [
   {
     id: "solo",
     price: 5000,
     trialMonths: 2,
-    maxLocations: 1,
-    maxStaff: 1,
     popular: false,
     features: [
       "unlimitedBookings",
@@ -27,8 +26,6 @@ const PLANS = [
     id: "point",
     price: 9000,
     trialMonths: 1,
-    maxLocations: 1,
-    maxStaff: 10,
     popular: true,
     features: [
       "allFromSolo",
@@ -42,8 +39,6 @@ const PLANS = [
     id: "network",
     price: 25000,
     trialMonths: 1,
-    maxLocations: Infinity,
-    maxStaff: Infinity,
     popular: false,
     features: [
       "allFromPoint",
@@ -55,24 +50,69 @@ const PLANS = [
 ] as const;
 
 interface SubscriptionTabProps {
+  user?: IEmployeeDto;
   isLoading?: boolean;
 }
 
+/** Форматирование лимита: "used / max" или "∞" */
+function formatLimit(
+  limit: ISubscriptionLimit,
+  t: ReturnType<typeof useTranslations>
+) {
+  if (limit.max === null) return t("unlimited");
+  return t("usedOfMax", { used: limit.used, max: limit.max });
+}
+
+/** Маппинг статуса подписки → i18n ключ + стиль Badge */
+const STATUS_MAP: Record<string, { key: string; className: string }> = {
+  active: {
+    key: "active",
+    className:
+      "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-0",
+  },
+  trial: {
+    key: "trial",
+    className:
+      "bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-0",
+  },
+  expired: {
+    key: "expired",
+    className:
+      "bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/10 border-0",
+  },
+  cancelled: {
+    key: "cancelled",
+    className:
+      "bg-gray-500/10 text-gray-600 dark:text-gray-400 hover:bg-gray-500/10 border-0",
+  },
+};
+
 /**
- * Таб «Подписка» — текущий план, сравнение, платежи
- * API подписок пока нет — данные захардкожены
+ * Таб «Подписка» — текущий план из API, сравнение, платежи
  */
-export function SubscriptionTab({ isLoading }: SubscriptionTabProps) {
+export function SubscriptionTab({ user, isLoading }: SubscriptionTabProps) {
   const t = useTranslations("Account.Subscription");
   const tf = useTranslations("Account.Subscription.features");
   const tp = useTranslations("Account.Subscription.plans");
+  const locale = useLocale();
   const [showPlans, setShowPlans] = useState(false);
 
-  // TODO: получать текущий план из API когда появится эндпоинт
-  const currentPlanId = "solo";
-  const currentPlan = PLANS.find(p => p.id === currentPlanId)!;
+  if (isLoading || !user) return <SubscriptionTabSkeleton />;
 
-  if (isLoading) return <SubscriptionTabSkeleton />;
+  const { subscription } = user.organization;
+  const currentPlanId = subscription.plan;
+  const currentPlan = PLANS.find(p => p.id === currentPlanId);
+  const statusInfo = STATUS_MAP[subscription.status] ?? STATUS_MAP.active;
+
+  /* Форматирование даты следующего платежа */
+  const dateLocale = locale === "kz" ? "kk-KZ" : "ru-RU";
+  const nextPayment = subscription.current_period_end
+    ? new Date(subscription.current_period_end).toLocaleDateString(dateLocale, {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : "—";
 
   return (
     <div className="space-y-4">
@@ -90,36 +130,33 @@ export function SubscriptionTab({ isLoading }: SubscriptionTabProps) {
               {tp(`${currentPlanId}.description`)}
             </p>
           </div>
-          <Badge
-            variant="default"
-            className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-0"
-          >
-            {t("active")}
+          <Badge variant="default" className={statusInfo.className}>
+            {t(statusInfo.key)}
           </Badge>
         </div>
 
-        {/* Статистика текущего плана */}
+        {/* Лимиты и статистика из API */}
         <div className="border-t border-border pt-3 grid grid-cols-2 gap-3">
           <StatCard
             label={t("amount")}
-            value={`${currentPlan.price.toLocaleString()} ₸ ${t("perMonth")}`}
+            value={
+              currentPlan
+                ? `${currentPlan.price.toLocaleString()} ₸ ${t("perMonth")}`
+                : "—"
+            }
           />
-          <StatCard label={t("nextPayment")} value="—" />
+          <StatCard label={t("nextPayment")} value={nextPayment} />
           <StatCard
             label={t("locations")}
-            value={
-              currentPlan.maxLocations === Infinity
-                ? t("unlimited")
-                : `${currentPlan.maxLocations}`
-            }
+            value={formatLimit(subscription.limits.locations, t)}
           />
           <StatCard
             label={t("staffSlots")}
-            value={
-              currentPlan.maxStaff === Infinity
-                ? t("unlimited")
-                : `${currentPlan.maxStaff}`
-            }
+            value={formatLimit(subscription.limits.employees, t)}
+          />
+          <StatCard
+            label={t("bookings")}
+            value={formatLimit(subscription.limits.bookings_monthly, t)}
           />
         </div>
 
@@ -279,7 +316,7 @@ function SubscriptionTabSkeleton() {
           <Skeleton className="h-5 w-16 rounded-full" />
         </div>
         <div className="border-t border-border pt-3 grid grid-cols-2 gap-3">
-          {[...Array(4)].map((_, i) => (
+          {[...Array(5)].map((_, i) => (
             <div key={i} className="rounded-md bg-muted/50 p-3 space-y-2">
               <Skeleton className="h-3 w-20" />
               <Skeleton className="h-5 w-24" />

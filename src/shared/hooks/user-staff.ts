@@ -22,9 +22,6 @@ export function useGetEmployees(params?: GetEmployeesParams) {
   });
 }
 
-/** @deprecated Используй useGetEmployees */
-export const useGetStaff = useGetEmployees;
-
 /**
  * Хук для приглашения нового сотрудника (POST /api/v1/employees/invite)
  * Инвалидирует кэш списка сотрудников после успешного приглашения
@@ -111,9 +108,4 @@ export function useTransferEmployee() {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
     },
   });
-}
-
-/** @deprecated Используй useInviteEmployee */
-export function useRegisterStaff() {
-  return useInviteEmployee();
 }

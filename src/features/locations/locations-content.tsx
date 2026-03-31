@@ -2,121 +2,110 @@
 
 import { useState } from "react";
 import { useLocationsPage } from "@/src/shared/hooks/use-network-locations";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Skeleton,
-  Button,
-} from "@/src/entities";
+import { useCurrentUser } from "@/src/shared/hooks/use-users";
+import { EUserRole } from "@/src/shared/types/user";
+import { Card, CardContent, Skeleton, Button } from "@/src/entities";
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ErrorMessage } from "./components/error-message";
-import { LocationsTableHeader } from "./components/table-header";
-import { LocationsTableRow } from "./components/table-row";
+import { LocationDetailView } from "./components/location-detail-view";
+import { LocationNetworkView } from "./components/location-network-view";
 import { AddPointDialog } from "./components/add-location-dialog";
-import { useCurrentUser } from "@/src/shared/hooks/use-users";
-import { EUserRole } from "@/src/shared/types/user";
 
 /**
- * Компонент таблицы точек обслуживания
+ * Основной контент страницы локаций
+ * Solo (1 локация) → детальная карточка
+ * Network (>1) → сетка карточек
+ * Empty → приглашение создать
  */
 export function LocationsContent() {
   const t = useTranslations("Locations");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { data: currentUser } = useCurrentUser();
-
-  // Получение данных
   const { data, isLoading, error } = useLocationsPage();
 
-  // Для Owner: блокируем кнопку добавления если уже есть точка (для Solo плана)
-  const disableAddButton =
-    isLoading ||
-    (currentUser?.role === EUserRole.OWNER &&
-      data?.locations?.length &&
-      data.locations.length > 0);
+  // Загрузка — скелетон сетки карточек
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-4 p-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-9 w-36 rounded-md" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <Skeleton className="h-32 rounded-xl" />
+          <Skeleton className="h-32 rounded-xl" />
+          <Skeleton className="h-32 rounded-xl" />
+        </div>
+      </div>
+    );
+  }
 
-  // Определение колонок таблицы
-  const tableColumns = [
-    { field: "code", labelKey: "code", sortable: false },
-    { field: "name", labelKey: "name", sortable: false },
-    { field: "address", labelKey: "address", sortable: false },
-    { field: "schedule", labelKey: "schedule.title", sortable: false },
-    { field: "status", labelKey: "status", sortable: false },
-    { field: "createdAt", labelKey: "createdAt", sortable: false },
-  ];
+  // Ошибка
+  if (error) {
+    return (
+      <div className="flex flex-col md:p-4">
+        <ErrorMessage error={error} />
+      </div>
+    );
+  }
 
-  return (
-    <div className="flex flex-col md:p-4">
-      {/* Таблица */}
-      <Card className="border-none bg-background">
-        <CardHeader className="flex flex-row justify-between items-center px-6 py-2">
-          <CardTitle>{t("tableTitle")}</CardTitle>
-          {!disableAddButton && (
-            <Button
-              onClick={() => setIsDialogOpen(true)}
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
+  const locations = data?.locations ?? [];
+  const total = data?.total ?? 0;
+
+  /* Проверяем лимит локаций по подписке */
+  const locLimit = currentUser?.organization.subscription.limits.locations;
+  const canAddLocation =
+    (currentUser?.role === EUserRole.OWNER ||
+      currentUser?.role === EUserRole.MANAGER) &&
+    (!locLimit || locLimit.max === null || locLimit.used < locLimit.max);
+
+  // Пустое состояние — предложение создать локацию
+  if (locations.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 px-4">
+        <p className="text-muted-foreground mb-4">{t("noData")}</p>
+        {canAddLocation && (
+          <>
+            <Button onClick={() => setIsDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-1" />
               {t("addPoint")}
             </Button>
-          )}
-        </CardHeader>
-        <CardContent>
-          {/* Состояние загрузки */}
-          {error ? (
-            /* Ошибка загрузки */
-            <ErrorMessage error={error} />
-          ) : (
-            <>
-              {/* Таблица */}
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <LocationsTableHeader columns={tableColumns} />
-                  </TableHeader>
-                  <TableBody>
-                    {isLoading ? (
-                      <TableRow>
-                        {Array.from({ length: tableColumns.length }).map(
-                          (_, i) => (
-                            <TableCell key={i} className="h-12">
-                              <Skeleton className="h-12 w-full" />
-                            </TableCell>
-                          )
-                        )}
-                      </TableRow>
-                    ) : !data?.locations || data.locations.length === 0 ? (
-                      <TableRow>
-                        <TableCell
-                          colSpan={6}
-                          className="text-center py-8 text-muted-foreground"
-                        >
-                          {t("noData")}
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      data.locations.map(location => (
-                        <LocationsTableRow key={location.id} point={location} />
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
+            <AddPointDialog
+              open={isDialogOpen}
+              onOpenChange={setIsDialogOpen}
+            />
+          </>
+        )}
+      </div>
+    );
+  }
 
-      {/* Диалог добавления локации */}
+  // Solo mode: единственная локация → детальный вид
+  if (total === 1) {
+    return (
+      <>
+        <LocationDetailView
+          location={locations[0]}
+          onAddLocation={
+            canAddLocation ? () => setIsDialogOpen(true) : undefined
+          }
+        />
+        <AddPointDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} />
+      </>
+    );
+  }
+
+  // Network mode: несколько локаций → сетка карточек
+  return (
+    <>
+      <LocationNetworkView
+        locations={locations}
+        total={total}
+        canAddLocation={canAddLocation}
+        onAddLocation={() => setIsDialogOpen(true)}
+      />
       <AddPointDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} />
-    </div>
+    </>
   );
 }
