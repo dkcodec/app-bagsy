@@ -40,10 +40,7 @@ export function ScheduleHeader({
         {/* Select локации — только для network плана с >1 точкой */}
         {showLocationSelect && onLocationChange && (
           <div className="ml-auto w-48 md:w-56">
-            <Select
-              value={selectedLocationId}
-              onValueChange={onLocationChange}
-            >
+            <Select value={selectedLocationId} onValueChange={onLocationChange}>
               <SelectTrigger className="h-9">
                 <SelectValue placeholder={t("selectLocation")} />
               </SelectTrigger>

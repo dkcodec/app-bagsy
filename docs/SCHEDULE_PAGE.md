@@ -47,6 +47,7 @@ src/features/schedule/
 ### Выбор локации (Network plan)
 
 Для плана **network** (несколько точек) в header показывается Select с локациями:
+
 - `useLocations()` загружает список (только для owner)
 - Select отображается если `plan === "network"` и `locations.length > 1`
 - По умолчанию выбрана `user.location_id`
