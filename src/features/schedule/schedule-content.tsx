@@ -120,15 +120,16 @@ export function ScheduleContent() {
   const isSoloPlan =
     user?.organization?.subscription?.plan === ESubscriptionPlan.SOLO;
 
-  /* TODO: schedule_type заменить когда появится API локации. */
-  const pointContext: PointScheduleContext = { schedule_type: "mixed" };
+  /* locationId и scheduleType из контекста (для network — переключается Select'ом). */
+  const { activeScope, setActiveScope, locationId, scheduleType } =
+    useScheduleScope();
+
+  const pointContext: PointScheduleContext = { schedule_type: scheduleType };
   const permissions = useSchedulePermissions({
     userFlags,
     pointContext,
     isSoloPlan,
   });
-
-  const { activeScope, setActiveScope } = useScheduleScope();
   const [currentMonth, setCurrentMonth] = useState(() => new Date());
   const [selectedDays, setSelectedDays] = useState<number[]>([]);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -139,9 +140,9 @@ export function ScheduleContent() {
 
   /* Определяем entityId по scope. Fixed staff → подставляем location_id. */
   const entityId = useMemo(() => {
-    if (isFixedStaffView) return user?.location_id;
-    return activeScope === "staff" ? user?.id : user?.location_id;
-  }, [activeScope, isFixedStaffView, user?.id, user?.location_id]);
+    if (isFixedStaffView) return locationId;
+    return activeScope === "staff" ? user?.id : locationId;
+  }, [activeScope, isFixedStaffView, user?.id, locationId]);
 
   /* Для fixed staff — scope запроса = "point" (грузим расписание точки). */
   const fetchScope = isFixedStaffView ? "point" : activeScope;
@@ -162,7 +163,7 @@ export function ScheduleContent() {
     currentMonth,
     /* Только если mixed staff scope */
     activeScope === "staff" && !permissions.isPointScheduleFixed
-      ? user?.location_id
+      ? locationId
       : undefined
   );
 
@@ -174,16 +175,22 @@ export function ScheduleContent() {
   /* Дни, авто-открытые при клике (для отката при deselect). */
   const autoOpenedDaysRef = useRef<Set<number>>(new Set());
 
-  /* Синхронизация с сервером при загрузке / смене месяца. */
+  /* Синхронизация с сервером при загрузке / смене месяца / смене локации. */
   const prevServerRef = useRef(serverSchedule);
+  const prevEntityRef = useRef(entityId);
   useEffect(() => {
-    if (serverSchedule !== prevServerRef.current) {
+    const entityChanged = entityId !== prevEntityRef.current;
+    const dataChanged = serverSchedule !== prevServerRef.current;
+    if (entityChanged || dataChanged) {
       setLocalSchedule(serverSchedule);
       setIsDirty(false);
       prevServerRef.current = serverSchedule;
+      prevEntityRef.current = entityId;
       autoOpenedDaysRef.current.clear();
+      setSelectedDays([]);
+      if (isMobile) setSheetOpen(false);
     }
-  }, [serverSchedule]);
+  }, [serverSchedule, entityId, isMobile]);
 
   const readOnly =
     isFixedStaffView ||

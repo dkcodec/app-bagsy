@@ -91,8 +91,13 @@ Frontend (app.bagsy.kz/locations) — доступно только owner:
 
 ## Управление расписанием (в ЛК)
 
-Аналогично POINT. Два таба: "График точки" и "Мой график".
-Логика fixed/mixed идентична. Подробнее: `docs/SCHEDULE_PAGE.md`
+Frontend (app.bagsy.kz/schedule):
+
+- В хедере — **Select локации** (переключение между точками сети)
+- Select виден только при >1 точки, по дефолту выбрана `user.location_id`
+- Два таба: "График точки" и "Мой график" (логика fixed/mixed как в POINT)
+- При смене точки — расписание и `schedule_type` перезагружаются
+- Подробнее: `docs/SCHEDULE_PAGE.md`
 
 ---
 

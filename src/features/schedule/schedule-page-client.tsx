@@ -1,7 +1,11 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useCurrentUser } from "@/src/shared/hooks/use-users";
-import { useLocation } from "@/src/shared/hooks/use-network-locations";
+import {
+  useLocation,
+  useLocations,
+} from "@/src/shared/hooks/use-network-locations";
 import { useSchedulePermissions } from "@/src/shared/hooks/use-schedule-permissions";
 import type {
   ScheduleUserFlags,
@@ -20,14 +24,35 @@ import { ESubscriptionPlan } from "@/src/shared/types/user";
 /**
  * Клиентская обёртка страницы графика: провайдер scope и права.
  * Берёт данные текущего пользователя и локации для определения schedule_type.
+ * Для network плана — показывает Select локации в хедере.
  */
 export function SchedulePageClient() {
   const { data: user, isLoading: isUserLoading } = useCurrentUser();
 
-  /* Загружаем локацию для schedule_type. */
-  const { data: location, isLoading: isLocationLoading } = useLocation(
-    user?.location_id
-  );
+  /* Network plan: загружаем список локаций для Select. */
+  const isNetworkPlan =
+    user?.organization?.subscription?.plan === ESubscriptionPlan.NETWORK;
+  const { data: locationsData, isLoading: isLocationsListLoading } =
+    useLocations();
+
+  /* Выбранная локация (для network — из Select, для остальных — user.location_id). */
+  const [selectedLocationId, setSelectedLocationId] = useState<
+    string | undefined
+  >();
+
+  /* Инициализация selectedLocationId когда user загрузился. */
+  useEffect(() => {
+    if (user?.location_id && !selectedLocationId) {
+      setSelectedLocationId(user.location_id);
+    }
+  }, [user?.location_id, selectedLocationId]);
+
+  /* Загружаем выбранную локацию для schedule_type. */
+  const { data: location, isLoading: isLocationLoading } =
+    useLocation(selectedLocationId);
+
+  const isSoloPlan =
+    user?.organization?.subscription?.plan === ESubscriptionPlan.SOLO;
 
   /* Маппинг permissions API → ScheduleUserFlags. */
   const userFlags: ScheduleUserFlags = {
@@ -37,13 +62,11 @@ export function SchedulePageClient() {
   };
 
   /* schedule_type из локации (fallback "mixed"). */
+  const scheduleType: ScheduleType =
+    (location?.schedule_type as ScheduleType) ?? "mixed";
   const pointContext: PointScheduleContext = {
-    schedule_type: (location?.schedule_type as ScheduleType) ?? "mixed",
+    schedule_type: scheduleType,
   };
-
-  /* Solo plan: owner = единственный сотрудник. */
-  const isSoloPlan =
-    user?.organization?.subscription?.plan === ESubscriptionPlan.SOLO;
 
   const permissions = useSchedulePermissions({
     userFlags,
@@ -51,12 +74,19 @@ export function SchedulePageClient() {
     isSoloPlan,
   });
 
+  /* Список локаций для Select (только network). */
+  const locations = isNetworkPlan ? (locationsData?.locations ?? []) : [];
+
   /* Скелетон при загрузке. */
-  if (isUserLoading || isLocationLoading) {
+  const isLoading =
+    isUserLoading ||
+    isLocationLoading ||
+    (isNetworkPlan && isLocationsListLoading);
+
+  if (isLoading) {
     return (
       <div className="flex flex-col">
         <ScheduleHeader />
-
         <div className="gap-4 p-4 grid grid-cols-1 md:grid-cols-[1fr_280px] items-start">
           <ScheduleCalendarSkeleton />
           <ScheduleEditorSkeleton />
@@ -66,8 +96,17 @@ export function SchedulePageClient() {
   }
 
   return (
-    <ScheduleScopeProvider defaultScope={permissions.defaultScope}>
-      <ScheduleHeader />
+    <ScheduleScopeProvider
+      defaultScope={permissions.defaultScope}
+      locationId={selectedLocationId}
+      scheduleType={scheduleType}
+    >
+      <ScheduleHeader
+        locations={locations}
+        selectedLocationId={selectedLocationId}
+        onLocationChange={setSelectedLocationId}
+        showLocationSelect={isNetworkPlan && locations.length > 1}
+      />
       <ScheduleContent />
     </ScheduleScopeProvider>
   );

@@ -1,11 +1,15 @@
 "use client";
 
 import { createContext, useContext, useState, useMemo } from "react";
-import type { ScheduleScope } from "@/src/shared/types/schedule";
+import type { ScheduleScope, ScheduleType } from "@/src/shared/types/schedule";
 
 type ScheduleScopeContextValue = {
   activeScope: ScheduleScope;
   setActiveScope: (s: ScheduleScope) => void;
+  /** ID выбранной локации (для network — переключается селектом в header). */
+  locationId: string | undefined;
+  /** Тип расписания выбранной локации. */
+  scheduleType: ScheduleType;
 };
 
 const ScheduleScopeContext = createContext<ScheduleScopeContextValue | null>(
@@ -23,13 +27,23 @@ export function useScheduleScope(): ScheduleScopeContextValue {
 
 export function ScheduleScopeProvider({
   defaultScope,
+  locationId,
+  scheduleType,
   children,
 }: {
   defaultScope: ScheduleScope;
+  /** ID локации — управляется родителем (schedule-page-client). */
+  locationId?: string;
+  scheduleType: ScheduleType;
   children: React.ReactNode;
 }) {
   const [activeScope, setActiveScope] = useState<ScheduleScope>(defaultScope);
-  const value = useMemo(() => ({ activeScope, setActiveScope }), [activeScope]);
+
+  const value = useMemo(
+    () => ({ activeScope, setActiveScope, locationId, scheduleType }),
+    [activeScope, locationId, scheduleType]
+  );
+
   return (
     <ScheduleScopeContext.Provider value={value}>
       {children}

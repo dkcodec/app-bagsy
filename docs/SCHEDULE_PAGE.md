@@ -9,10 +9,10 @@
 ```
 app/[locale]/(sidebar)/schedule/   — страница
 src/features/schedule/
-├── schedule-page-client.tsx       — обёртка: загрузка user + location, permissions, skeleton
+├── schedule-page-client.tsx       — обёртка: загрузка user + location(s), permissions, skeleton
 ├── schedule-content.tsx           — основной layout: табы, навигация, календарь + editor
-├── schedule-header.tsx            — заголовок страницы
-├── schedule-scope-context.tsx     — Zustand-контекст scope (point | staff)
+├── schedule-header.tsx            — заголовок + Select локации (network plan)
+├── schedule-scope-context.tsx     — контекст: scope (point|staff), locationId, scheduleType
 ├── api/
 │   └── use-month-schedule.ts      — React Query хук: GET/PUT/DELETE schedule за месяц
 └── ui/
@@ -43,6 +43,15 @@ src/features/schedule/
 - Solo plan определяется по `user.organization.subscription.plan === "solo"`
 - При fixed + staff scope — информер "Ваш график определяется расписанием точки"
 - `schedule_type` берётся из `GET /api/v1/locations/{id}`
+
+### Выбор локации (Network plan)
+
+Для плана **network** (несколько точек) в header показывается Select с локациями:
+- `useLocations()` загружает список (только для owner)
+- Select отображается если `plan === "network"` и `locations.length > 1`
+- По умолчанию выбрана `user.location_id`
+- При смене локации — пересчитывается `schedule_type`, сбрасываются выбранные дни, перезагружается расписание
+- `locationId` передаётся через `ScheduleScopeContext` в `ScheduleContent`
 
 ---
 

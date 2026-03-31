@@ -768,7 +768,8 @@
       "fixedBadge": "Бекітілген",
       "mixedBadge": "Аралас",
       "scheduleTypeFixedHint": "Нүкте графигі бекітілген, сіз оны өзгерте алмайсыз",
-      "scheduleTypeMixedHint": "Нүкте графигі аралас — шебер әр айға өз графигін өзі орнатады"
+      "scheduleTypeMixedHint": "Нүкте графигі аралас — шебер әр айға өз графигін өзі орнатады",
+      "selectLocation": "Нүктені таңдаңыз"
     },
     "save": "Сақтау",
     "Editor": {
