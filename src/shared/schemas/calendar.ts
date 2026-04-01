@@ -39,4 +39,3 @@ export const createAddAppointmentSchema = (t: (key: string) => string) =>
 export type TAddAppointmentFormData = z.infer<
   ReturnType<typeof createAddAppointmentSchema>
 >;
-
