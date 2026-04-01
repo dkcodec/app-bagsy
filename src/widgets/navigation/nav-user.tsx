@@ -24,7 +24,7 @@ import type { IEmployeeDto } from "@/src/shared/types/user";
 import { Skeleton } from "@/src/entities/skeleton";
 
 export function NavUser({ user }: { user?: IEmployeeDto }) {
-  const { isMobile } = useSidebar();
+  const { isMobile, setOpenMobile } = useSidebar();
   const t = useTranslations("Sidebar.User");
 
   const logout = useLogout();
@@ -77,7 +77,10 @@ export function NavUser({ user }: { user?: IEmployeeDto }) {
             <DropdownMenuLabel className="p-0 font-normal">
               <div
                 className="flex items-center gap-2 px-1 py-1.5 text-left text-sm cursor-pointer"
-                onClick={() => router.push("/account")}
+                onClick={() => {
+                  setOpenMobile(false);
+                  router.push("/account");
+                }}
               >
                 <Avatar className="h-8 w-8 rounded-lg">
                   {user?.avatar_url ? (
@@ -108,7 +111,10 @@ export function NavUser({ user }: { user?: IEmployeeDto }) {
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="cursor-pointer"
-              onClick={() => logout.mutate()}
+              onClick={() => {
+                setOpenMobile(false);
+                logout.mutate();
+              }}
             >
               <LogOut />
               {t("logout")}
