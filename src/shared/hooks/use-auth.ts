@@ -41,7 +41,7 @@ export function useLogout() {
     mutationKey: ["auth", "logout"],
     mutationFn: () => AuthService.logout(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["me"] });
+      queryClient.clear(); // Полностью очищаем весь кэш при логауте
       router.refresh();
     },
   });
