@@ -119,7 +119,17 @@
         "comment": "Комментарий",
         "commentDescription": "Дополнительная информация",
         "add": "Добавить запись",
-        "cancel": "Отмена"
+        "cancel": "Отмена",
+        "errors": {
+          "firstNameRequired": "Введите имя",
+          "lastNameRequired": "Введите фамилию",
+          "phoneRequired": "Введите телефон",
+          "serviceRequired": "Выберите услугу",
+          "startDateRequired": "Выберите дату начала",
+          "selectStaff": "Выберите работника",
+          "selectLocation": "Выберите точку",
+          "selectLocationFirst": "Сначала выберите точку"
+        }
       },
       "EventDetailsDialog": {
         "edit": "Редактировать",

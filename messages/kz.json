@@ -120,7 +120,17 @@
         "comment": "Пікір",
         "commentDescription": "Қосымша ақпарат",
         "add": "Жазбаны қосу",
-        "cancel": "Бас тарту"
+        "cancel": "Бас тарту",
+        "errors": {
+          "firstNameRequired": "Атыңызды енгізіңіз",
+          "lastNameRequired": "Тегіңізді енгізіңіз",
+          "phoneRequired": "Телефон нөмірін енгізіңіз",
+          "serviceRequired": "Қызметті таңдаңыз",
+          "startDateRequired": "Басталу күнін таңдаңыз",
+          "selectStaff": "Қызметкерді таңдаңыз",
+          "selectLocation": "Нүктені таңдаңыз",
+          "selectLocationFirst": "Алдымен нүктені таңдаңыз"
+        }
       },
       "EventDetailsDialog": {
         "edit": "Өңдеу",

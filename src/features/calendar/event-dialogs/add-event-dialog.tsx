@@ -15,7 +15,7 @@ import { useCalendar } from "@/src/features/calendar/calendar-context";
 import { toTimestampWithTz } from "@/src/shared/utils/formater";
 import { EUserRole } from "@/src/shared/types/user";
 import {
-  addAppointmentSchema,
+  createAddAppointmentSchema,
   type TAddAppointmentFormData,
 } from "@/src/shared/schemas";
 
@@ -94,6 +94,7 @@ export function AddEventDrawer({
       : ""
     : undefined;
 
+  const addAppointmentSchema = createAddAppointmentSchema(t);
   const form = useForm<TAddAppointmentFormData>({
     resolver: zodResolver(addAppointmentSchema),
     defaultValues: {
@@ -111,11 +112,11 @@ export function AddEventDrawer({
   const onSubmit = async (values: TAddAppointmentFormData) => {
     const employeeId = isStaff ? currentUser?.id : values.employee_id;
     if (!employeeId) {
-      toast.error(t("staffDescription") ?? "Выберите мастера");
+      toast.error(t("errors.selectStaff"));
       return;
     }
     if (!locationId) {
-      toast.error("Выберите точку");
+      toast.error(t("errors.selectLocation"));
       return;
     }
     const d = new Date(values.startDate);
@@ -136,7 +137,7 @@ export function AddEventDrawer({
       onOpenChange(false);
       form.reset();
     } catch {
-      toast.error(t("errorCreating") ?? "Ошибка при создании записи");
+      toast.error(t("errorCreating"));
     }
   };
 
@@ -234,7 +235,7 @@ export function AddEventDrawer({
                         placeholder={
                           locationId
                             ? t("serviceDescription")
-                            : "Сначала выберите точку"
+                            : t("errors.selectLocationFirst")
                         }
                       />
                     </SelectTrigger>
