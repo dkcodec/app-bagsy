@@ -88,17 +88,17 @@ src/
 
 ### Хуки (React Query)
 
-| Файл                                           | Хуки                                                                |
-| ---------------------------------------------- | ------------------------------------------------------------------- |
-| `src/shared/hooks/use-auth.ts`                 | useLogin, useLogout, usePasswordReset                               |
-| `src/shared/hooks/use-users.ts`                | useCurrentUser, useUpdateProfile                                    |
-| `src/shared/hooks/use-calendar.ts`             | useCalendar (main hook)                                             |
+| Файл                                           | Хуки                                                                                                                                                        |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/shared/hooks/use-auth.ts`                 | useLogin, useLogout, usePasswordReset                                                                                                                       |
+| `src/shared/hooks/use-users.ts`                | useCurrentUser, useUpdateProfile                                                                                                                            |
+| `src/shared/hooks/use-calendar.ts`             | useCalendar (main hook)                                                                                                                                     |
 | `src/shared/hooks/user-staff.ts`               | useGetEmployees, useInviteEmployee, useGetEmployeeServices, useActivateEmployee, useDeactivateEmployee, useChangeEmployeePermissions, useChangeEmployeeRole |
-| `src/shared/hooks/use-services.ts`             | useLocationServices, useServiceCategories, useCreateService         |
-| `src/shared/hooks/use-network-points.ts`       | useLocations, useLocation, useCreateLocation, useLocationCategories |
-| `src/shared/hooks/use-bagsies.ts`              | useCreateBooking, useCancelBooking                                  |
-| `src/shared/hooks/use-master-services.ts`      | useCreateMasterService                                              |
-| `src/shared/hooks/use-schedule-permissions.ts` | useSchedulePermissions (scope, rights по plan/type)                 |
+| `src/shared/hooks/use-services.ts`             | useLocationServices, useServiceCategories, useCreateService                                                                                                 |
+| `src/shared/hooks/use-network-points.ts`       | useLocations, useLocation, useCreateLocation, useLocationCategories                                                                                         |
+| `src/shared/hooks/use-bagsies.ts`              | useCreateBooking, useCancelBooking                                                                                                                          |
+| `src/shared/hooks/use-master-services.ts`      | useCreateMasterService                                                                                                                                      |
+| `src/shared/hooks/use-schedule-permissions.ts` | useSchedulePermissions (scope, rights по plan/type)                                                                                                         |
 
 ### Типы
 
