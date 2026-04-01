@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
 import {
   getDaysInMonth,
   startOfMonth,
@@ -160,12 +161,18 @@ export function useMonthSchedule(
     },
   });
 
+  /* Стабильный fallback — не создаём новый объект каждый рендер. */
+  const emptySchedule = useMemo(
+    () => buildEmptyMonthSchedule(year, month),
+    [year, month]
+  );
+
   const monthStart = startOfMonth(date);
   const prevMonth = subMonths(monthStart, 1);
   const nextMonth = addMonths(monthStart, 1);
 
   return {
-    data: query.data ?? buildEmptyMonthSchedule(year, month),
+    data: query.data ?? emptySchedule,
     isLoading: query.isLoading,
     error: query.error,
     refetch: query.refetch,

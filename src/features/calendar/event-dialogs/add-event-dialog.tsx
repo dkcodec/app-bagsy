@@ -87,6 +87,10 @@ export function AddEventDrawer({
   const isStaff = currentUser?.role === EUserRole.STAFF;
   // manager и выше: выбор мастера из employees; для STAFF — только свой id (поле скрыто)
   const showMasterSelect = !isStaff && masters.length > 0;
+  // Solo plan / один мастер — автовыбор
+  const defaultEmployeeId = showMasterSelect
+    ? (masters.length === 1 ? masters[0].id : "")
+    : undefined;
 
   const form = useForm<TAddAppointmentFormData>({
     resolver: zodResolver(addAppointmentSchema),
@@ -95,7 +99,7 @@ export function AddEventDrawer({
       last_name: "",
       phone: "",
       comment: "",
-      employee_id: showMasterSelect ? "" : undefined,
+      employee_id: defaultEmployeeId,
       service_id: "",
       startDate: startDate ?? new Date(),
       startTime: startTime ?? { hour: 10, minute: 0 },
@@ -139,6 +143,13 @@ export function AddEventDrawer({
     if (startDate != null) form.setValue("startDate", startDate);
     if (startTime != null) form.setValue("startTime", startTime);
   }, [startDate, startTime, form]);
+
+  // Автовыбор единственного мастера (solo plan)
+  useEffect(() => {
+    if (showMasterSelect && masters.length === 1 && !form.getValues("employee_id")) {
+      form.setValue("employee_id", masters[0].id);
+    }
+  }, [masters, showMasterSelect, form]);
 
   // Общий контент формы для обоих вариантов
   const formContent = (
