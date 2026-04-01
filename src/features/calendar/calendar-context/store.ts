@@ -234,6 +234,7 @@ export const useCalendarStore = create<CalendarState>()(
       name: "calendar-store",
       partialize: state => ({
         badgeVariant: state.badgeVariant,
+        locationId: state.locationId,
       }),
       storage: createJSONStorage(() => localStorage),
     }

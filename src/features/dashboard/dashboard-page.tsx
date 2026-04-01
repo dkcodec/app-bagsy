@@ -8,6 +8,7 @@ import { Loader } from "lucide-react";
 import { useCalendar as useCalendarApi } from "@/src/shared/hooks/use-calendar";
 import { useCurrentUser } from "@/src/shared/hooks/use-users";
 import { useLocations } from "@/src/shared/hooks/use-network-locations";
+import { useCalendarStore } from "@/src/features/calendar/calendar-context/store";
 import { EUserRole } from "@/src/shared/types/user";
 import { EmptyLocationsState } from "@/src/features/dashboard/empty-locations-state";
 import { toast } from "sonner";
@@ -90,48 +91,25 @@ export function DashboardPage() {
     window.history.replaceState(null, "", `?${params.toString()}`);
   }, []);
 
-  // Выбранная локация: из URL → первая локация → currentUser.location_id
-  const [selectedLocationId, setSelectedLocationId] = useState<
-    string | undefined
-  >(() => searchParams.get("location") ?? undefined);
+  // Выбранная локация из calendar store (устанавливается в сайдбаре)
+  const selectedLocationId = useCalendarStore(s => s.locationId);
 
-  // Инициализируем локацией при загрузке (если нет в URL)
+  // Для не-Owner: инициализируем locationId из currentUser.location_id
+  const setLocationId = useCalendarStore(s => s.setLocationId);
   useEffect(() => {
-    if (
-      shouldLoadLocations &&
-      locationsData?.locations?.length &&
-      !selectedLocationId
-    ) {
-      const id = locationsData.locations[0].id;
-      setSelectedLocationId(id);
-      setUrlParam("location", id);
-    }
     if (
       !shouldLoadLocations &&
       currentUser?.location_id &&
       !selectedLocationId
     ) {
-      setSelectedLocationId(currentUser.location_id);
+      setLocationId(currentUser.location_id);
     }
   }, [
     shouldLoadLocations,
-    locationsData,
     currentUser?.location_id,
     selectedLocationId,
-    setUrlParam,
+    setLocationId,
   ]);
-
-  // Обёртка: обновляет state + URL при смене локации
-  const handleLocationChange = useCallback(
-    (locationId: string) => {
-      setSelectedLocationId(locationId);
-      setUrlParam("location", locationId);
-    },
-    [setUrlParam]
-  );
-
-  // Список локаций для Select в хедере (Owner с несколькими точками)
-  const locations = shouldLoadLocations ? (locationsData?.locations ?? []) : [];
 
   // Получаем начальную дату
   const [selectedDate, setSelectedDate] = useState<Date>(() =>
@@ -256,11 +234,7 @@ export function DashboardPage() {
       }}
       onEmployeeIdChange={handleEmployeeIdChange}
     >
-      <DashboardHeader
-        locations={locations}
-        selectedLocationId={selectedLocationId}
-        onLocationChange={handleLocationChange}
-      />
+      <DashboardHeader />
 
       <DashboardContent
         calendarView={calendarView}

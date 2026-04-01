@@ -20,6 +20,7 @@ import {
 import { ThemeLogo } from "../ui/theme-logo";
 import { PwaInstallPrompt } from "../ui/pwa-install-prompt";
 import { NavMain } from "./nav-main";
+import { NavLocationSwitcher } from "./nav-location-switcher";
 import Link from "next/link";
 import { useCurrentUser } from "@/src/shared/hooks/use-users";
 import type { TUserRole } from "@/src/shared/types/user";
@@ -103,6 +104,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </Link>
       </SidebarHeader>
       <SidebarContent className="flex flex-col">
+        {/* Глобальный переключатель точки для Owner с >1 локацией */}
+        <NavLocationSwitcher />
         <NavMain main={filteredNav} />
       </SidebarContent>
       <SidebarFooter>

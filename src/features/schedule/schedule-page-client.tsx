@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useCurrentUser } from "@/src/shared/hooks/use-users";
 import {
   useLocation,
   useLocations,
 } from "@/src/shared/hooks/use-network-locations";
+import { useCalendarStore } from "@/src/features/calendar/calendar-context/store";
 import { useSchedulePermissions } from "@/src/shared/hooks/use-schedule-permissions";
 import type {
   ScheduleUserFlags,
@@ -35,17 +36,16 @@ export function SchedulePageClient() {
   const { data: locationsData, isLoading: isLocationsListLoading } =
     useLocations();
 
-  /* Выбранная локация (для network — из Select, для остальных — user.location_id). */
-  const [selectedLocationId, setSelectedLocationId] = useState<
-    string | undefined
-  >();
+  /* Выбранная локация из calendar store (устанавливается в сайдбаре). */
+  const selectedLocationId = useCalendarStore(s => s.locationId);
+  const setLocationId = useCalendarStore(s => s.setLocationId);
 
-  /* Инициализация selectedLocationId когда user загрузился. */
+  /* Для не-network: инициализируем locationId из user.location_id. */
   useEffect(() => {
     if (user?.location_id && !selectedLocationId) {
-      setSelectedLocationId(user.location_id);
+      setLocationId(user.location_id);
     }
-  }, [user?.location_id, selectedLocationId]);
+  }, [user?.location_id, selectedLocationId, setLocationId]);
 
   /* Загружаем выбранную локацию для schedule_type. */
   const { data: location, isLoading: isLocationLoading } =
@@ -74,9 +74,6 @@ export function SchedulePageClient() {
     isSoloPlan,
   });
 
-  /* Список локаций для Select (только network). */
-  const locations = isNetworkPlan ? (locationsData?.locations ?? []) : [];
-
   /* Скелетон при загрузке. */
   const isLoading =
     isUserLoading ||
@@ -101,12 +98,7 @@ export function SchedulePageClient() {
       locationId={selectedLocationId}
       scheduleType={scheduleType}
     >
-      <ScheduleHeader
-        locations={locations}
-        selectedLocationId={selectedLocationId}
-        onLocationChange={setSelectedLocationId}
-        showLocationSelect={isNetworkPlan && locations.length > 1}
-      />
+      <ScheduleHeader />
       <ScheduleContent />
     </ScheduleScopeProvider>
   );
