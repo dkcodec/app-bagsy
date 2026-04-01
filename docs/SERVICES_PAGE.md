@@ -21,7 +21,7 @@ src/features/services/
     service-list.tsx           — таблица с группировкой по категориям
     service-row.tsx            — строка услуги (grid layout)
     service-row-actions.tsx    — DropdownMenu (⋯): Edit, Staff, Duplicate, Delete
-    service-drawer.tsx         — Sheet (right) с табами
+    service-drawer.tsx         — адаптивный drawer: Sheet (right) на десктопе, Vaul bottom-sheet на мобилке
     service-details-tab.tsx    — таб "Детали" — форма редактирования (PUT)
     service-staff-tab.tsx      — таб "Сотрудники" — привязка мастеров
     delete-service-dialog.tsx  — диалог подтверждения удаления
@@ -34,7 +34,7 @@ src/features/services/
 ## Interaction
 
 1. **Таблица** — grid-layout, группировка по category_id. Клик по строке → Sheet (Details tab)
-2. **Sheet drawer** — правый Sheet с двумя табами:
+2. **Drawer** — адаптивный: Sheet (right) на десктопе / Vaul bottom-sheet на мобилке, два таба:
    - **Details** — редактирование name, description, duration, color, sort_order (PUT /api/v1/services/{id})
    - **Staff** — привязка сотрудников (POST /api/v1/employee-services), отвязка (DELETE — TODO, эндпоинт скоро)
 3. **DropdownMenu (⋯)** — Edit, Manage staff, Duplicate, Delete

@@ -93,7 +93,7 @@ src/
 | `src/shared/hooks/use-auth.ts`                 | useLogin, useLogout, usePasswordReset                               |
 | `src/shared/hooks/use-users.ts`                | useCurrentUser, useUpdateProfile                                    |
 | `src/shared/hooks/use-calendar.ts`             | useCalendar (main hook)                                             |
-| `src/shared/hooks/user-staff.ts`               | useGetEmployees, useInviteEmployee                                  |
+| `src/shared/hooks/user-staff.ts`               | useGetEmployees, useInviteEmployee, useGetEmployeeServices, useActivateEmployee, useDeactivateEmployee, useChangeEmployeePermissions, useChangeEmployeeRole |
 | `src/shared/hooks/use-services.ts`             | useLocationServices, useServiceCategories, useCreateService         |
 | `src/shared/hooks/use-network-points.ts`       | useLocations, useLocation, useCreateLocation, useLocationCategories |
 | `src/shared/hooks/use-bagsies.ts`              | useCreateBooking, useCancelBooking                                  |
@@ -117,6 +117,7 @@ src/
 | `src/shared/utils/jwt.ts`                 | decodeJwt (client-side)                            |
 | `src/shared/utils/calendar-api-mapper.ts` | API → IEvent маппинг                               |
 | `src/shared/utils/formater.ts`            | parseTimestamp, formatTimestamp, toTimestampWithTz |
+| `src/shared/utils/avatar.ts`              | getInitials (имя + фамилия → инициалы)             |
 
 ---
 
