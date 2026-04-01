@@ -56,6 +56,7 @@ import {
 } from "@/src/entities/drawer";
 
 import { PhoneInput } from "@/src/widgets";
+import { EVENT_COLOR_BG, TEventColor } from "@/src/shared";
 
 interface AddEventDrawerProps {
   open: boolean;
@@ -225,7 +226,12 @@ export function AddEventDrawer({
                         ?.filter(s => s.active)
                         .map(s => (
                           <SelectItem key={s.id} value={s.id}>
-                            {s.name}
+                            <span className="flex items-center gap-2">
+                              <span
+                                className={`size-2.5 shrink-0 rounded-full ${EVENT_COLOR_BG[s.color as TEventColor] ?? "bg-gray-600"}`}
+                              />
+                              {s.name}
+                            </span>
                           </SelectItem>
                         ))}
                     </SelectContent>
