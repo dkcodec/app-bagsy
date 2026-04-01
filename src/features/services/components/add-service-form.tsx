@@ -31,18 +31,11 @@ import {
 } from "@/src/shared/hooks/use-services";
 import { useLocation } from "@/src/shared/hooks/use-network-locations";
 import { useEffect, useMemo } from "react";
-import { TEventColor } from "@/src/shared/types/calendar";
-
-// Массив цветов из типа TEventColor для использования в валидации и UI
-const EVENT_COLORS: TEventColor[] = [
-  "blue",
-  "green",
-  "red",
-  "yellow",
-  "purple",
-  "orange",
-  "gray",
-];
+import {
+  EVENT_COLORS,
+  EVENT_COLOR_BG,
+  type TEventColor,
+} from "@/src/shared/types/calendar";
 
 /**
  * Схема валидации для создания услуги
@@ -156,20 +149,11 @@ export function AddServiceForm({
     }
   };
 
-  // Маппинг цветов для UI (только из типа TEventColor)
-  const colorMap: Record<TEventColor, { label: string; bgColor: string }> = {
-    blue: { label: t("colors.blue"), bgColor: "bg-blue-600" },
-    green: { label: t("colors.green"), bgColor: "bg-green-600" },
-    red: { label: t("colors.red"), bgColor: "bg-red-600" },
-    yellow: { label: t("colors.yellow"), bgColor: "bg-yellow-600" },
-    purple: { label: t("colors.purple"), bgColor: "bg-purple-600" },
-    orange: { label: t("colors.orange"), bgColor: "bg-orange-600" },
-    gray: { label: t("colors.gray"), bgColor: "bg-gray-600" },
-  };
-
+  // Маппинг цветов для UI — bgColor из EVENT_COLOR_BG, label из i18n
   const colors = EVENT_COLORS.map(color => ({
     value: color,
-    ...colorMap[color],
+    label: t(`colors.${color}`),
+    bgColor: EVENT_COLOR_BG[color],
   }));
 
   return (

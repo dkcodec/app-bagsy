@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { isSameDay } from "date-fns";
+import { isSameDay, startOfWeek, endOfWeek, format } from "date-fns";
 
 import type {
   IEvent,
@@ -9,7 +9,8 @@ import type {
   TWorkingHours,
 } from "@/src/shared/types/calendar";
 import { IEmployeeDto } from "@/src/shared/types/user";
-import { LocationService } from "@/src/shared/services/location-service";
+import { ScheduleService } from "@/src/shared/services/schedule-service";
+import type { ScheduleSlotDto } from "@/src/shared/types/schedule";
 import { parseScheduleTime } from "@/src/shared/utils/datetime";
 
 const WORKING_HOURS: TWorkingHours = {
@@ -41,31 +42,39 @@ function emptyWorkingHours(): TWorkingHours {
   };
 }
 
-/** Маппинг ISchedule[] (open/close) в TWorkingHours. Экспорт для calendar-settings. */
-export function mapLocationScheduleToWorkingHours(
-  schedule: Array<{
-    all_day: boolean;
-    open: string;
-    close: string;
-    week_day: number;
-  }>
-): TWorkingHours {
-  // API: week_day 0..6 (вс..сб). JS: 0..6 (вс..сб)
-  // 0 = воскресенье всегда
+/** Маппинг ScheduleSlotDto[] → TWorkingHours (группировка work-слотов по дню недели) */
+export function mapScheduleSlotsToWorkingHours(
+  slots: ScheduleSlotDto[]
+): TWorkingHours | null {
   const result = emptyWorkingHours();
+  const seen = new Set<number>();
 
-  for (const day of schedule ?? []) {
-    const jsDay = Number(day.week_day);
-    if (day.all_day) {
-      result[jsDay] = { from: 0, to: 24 };
-      continue;
+  for (const slot of slots) {
+    if (slot.type !== "work") continue;
+
+    // date = "YYYY-MM-DD" → определяем день недели
+    const date = new Date(slot.date + "T00:00:00");
+    const dow = date.getDay(); // 0=вс, 6=сб
+
+    const from = parseScheduleTime(slot.start_time).hour;
+    let to = parseScheduleTime(slot.end_time).hour;
+    // "00:00" в end_time → конец дня (24:00)
+    if (to === 0 && from > 0) to = 24;
+
+    if (!seen.has(dow)) {
+      result[dow] = { from, to };
+      seen.add(dow);
+    } else {
+      // Несколько рабочих слотов в один день — расширяем диапазон
+      result[dow] = {
+        from: Math.min(result[dow].from, from),
+        to: Math.max(result[dow].to, to),
+      };
     }
-    const from = parseScheduleTime(day.open).hour;
-    const to = parseScheduleTime(day.close).hour;
-    result[jsDay] = { from, to };
   }
 
-  return result;
+  // Если нет ни одного work-слота — расписание не настроено, оставляем дефолты
+  return seen.size > 0 ? result : null;
 }
 
 function deriveVisibleHoursFromWorkingHours(
@@ -98,6 +107,11 @@ export type CalendarState = {
     updater: TWorkingHours | ((prev: TWorkingHours) => TWorkingHours)
   ) => void;
   loadWorkingHours: (locationId: string | undefined) => Promise<void>;
+  /** Загрузить расписание конкретного сотрудника (или вернуть расписание локации если "all") */
+  loadSchedule: (
+    locationId: string | undefined,
+    employeeId: string | "all"
+  ) => Promise<void>;
   visibleHours: TVisibleHours;
   setVisibleHours: (
     updater: TVisibleHours | ((prev: TVisibleHours) => TVisibleHours)
@@ -145,14 +159,50 @@ export const useCalendarStore = create<CalendarState>()(
               : updater,
         })),
       loadWorkingHours: async (locationId: string | undefined) => {
+        // Делегируем в loadSchedule с "all" (расписание локации)
+        await get().loadSchedule(locationId, "all");
+      },
+      loadSchedule: async (
+        locationId: string | undefined,
+        employeeId: string | "all"
+      ) => {
         if (!locationId) return;
         try {
-          const location = await LocationService.getLocation(locationId);
-          // TODO: schedule данные пока не приходят из GET /api/v1/locations/{id}
-          // Когда бэк добавит schedule — парсить и маппить как раньше
-          void location;
+          const now = new Date();
+          const weekStart = format(
+            startOfWeek(now, { weekStartsOn: 1 }),
+            "yyyy-MM-dd"
+          );
+          const weekEnd = format(
+            endOfWeek(now, { weekStartsOn: 1 }),
+            "yyyy-MM-dd"
+          );
+
+          // "all" → расписание локации, конкретный сотрудник → его расписание
+          const { slots } =
+            employeeId === "all"
+              ? await ScheduleService.getLocationSchedule(
+                  locationId,
+                  weekStart,
+                  weekEnd
+                )
+              : await ScheduleService.getEmployeeSchedule(
+                  employeeId,
+                  weekStart,
+                  weekEnd
+                );
+
+          const workingHours = mapScheduleSlotsToWorkingHours(slots);
+          if (!workingHours) return; // Нет данных — оставляем текущие
+
+          set({ workingHours });
+
+          if (get().isVisibleHoursAuto) {
+            const vis = deriveVisibleHoursFromWorkingHours(workingHours);
+            if (vis) set({ visibleHours: vis });
+          }
         } catch {
-          // Используем дефолтные рабочие часы при ошибке
+          // При ошибке оставляем текущие рабочие часы
         }
       },
       visibleHours: VISIBLE_HOURS,

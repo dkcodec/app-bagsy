@@ -9,6 +9,8 @@ import { Switch } from "@/src/entities/switch";
 import { Skeleton } from "@/src/entities";
 import { PushNotificationManager } from "@/src/shared/utils/push-notifications";
 import { cn } from "@/src/shared/utils/styles";
+import { useCalendarStore } from "@/src/features/calendar/calendar-context/store";
+import { ChangeBadgeVariantInput } from "@/src/features/calendar/settings/change-badge-variant-input";
 
 /**
  * Таб «Внешний вид» — тема, язык, уведомления
@@ -168,6 +170,14 @@ export function AppearanceTab() {
         </div>
       </section>
 
+      {/* Вид календаря (badge variant) */}
+      <section>
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
+          {t("calendar")}
+        </p>
+        <CalendarBadgeVariantSection />
+      </section>
+
       {/* Уведомления */}
       <section>
         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
@@ -224,5 +234,16 @@ export function AppearanceTab() {
         </div>
       </section>
     </div>
+  );
+}
+
+/** Секция badge variant — читает/пишет напрямую в Zustand store (persisted в localStorage) */
+function CalendarBadgeVariantSection() {
+  const { badgeVariant, setBadgeVariant } = useCalendarStore();
+  return (
+    <ChangeBadgeVariantInput
+      badgeVariant={badgeVariant}
+      onBadgeVariantChange={setBadgeVariant}
+    />
   );
 }

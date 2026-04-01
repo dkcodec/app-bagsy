@@ -11,6 +11,29 @@ export type TEventColor =
   | "purple"
   | "orange"
   | "gray";
+
+/** Все возможные цвета событий */
+export const EVENT_COLORS: TEventColor[] = [
+  "blue",
+  "green",
+  "red",
+  "yellow",
+  "purple",
+  "orange",
+  "gray",
+];
+
+/** Маппинг TEventColor → Tailwind bg-класс */
+export const EVENT_COLOR_BG: Record<TEventColor, string> = {
+  blue: "bg-blue-600",
+  green: "bg-green-600",
+  red: "bg-red-600",
+  yellow: "bg-yellow-600",
+  purple: "bg-purple-600",
+  orange: "bg-orange-600",
+  gray: "bg-gray-600",
+};
+
 export type TBadgeVariant = "dot" | "colored" | "mixed";
 export type TWorkingHours = { [key: number]: { from: number; to: number } };
 export type TVisibleHours = { from: number; to: number };
@@ -60,7 +83,7 @@ export interface ICalendarCell {
 }
 
 /**
- * Типы для API календаря (новый формат /api/v1/bookings/calendar)
+ * Типы для API календаря (/api/v1/appointments/calendar)
  */
 
 /** Параметры запроса календаря */

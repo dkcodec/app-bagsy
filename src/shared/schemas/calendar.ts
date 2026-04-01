@@ -20,8 +20,8 @@ export const eventSchema = z.object({
 
 export type TEventFormData = z.infer<typeof eventSchema>;
 
-/** Схема для создания записи POST /api/v1/bookings */
-export const addBookingSchema = z.object({
+/** Схема для создания записи POST /api/v1/appointments/direct */
+export const addAppointmentSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
   phone: z.string().min(1, "Phone is required"),
@@ -35,9 +35,4 @@ export const addBookingSchema = z.object({
   startTime: z.object({ hour: z.number(), minute: z.number() }),
 });
 
-export type TAddBookingFormData = z.infer<typeof addBookingSchema>;
-
-/** @deprecated Используй addBookingSchema */
-export const addBagsieSchema = addBookingSchema;
-/** @deprecated Используй TAddBookingFormData */
-export type TAddBagsieFormData = TAddBookingFormData;
+export type TAddAppointmentFormData = z.infer<typeof addAppointmentSchema>;

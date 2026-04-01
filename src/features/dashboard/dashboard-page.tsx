@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { parseISO, isValid, format } from "date-fns";
 import { CalendarProvider } from "@/src/features/calendar";
@@ -94,37 +94,85 @@ export function DashboardPage() {
     error: locationsError,
   } = useLocations();
 
-  // Автоматически выбираем первую локацию из списка при загрузке
-  const selectedLocationId = useMemo(() => {
-    if (shouldLoadLocations && locationsData) {
-      const locations = locationsData.locations;
-      if (locations && locations.length > 0) {
-        return locations[0].id;
+  // Хелпер: обновить один query-параметр в URL
+  const setUrlParam = useCallback(
+    (key: string, value: string | undefined) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (value) {
+        if (params.get(key) === value) return;
+        params.set(key, value);
+      } else {
+        if (!params.has(key)) return;
+        params.delete(key);
       }
+      router.replace(`?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, router]
+  );
+
+  // Выбранная локация: из URL → первая локация → currentUser.location_id
+  const [selectedLocationId, setSelectedLocationId] = useState<
+    string | undefined
+  >(() => searchParams.get("location") ?? undefined);
+
+  // Инициализируем локацией при загрузке (если нет в URL)
+  useEffect(() => {
+    if (
+      shouldLoadLocations &&
+      locationsData?.locations?.length &&
+      !selectedLocationId
+    ) {
+      const id = locationsData.locations[0].id;
+      setSelectedLocationId(id);
+      setUrlParam("location", id);
     }
-    // Для других ролей - используем location_id из currentUser
-    return currentUser?.location_id;
-  }, [shouldLoadLocations, locationsData, currentUser?.location_id]);
+    if (
+      !shouldLoadLocations &&
+      currentUser?.location_id &&
+      !selectedLocationId
+    ) {
+      setSelectedLocationId(currentUser.location_id);
+    }
+  }, [
+    shouldLoadLocations,
+    locationsData,
+    currentUser?.location_id,
+    selectedLocationId,
+    setUrlParam,
+  ]);
+
+  // Обёртка: обновляет state + URL при смене локации
+  const handleLocationChange = useCallback(
+    (locationId: string) => {
+      setSelectedLocationId(locationId);
+      setUrlParam("location", locationId);
+    },
+    [setUrlParam]
+  );
+
+  // Список локаций для Select в хедере (Owner с несколькими точками)
+  const locations = useMemo(
+    () => (shouldLoadLocations ? (locationsData?.locations ?? []) : []),
+    [shouldLoadLocations, locationsData]
+  );
 
   // Получаем начальную дату
   const [selectedDate, setSelectedDate] = useState<Date>(() =>
     getInitialDate()
   );
 
-  // Состояние для employeeId (будет обновляться через CalendarProvider при изменении selectedEmployeeId)
-  const [employeeId, setEmployeeId] = useState<string | undefined>(undefined);
+  // Состояние для employeeId: из URL или undefined ("all")
+  const [employeeId, setEmployeeId] = useState<string | undefined>(
+    () => searchParams.get("employee") ?? undefined
+  );
 
-  // Обертка для setEmployeeId, которая обновляет состояние только если значение изменилось
-  const handleEmployeeIdChange = React.useCallback(
+  // Обёртка: обновляет state + URL при смене сотрудника
+  const handleEmployeeIdChange = useCallback(
     (newEmployeeId: string | undefined) => {
-      setEmployeeId(prev => {
-        if (prev !== newEmployeeId) {
-          return newEmployeeId;
-        }
-        return prev;
-      });
+      setEmployeeId(newEmployeeId);
+      setUrlParam("employee", newEmployeeId);
     },
-    []
+    [setUrlParam]
   );
 
   // Обновляем selectedDate при изменении даты в URL (только если дата действительно изменилась)
@@ -228,6 +276,7 @@ export function DashboardPage() {
       events={events}
       masters={masters}
       initialDate={selectedDate}
+      initialEmployeeId={employeeId}
       selectedLocationId={selectedLocationId}
       onDateChange={date => {
         // Проверяем, изменилась ли дата перед обновлением
@@ -238,7 +287,11 @@ export function DashboardPage() {
       }}
       onEmployeeIdChange={handleEmployeeIdChange}
     >
-      <DashboardHeader />
+      <DashboardHeader
+        locations={locations}
+        selectedLocationId={selectedLocationId}
+        onLocationChange={handleLocationChange}
+      />
 
       <DashboardContent
         calendarView={calendarView}

@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/src/entities/button";
 import { Input } from "@/src/entities/input";
 import { useCalendar } from "@/src/features/calendar";
-import { useCancelBooking } from "@/src/shared/hooks/use-bagsies";
+import { useCancelAppointment } from "@/src/shared/hooks/use-appointments";
 import {
   Dialog,
   DialogContent,
@@ -36,10 +36,10 @@ export function EventDetailsDialog({ event, children }: IProps) {
   // Состояние для отмены записи
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
-  const cancelBooking = useCancelBooking();
+  const cancelAppointment = useCancelAppointment();
 
   const handleCancel = () => {
-    cancelBooking.mutate(
+    cancelAppointment.mutate(
       { id: event.id, reason: cancelReason || undefined },
       {
         onSuccess: () => {
@@ -144,16 +144,16 @@ export function EventDetailsDialog({ event, children }: IProps) {
                 placeholder={t("cancelReasonPlaceholder")}
                 value={cancelReason}
                 onChange={e => setCancelReason(e.target.value)}
-                disabled={cancelBooking.isPending}
+                disabled={cancelAppointment.isPending}
               />
               <div className="flex gap-2">
                 <Button
                   size="sm"
                   variant="destructive"
                   onClick={handleCancel}
-                  disabled={cancelBooking.isPending}
+                  disabled={cancelAppointment.isPending}
                 >
-                  {cancelBooking.isPending ? t("cancelling") : t("cancel")}
+                  {cancelAppointment.isPending ? t("cancelling") : t("cancel")}
                 </Button>
                 <Button
                   size="sm"
@@ -162,7 +162,7 @@ export function EventDetailsDialog({ event, children }: IProps) {
                     setShowCancelConfirm(false);
                     setCancelReason("");
                   }}
-                  disabled={cancelBooking.isPending}
+                  disabled={cancelAppointment.isPending}
                 >
                   {t("cancelReasonPlaceholder").includes("необязательно")
                     ? "Нет"

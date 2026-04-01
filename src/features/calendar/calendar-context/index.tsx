@@ -40,6 +40,7 @@ export function CalendarProvider({
   masters,
   events,
   initialDate,
+  initialEmployeeId,
   onDateChange,
   onEmployeeIdChange,
   selectedLocationId,
@@ -48,6 +49,8 @@ export function CalendarProvider({
   masters: IEmployeeDto[];
   events: IEvent[];
   initialDate?: Date;
+  /** UUID сотрудника из URL (для восстановления при перезагрузке) */
+  initialEmployeeId?: string;
   onDateChange?: (date: Date) => void;
   onEmployeeIdChange?: (employeeId: string | undefined) => void;
   /** Выбранный UUID локации для owner (приоритет над currentUser.location_id) */
@@ -61,6 +64,7 @@ export function CalendarProvider({
   const loadWorkingHours = useCalendarStore(
     (s: CalendarState) => s.loadWorkingHours
   );
+  const loadSchedule = useCalendarStore((s: CalendarState) => s.loadSchedule);
   const setSelectedDate = useCalendarStore(
     (s: CalendarState) => s.setSelectedDate
   );
@@ -69,6 +73,9 @@ export function CalendarProvider({
   );
   const selectedEmployeeId = useCalendarStore(
     (s: CalendarState) => s.selectedEmployeeId
+  );
+  const setSelectedEmployeeId = useCalendarStore(
+    (s: CalendarState) => s.setSelectedEmployeeId
   );
   const setLocationId = useCalendarStore((s: CalendarState) => s.setLocationId);
 
@@ -114,20 +121,30 @@ export function CalendarProvider({
     if (initialDate) setSelectedDate(initialDate);
   }, [masters, events, initialDate]);
 
-  // Загружаем рабочие часы локации при изменении location_id
+  // Восстанавливаем выбранного сотрудника из URL при маунте
+  const didInitEmployeeRef = useRef(false);
+  useEffect(() => {
+    if (!didInitEmployeeRef.current && initialEmployeeId) {
+      setSelectedEmployeeId(initialEmployeeId);
+      didInitEmployeeRef.current = true;
+    }
+  }, [initialEmployeeId, setSelectedEmployeeId]);
+
+  // Загружаем расписание при маунте и изменении location_id
   const locationIdToUse = selectedLocationId || currentUser?.location_id;
-  const prevLocationIdRef = useRef<string | undefined>(locationIdToUse);
+  const prevLocationIdRef = useRef<string | undefined>(undefined);
   useEffect(() => {
     setLocationId(locationIdToUse ?? undefined);
   }, [locationIdToUse, setLocationId]);
   useEffect(() => {
     if (locationIdToUse && prevLocationIdRef.current !== locationIdToUse) {
-      loadWorkingHours(locationIdToUse);
+      // При смене локации загружаем расписание с учётом выбранного сотрудника
+      loadSchedule(locationIdToUse, selectedEmployeeId);
       prevLocationIdRef.current = locationIdToUse;
     }
-  }, [locationIdToUse, loadWorkingHours]);
+  }, [locationIdToUse, loadSchedule, selectedEmployeeId]);
 
-  // Отслеживаем изменения selectedEmployeeId и вызываем колбэк
+  // Отслеживаем изменения selectedEmployeeId: колбэк + перезагрузка расписания
   const prevSelectedEmployeeIdRef = useRef<IEmployeeDto["id"] | "all">(
     selectedEmployeeId
   );
@@ -145,9 +162,12 @@ export function CalendarProvider({
         prevEmployeeIdRef.current = empId;
       }
 
+      // Перезагружаем расписание: "all" → локации, конкретный → сотрудника
+      loadSchedule(locationIdToUse, selectedEmployeeId);
+
       prevSelectedEmployeeIdRef.current = selectedEmployeeId;
     }
-  }, [selectedEmployeeId]);
+  }, [selectedEmployeeId, locationIdToUse, loadSchedule]);
 
   const didInitRef = useRef(false);
   const prevSelectedDateRef = useRef<Date | null>(null);

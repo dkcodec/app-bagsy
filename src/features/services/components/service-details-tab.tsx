@@ -28,19 +28,12 @@ import {
 } from "@/src/entities/form";
 import { useUpdateService } from "@/src/shared/hooks/use-services";
 import type { IServiceDto } from "@/src/shared/services/service-service";
-import type { TEventColor } from "@/src/shared/types/calendar";
+import {
+  EVENT_COLORS,
+  EVENT_COLOR_BG,
+  type TEventColor,
+} from "@/src/shared/types/calendar";
 import { DeleteServiceDialog } from "./delete-service-dialog";
-
-// Цвета из TEventColor
-const EVENT_COLORS: TEventColor[] = [
-  "blue",
-  "green",
-  "red",
-  "yellow",
-  "purple",
-  "orange",
-  "gray",
-];
 
 const createSchema = (t: (key: string) => string) =>
   z.object({
@@ -94,16 +87,13 @@ export function ServiceDetailsTab({
     },
   });
 
-  // Маппинг цветов для UI
-  const colorMap: Record<TEventColor, { label: string; bgColor: string }> = {
-    blue: { label: tForm("colors.blue"), bgColor: "bg-blue-600" },
-    green: { label: tForm("colors.green"), bgColor: "bg-green-600" },
-    red: { label: tForm("colors.red"), bgColor: "bg-red-600" },
-    yellow: { label: tForm("colors.yellow"), bgColor: "bg-yellow-600" },
-    purple: { label: tForm("colors.purple"), bgColor: "bg-purple-600" },
-    orange: { label: tForm("colors.orange"), bgColor: "bg-orange-600" },
-    gray: { label: tForm("colors.gray"), bgColor: "bg-gray-600" },
-  };
+  // Маппинг цветов для UI — bgColor из EVENT_COLOR_BG
+  const colorMap = Object.fromEntries(
+    EVENT_COLORS.map(c => [
+      c,
+      { label: tForm(`colors.${c}`), bgColor: EVENT_COLOR_BG[c] },
+    ])
+  ) as Record<TEventColor, { label: string; bgColor: string }>;
 
   const onSubmit = async (data: FormData) => {
     try {
