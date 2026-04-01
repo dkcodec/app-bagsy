@@ -356,7 +356,7 @@ export function AddEventDrawer({
 
   // Кнопки
   const footerContent = (
-    <div className="flex gap-3 p-4 border-t">
+    <div className="flex gap-3 p-4 border-t w-full">
       <Button
         type="button"
         variant="outline"
@@ -391,7 +391,7 @@ export function AddEventDrawer({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-full sm:w-3/4 sm:max-w-md p-0 flex flex-col"
+        className="w-full sm:w-3/4 sm:max-w-md p-0 flex flex-col gap-0"
       >
         <SheetHeader className="px-4 pt-4 pb-3 border-b">
           <SheetTitle>{t("title")}</SheetTitle>

@@ -1,6 +1,6 @@
 "use client";
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { parseISO, isValid, format } from "date-fns";
 import { CalendarProvider } from "@/src/features/calendar";
 import { DashboardHeader, DashboardContent } from "@/src/features";
@@ -13,16 +13,12 @@ import { EmptyLocationsState } from "@/src/features/dashboard/empty-locations-st
 import { toast } from "sonner";
 import EmptyLocationsHeader from "./empty-locations-header";
 
+type View = "day" | "week" | "month" | "agenda";
+const VIEWS = new Set<string>(["day", "week", "month", "agenda"]);
+const isView = (v: string): v is View => VIEWS.has(v);
+
 export function DashboardPage() {
   const searchParams = useSearchParams();
-  const router = useRouter();
-
-  type View = "day" | "week" | "month" | "agenda";
-  const isView = useCallback(
-    (v: string): v is View =>
-      ["day", "week", "month", "agenda"].includes(v as View),
-    []
-  );
 
   const getInitialView = (): View => {
     const viewParam = searchParams.get("view");
@@ -35,13 +31,7 @@ export function DashboardPage() {
   const handleViewChange = (view: View) => {
     if (view === calendarView) return;
     setCalendarView(view);
-
-    const current = searchParams.get("view");
-    if (current === view) return;
-
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("view", view);
-    router.replace(`?${params.toString()}`, { scroll: false });
+    setUrlParam("view", view);
   };
 
   // Получаем дату из URL или используем текущую дату
@@ -58,13 +48,7 @@ export function DashboardPage() {
 
   // Обновляем URL при изменении даты
   const handleDateChange = (date: Date) => {
-    const next = format(date, "yyyy-MM-dd");
-    const current = searchParams.get("date");
-    if (current === next) return;
-
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("date", next);
-    router.replace(`?${params.toString()}`, { scroll: false });
+    setUrlParam("date", format(date, "yyyy-MM-dd"));
   };
 
   // Синхронизируем состояние с URL при изменении параметров
@@ -73,7 +57,7 @@ export function DashboardPage() {
     if (viewParam && isView(viewParam) && viewParam !== calendarView) {
       setCalendarView(viewParam);
     }
-  }, [searchParams, calendarView, isView]);
+  }, [searchParams, calendarView]);
 
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => setIsMounted(true), []);
@@ -82,9 +66,7 @@ export function DashboardPage() {
   const { data: currentUser } = useCurrentUser();
 
   // Определяем, нужно ли загружать локации (только для Owner)
-  const shouldLoadLocations = useMemo(() => {
-    return currentUser && currentUser.role === EUserRole.OWNER;
-  }, [currentUser]);
+  const shouldLoadLocations = currentUser?.role === EUserRole.OWNER;
 
   // Загружаем локации организации для Owner
   const {
@@ -94,21 +76,19 @@ export function DashboardPage() {
     error: locationsError,
   } = useLocations();
 
-  // Хелпер: обновить один query-параметр в URL
-  const setUrlParam = useCallback(
-    (key: string, value: string | undefined) => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (value) {
-        if (params.get(key) === value) return;
-        params.set(key, value);
-      } else {
-        if (!params.has(key)) return;
-        params.delete(key);
-      }
-      router.replace(`?${params.toString()}`, { scroll: false });
-    },
-    [searchParams, router]
-  );
+  // Хелпер: обновить query-параметр в URL без навигации Next.js
+  // (window.history.replaceState не триггерит Suspense, в отличие от router.replace)
+  const setUrlParam = useCallback((key: string, value: string | undefined) => {
+    const params = new URLSearchParams(window.location.search);
+    if (value) {
+      if (params.get(key) === value) return;
+      params.set(key, value);
+    } else {
+      if (!params.has(key)) return;
+      params.delete(key);
+    }
+    window.history.replaceState(null, "", `?${params.toString()}`);
+  }, []);
 
   // Выбранная локация: из URL → первая локация → currentUser.location_id
   const [selectedLocationId, setSelectedLocationId] = useState<
@@ -151,10 +131,7 @@ export function DashboardPage() {
   );
 
   // Список локаций для Select в хедере (Owner с несколькими точками)
-  const locations = useMemo(
-    () => (shouldLoadLocations ? (locationsData?.locations ?? []) : []),
-    [shouldLoadLocations, locationsData]
-  );
+  const locations = shouldLoadLocations ? (locationsData?.locations ?? []) : [];
 
   // Получаем начальную дату
   const [selectedDate, setSelectedDate] = useState<Date>(() =>
@@ -211,26 +188,18 @@ export function DashboardPage() {
   });
 
   // Обработка ошибок загрузки
+  // Обработка ошибок загрузки (календарь + точки)
   useEffect(() => {
-    if (isError && error) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Ошибка загрузки данных календаря";
-      toast.error(errorMessage);
+    const errors = [
+      [isError, error, "Ошибка загрузки данных календаря"],
+      [isLocationsError, locationsError, "Ошибка загрузки точек сети"],
+    ] as const;
+    for (const [flag, err, fallback] of errors) {
+      if (flag && err) {
+        toast.error(err instanceof Error ? err.message : fallback);
+      }
     }
-  }, [isError, error]);
-
-  // Обработка ошибок загрузки точек
-  useEffect(() => {
-    if (isLocationsError && locationsError) {
-      const errorMessage =
-        locationsError instanceof Error
-          ? locationsError.message
-          : "Ошибка загрузки точек сети";
-      toast.error(errorMessage);
-    }
-  }, [isLocationsError, locationsError]);
+  }, [isError, error, isLocationsError, locationsError]);
 
   // Если точек нет (пустой массив) - показываем EmptyLocationsState
   const hasNoLocations =

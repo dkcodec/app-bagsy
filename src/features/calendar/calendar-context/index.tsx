@@ -61,9 +61,6 @@ export function CalendarProvider({
   const setLocalEvents = useCalendarStore(
     (s: CalendarState) => s.setLocalEvents
   );
-  const loadWorkingHours = useCalendarStore(
-    (s: CalendarState) => s.loadWorkingHours
-  );
   const loadSchedule = useCalendarStore((s: CalendarState) => s.loadSchedule);
   const setSelectedDate = useCalendarStore(
     (s: CalendarState) => s.setSelectedDate
@@ -89,33 +86,21 @@ export function CalendarProvider({
     onEmployeeIdChangeRef.current = onEmployeeIdChange;
   }, [onEmployeeIdChange]);
 
-  // Сравнение мастеров и событий по id
-  const prevMastersLengthRef = useRef<number>(masters.length);
-  const prevEventsLengthRef = useRef<number>(events.length);
-  const prevMastersIdsRef = useRef<string>(
-    masters.map(master => master.id).join(",")
-  );
-  const prevEventsIdsRef = useRef<string>(events.map(e => e.id).join(","));
+  // Синхронизируем мастеров и события по id (пропускаем если не изменились)
+  const prevMastersIdsRef = useRef(masters.map(m => m.id).join(","));
+  const prevEventsIdsRef = useRef(events.map(e => e.id).join(","));
 
   useEffect(() => {
-    const currentMastersIds = masters.map(master => master.id).join(",");
-    if (
-      prevMastersLengthRef.current !== masters.length ||
-      prevMastersIdsRef.current !== currentMastersIds
-    ) {
+    const mastersIds = masters.map(m => m.id).join(",");
+    if (prevMastersIdsRef.current !== mastersIds) {
       setMasters(masters);
-      prevMastersLengthRef.current = masters.length;
-      prevMastersIdsRef.current = currentMastersIds;
+      prevMastersIdsRef.current = mastersIds;
     }
 
-    const currentEventsIds = events.map(e => e.id).join(",");
-    if (
-      prevEventsLengthRef.current !== events.length ||
-      prevEventsIdsRef.current !== currentEventsIds
-    ) {
+    const eventsIds = events.map(e => e.id).join(",");
+    if (prevEventsIdsRef.current !== eventsIds) {
       setLocalEvents(events);
-      prevEventsLengthRef.current = events.length;
-      prevEventsIdsRef.current = currentEventsIds;
+      prevEventsIdsRef.current = eventsIds;
     }
 
     if (initialDate) setSelectedDate(initialDate);
@@ -135,36 +120,24 @@ export function CalendarProvider({
   const prevLocationIdRef = useRef<string | undefined>(undefined);
   useEffect(() => {
     setLocationId(locationIdToUse ?? undefined);
-  }, [locationIdToUse, setLocationId]);
-  useEffect(() => {
+    // При смене локации загружаем расписание с учётом выбранного сотрудника
     if (locationIdToUse && prevLocationIdRef.current !== locationIdToUse) {
-      // При смене локации загружаем расписание с учётом выбранного сотрудника
       loadSchedule(locationIdToUse, selectedEmployeeId);
       prevLocationIdRef.current = locationIdToUse;
     }
-  }, [locationIdToUse, loadSchedule, selectedEmployeeId]);
+  }, [locationIdToUse, setLocationId, loadSchedule, selectedEmployeeId]);
 
   // Отслеживаем изменения selectedEmployeeId: колбэк + перезагрузка расписания
-  const prevSelectedEmployeeIdRef = useRef<IEmployeeDto["id"] | "all">(
-    selectedEmployeeId
-  );
-  const prevEmployeeIdRef = useRef<string | undefined>(
-    selectedEmployeeId !== "all" ? selectedEmployeeId : undefined
-  );
+  const prevSelectedEmployeeIdRef = useRef(selectedEmployeeId);
 
   useEffect(() => {
     if (prevSelectedEmployeeIdRef.current !== selectedEmployeeId) {
-      const empId =
-        selectedEmployeeId !== "all" ? selectedEmployeeId : undefined;
-
-      if (prevEmployeeIdRef.current !== empId) {
-        onEmployeeIdChangeRef.current?.(empId);
-        prevEmployeeIdRef.current = empId;
-      }
-
+      // Колбэк наверх (undefined если "all")
+      onEmployeeIdChangeRef.current?.(
+        selectedEmployeeId !== "all" ? selectedEmployeeId : undefined
+      );
       // Перезагружаем расписание: "all" → локации, конкретный → сотрудника
       loadSchedule(locationIdToUse, selectedEmployeeId);
-
       prevSelectedEmployeeIdRef.current = selectedEmployeeId;
     }
   }, [selectedEmployeeId, locationIdToUse, loadSchedule]);
