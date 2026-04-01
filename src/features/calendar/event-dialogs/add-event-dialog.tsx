@@ -89,7 +89,9 @@ export function AddEventDrawer({
   const showMasterSelect = !isStaff && masters.length > 0;
   // Solo plan / один мастер — автовыбор
   const defaultEmployeeId = showMasterSelect
-    ? (masters.length === 1 ? masters[0].id : "")
+    ? masters.length === 1
+      ? masters[0].id
+      : ""
     : undefined;
 
   const form = useForm<TAddAppointmentFormData>({
@@ -146,7 +148,11 @@ export function AddEventDrawer({
 
   // Автовыбор единственного мастера (solo plan)
   useEffect(() => {
-    if (showMasterSelect && masters.length === 1 && !form.getValues("employee_id")) {
+    if (
+      showMasterSelect &&
+      masters.length === 1 &&
+      !form.getValues("employee_id")
+    ) {
       form.setValue("employee_id", masters[0].id);
     }
   }, [masters, showMasterSelect, form]);
