@@ -37,17 +37,12 @@ import { ru, kk } from "date-fns/locale";
 import { getDay } from "date-fns";
 import { toast } from "sonner";
 import type { TimeRange } from "@/src/shared/types/schedule";
+import { timeToMinutes } from "@/src/shared/utils/schedule";
 import { ESubscriptionPlan } from "@/src/shared/types/user";
 
 // ============================================================
 // Валидация расписания
 // ============================================================
-
-/** Время "HH:mm" → минуты от полуночи. */
-function timeToMinutes(t: string): number {
-  const [h, m] = t.split(":").map(Number);
-  return h * 60 + m;
-}
 
 /** Два диапазона пересекаются? */
 function rangesOverlap(a: TimeRange, b: TimeRange): boolean {
@@ -88,6 +83,14 @@ function validateSchedule(schedule: MonthSchedule): string | null {
         r => bStart >= timeToMinutes(r.start) && bEnd <= timeToMinutes(r.end)
       );
       if (!insideWork) return "breakOutsideWork";
+    }
+
+    /* Пересечения между перерывами */
+    for (let i = 0; i < day.breaks.length; i++) {
+      for (let j = i + 1; j < day.breaks.length; j++) {
+        if (rangesOverlap(day.breaks[i], day.breaks[j]))
+          return "overlappingBreaks";
+      }
     }
   }
   return null;
@@ -149,6 +152,7 @@ export function ScheduleContent() {
 
   const {
     data: serverSchedule,
+    dataUpdatedAt,
     save,
     isSaving,
     isLoading,
@@ -175,22 +179,16 @@ export function ScheduleContent() {
   /* Дни, авто-открытые при клике (для отката при deselect). */
   const autoOpenedDaysRef = useRef<Set<number>>(new Set());
 
-  /* Синхронизация с сервером при загрузке / смене месяца / смене локации. */
-  const prevServerRef = useRef(serverSchedule);
-  const prevEntityRef = useRef(entityId);
+  /* Синхронизация с сервером при загрузке / смене месяца / смене локации.
+     dataUpdatedAt — числовой timestamp из React Query, меняется только при реальном обновлении. */
   useEffect(() => {
-    const entityChanged = entityId !== prevEntityRef.current;
-    const dataChanged = serverSchedule !== prevServerRef.current;
-    if (entityChanged || dataChanged) {
-      setLocalSchedule(serverSchedule);
-      setIsDirty(false);
-      prevServerRef.current = serverSchedule;
-      prevEntityRef.current = entityId;
-      autoOpenedDaysRef.current.clear();
-      setSelectedDays([]);
-      if (isMobile) setSheetOpen(false);
-    }
-  }, [serverSchedule, entityId, isMobile]);
+    setLocalSchedule(serverSchedule);
+    setIsDirty(false);
+    autoOpenedDaysRef.current.clear();
+    setSelectedDays([]);
+    if (isMobile) setSheetOpen(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entityId, dataUpdatedAt]);
 
   const readOnly =
     isFixedStaffView ||

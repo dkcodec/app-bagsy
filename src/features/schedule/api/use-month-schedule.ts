@@ -10,6 +10,7 @@ import {
   format,
 } from "date-fns";
 import { ScheduleService } from "@/src/shared/services/schedule-service";
+import { splitWorkByBreaks } from "@/src/shared/utils/schedule";
 import type {
   MonthSchedule,
   ScheduleScope,
@@ -72,11 +73,10 @@ function monthScheduleToSlots(
 
     const date = format(new Date(year, month, Number(dayStr)), "yyyy-MM-dd");
 
-    for (const r of day.workRanges) {
-      slots.push({ date, type: "work", start_time: r.start, end_time: r.end });
-    }
-    for (const r of day.breaks) {
-      slots.push({ date, type: "rest", start_time: r.start, end_time: r.end });
+    /* Разрезаем рабочие интервалы по перерывам → неперекрывающиеся слоты. */
+    const split = splitWorkByBreaks(day.workRanges, day.breaks);
+    for (const s of split) {
+      slots.push({ date, type: s.type, start_time: s.start, end_time: s.end });
     }
   }
 
@@ -142,7 +142,6 @@ export function useMonthSchedule(
             );
       return slotsToMonthSchedule(resp.slots, year, month);
     },
-    placeholderData: () => buildEmptyMonthSchedule(year, month),
     enabled: !!entityId,
   });
 
@@ -173,6 +172,8 @@ export function useMonthSchedule(
 
   return {
     data: query.data ?? emptySchedule,
+    /** Timestamp последнего обновления данных — стабильный примитив для отслеживания изменений. */
+    dataUpdatedAt: query.dataUpdatedAt,
     isLoading: query.isLoading,
     error: query.error,
     refetch: query.refetch,
