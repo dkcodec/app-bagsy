@@ -52,9 +52,15 @@ function rangesOverlap(a: TimeRange, b: TimeRange): boolean {
   );
 }
 
-/** Валидация расписания. Возвращает ключ ошибки или null. */
-function validateSchedule(schedule: MonthSchedule): string | null {
-  for (const day of Object.values(schedule)) {
+/** Валидация расписания. days — фильтр по конкретным дням (если не указан — все). */
+function validateSchedule(
+  schedule: MonthSchedule,
+  days?: number[]
+): string | null {
+  const entries = days
+    ? days.map(d => schedule[d]).filter(Boolean)
+    : Object.values(schedule);
+  for (const day of entries) {
     if (day.isClosed) continue;
 
     /* end <= start */
@@ -174,7 +180,18 @@ export function ScheduleContent() {
   /* Локальный state расписания (изменения копятся здесь до нажатия "Сохранить"). */
   const [localSchedule, setLocalSchedule] =
     useState<MonthSchedule>(serverSchedule);
+
+  /* Трекинг изменённых дней — только они отправляются на бэк. */
+  const dirtyDaysRef = useRef<Set<number>>(new Set());
   const [isDirty, setIsDirty] = useState(false);
+  const markDirty = useCallback((days: number[]) => {
+    days.forEach(d => dirtyDaysRef.current.add(d));
+    setIsDirty(true);
+  }, []);
+  const clearDirty = useCallback(() => {
+    dirtyDaysRef.current.clear();
+    setIsDirty(false);
+  }, []);
 
   /* Дни, авто-открытые при клике (для отката при deselect). */
   const autoOpenedDaysRef = useRef<Set<number>>(new Set());
@@ -183,7 +200,7 @@ export function ScheduleContent() {
      dataUpdatedAt — числовой timestamp из React Query, меняется только при реальном обновлении. */
   useEffect(() => {
     setLocalSchedule(serverSchedule);
-    setIsDirty(false);
+    clearDirty();
     autoOpenedDaysRef.current.clear();
     setSelectedDays([]);
     if (isMobile) setSheetOpen(false);
@@ -196,14 +213,15 @@ export function ScheduleContent() {
 
   /* Обновить локальное расписание (без сохранения на бэк). */
   const updateLocal = useCallback(
-    (updater: (prev: MonthSchedule) => MonthSchedule) => {
+    (updater: (prev: MonthSchedule) => MonthSchedule, days?: number[]) => {
       setLocalSchedule(prev => {
         const next = updater(prev);
-        setIsDirty(true);
+        /* Трекаем изменённые дни. */
+        if (days) markDirty(days);
         return next;
       });
     },
-    []
+    [markDirty]
   );
 
   /* Выбор / отмена дня. При выборе — авто-открытие; при deselect — откат. */
@@ -229,7 +247,7 @@ export function ScheduleContent() {
           const dayData = p[day];
           if (!dayData || dayData.isClosed) {
             autoOpenedDaysRef.current.add(day);
-            setIsDirty(true);
+            markDirty([day]);
             return { ...p, [day]: { ...DEFAULT_OPEN_DAY } };
           }
           return p;
@@ -250,15 +268,17 @@ export function ScheduleContent() {
       setSelectedDays(Array.from(newDays).sort((a, b) => a - b));
       setLocalSchedule(prev => {
         let changed = false;
+        const changedDays: number[] = [];
         const next = { ...prev };
         for (let d = from; d <= to; d++) {
           if (next[d]?.isClosed) {
             next[d] = { ...DEFAULT_OPEN_DAY };
             autoOpenedDaysRef.current.add(d);
+            changedDays.push(d);
             changed = true;
           }
         }
-        if (changed) setIsDirty(true);
+        if (changed) markDirty(changedDays);
         return changed ? next : prev;
       });
     },
@@ -280,7 +300,7 @@ export function ScheduleContent() {
           next[day] = updater(draft);
         });
         return next;
-      });
+      }, selectedDays);
     },
     [selectedDays, updateLocal]
   );
@@ -294,7 +314,7 @@ export function ScheduleContent() {
           next[day] = { ...schedule };
         });
         return next;
-      });
+      }, days);
     },
     [updateLocal]
   );
@@ -302,28 +322,32 @@ export function ScheduleContent() {
   /* Сбросить выделение + откатить все несохранённые изменения к серверному состоянию. */
   const clearSelection = useCallback(() => {
     setLocalSchedule(serverSchedule);
-    setIsDirty(false);
+    clearDirty();
     autoOpenedDaysRef.current.clear();
     setSelectedDays([]);
     if (isMobile) setSheetOpen(false);
-  }, [isMobile, serverSchedule]);
+  }, [isMobile, serverSchedule, clearDirty]);
 
-  /* Сохранить на бэк с валидацией. */
+  /* Сохранить на бэк с валидацией (только изменённые дни). */
   const handleSave = useCallback(async () => {
-    const error = validateSchedule(localSchedule);
+    const dirty = Array.from(dirtyDaysRef.current);
+    const error = validateSchedule(
+      localSchedule,
+      dirty.length > 0 ? dirty : undefined
+    );
     if (error) {
       toast.error(t(`Editor.${error}`));
       return;
     }
     try {
-      await save(localSchedule);
-      setIsDirty(false);
+      await save(localSchedule, dirty.length > 0 ? dirty : undefined);
+      clearDirty();
       autoOpenedDaysRef.current.clear();
       toast.success(t("savedSuccess"));
     } catch {
       toast.error(t("savedError"));
     }
-  }, [save, localSchedule, t]);
+  }, [save, localSchedule, t, clearDirty]);
 
   /* Пометить выбранные дни выходными и сразу сохранить (атомарно). */
   const handleMarkDayOff = useCallback(async () => {
@@ -333,14 +357,14 @@ export function ScheduleContent() {
     });
     setLocalSchedule(updated);
     try {
-      await save(updated);
-      setIsDirty(false);
+      await save(updated, selectedDays);
+      clearDirty();
       autoOpenedDaysRef.current.clear();
       toast.success(t("dayOffSuccess"));
     } catch {
       toast.error(t("savedError"));
     }
-  }, [localSchedule, selectedDays, save, t]);
+  }, [localSchedule, selectedDays, save, t, clearDirty]);
 
   /* Перейти к сегодня. */
   const goToday = useCallback(() => {
