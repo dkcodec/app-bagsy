@@ -100,7 +100,7 @@ export function NavLocationSwitcher() {
                     <button
                       className={cn(
                         "size-8 rounded-md flex flex-col items-center justify-center cursor-pointer transition-colors",
-                        "ring-1.5 ring-sidebar-foreground/20 hover:bg-sidebar-accent",
+                        "ring-1.5 ring-sidebar-foreground/20 hover:bg-sidebar-accent bg-sidebar-accent",
                         open && "ring-sidebar-foreground/40"
                       )}
                       aria-label={selected.name}
