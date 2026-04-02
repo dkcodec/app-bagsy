@@ -146,16 +146,38 @@ export function useMonthSchedule(
   });
 
   const mutation = useMutation({
-    mutationFn: async (data: MonthSchedule) => {
-      const slots = monthScheduleToSlots(data, year, month);
-      const body = { start: startDate, end: endDate, slots };
+    mutationFn: async ({
+      data,
+      days,
+    }: {
+      data: MonthSchedule;
+      days?: number[];
+    }) => {
+      /* Если указаны конкретные дни — сужаем start/end и фильтруем слоты. */
+      const targetDays = days && days.length > 0 ? days : undefined;
+      const rangeStart = targetDays
+        ? format(new Date(year, month, Math.min(...targetDays)), "yyyy-MM-dd")
+        : startDate;
+      const rangeEnd = targetDays
+        ? format(new Date(year, month, Math.max(...targetDays)), "yyyy-MM-dd")
+        : endDate;
+
+      /* Конвертируем только нужные дни в слоты. */
+      const filteredSchedule = targetDays
+        ? (Object.fromEntries(
+            targetDays.map(d => [d, data[d]])
+          ) as MonthSchedule)
+        : data;
+      const slots = monthScheduleToSlots(filteredSchedule, year, month);
+
+      const body = { start: rangeStart, end: rangeEnd, slots };
       if (scope === "staff") {
         await ScheduleService.saveEmployeeSchedule(entityId!, body);
       } else {
         await ScheduleService.saveLocationSchedule(entityId!, body);
       }
     },
-    onSuccess: (_, data) => {
+    onSuccess: (_, { data }) => {
       queryClient.setQueryData(queryKey, data);
     },
   });
@@ -177,7 +199,9 @@ export function useMonthSchedule(
     isLoading: query.isLoading,
     error: query.error,
     refetch: query.refetch,
-    save: mutation.mutateAsync,
+    /** Сохранить расписание. days — только изменённые дни (сужает start/end). */
+    save: (data: MonthSchedule, days?: number[]) =>
+      mutation.mutateAsync({ data, days }),
     isSaving: mutation.isPending,
     year,
     month,
