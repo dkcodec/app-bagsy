@@ -35,7 +35,6 @@ export function ThemeLogo({
         width={width}
         height={height}
         priority
-        className="pl-2"
       />
     );
   }
