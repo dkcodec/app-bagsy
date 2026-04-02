@@ -50,13 +50,6 @@ export function ThemeLogo({
   })();
 
   return (
-    <Image
-      src={logoSrc}
-      alt={alt}
-      width={width}
-      height={height}
-      priority
-      className="pl-2"
-    />
+    <Image src={logoSrc} alt={alt} width={width} height={height} priority />
   );
 }
