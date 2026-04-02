@@ -15,6 +15,7 @@ import {
   type ConfirmInviteResponse,
 } from "../services/employee-service";
 import { setAuthTokens, clearAuthTokens } from "../utils/cookies";
+import { useCalendarStore } from "@/src/features/calendar/calendar-context/store";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
@@ -42,6 +43,7 @@ export function useLogout() {
     mutationFn: () => AuthService.logout(),
     onSuccess: () => {
       queryClient.clear(); // Полностью очищаем весь кэш при логауте
+      useCalendarStore.persist.clearStorage(); // Сбрасываем locationId из localStorage
       router.refresh();
     },
   });
