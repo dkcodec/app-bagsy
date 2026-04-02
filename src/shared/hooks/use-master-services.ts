@@ -7,10 +7,7 @@ import {
   type CreateEmployeeServiceResponse,
 } from "../services/employee-service";
 
-/**
- * Хук для отвязки сотрудника от услуги DELETE /api/v1/employee-services/{id}
- * TODO: эндпоинт на беке ещё не готов — подключить когда появится
- */
+/** Хук для отвязки сотрудника от услуги DELETE /api/v1/employee-services/{id} */
 export function useRemoveMasterService() {
   const queryClient = useQueryClient();
 

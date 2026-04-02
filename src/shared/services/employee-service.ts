@@ -57,6 +57,8 @@ export interface ResendInviteResponse {
 export interface IEmployeeServiceItem {
   /** UUID услуги (это service.id, не employee_service.id) */
   id: string;
+  /** UUID привязки сотрудник-услуга (для DELETE /api/v1/employee-services/{id}) */
+  employee_service_id: string;
   category_id: string;
   name: string;
   description: string;
@@ -229,6 +231,13 @@ export class EmployeeService {
     await apiClient.post(
       `api/v1/employees/${encodeURIComponent(id)}/transfer`,
       { location_id }
+    );
+  }
+
+  /** Отвязка сотрудника от точки (DELETE /api/v1/employees/{id}/location) — только owner */
+  static async removeFromLocation(id: string): Promise<void> {
+    await apiClient.delete(
+      `api/v1/employees/${encodeURIComponent(id)}/location`
     );
   }
 

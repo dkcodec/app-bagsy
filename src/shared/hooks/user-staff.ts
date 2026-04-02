@@ -163,6 +163,19 @@ export function useTransferEmployee() {
   });
 }
 
+/** Хук для отвязки сотрудника от точки (DELETE /api/v1/employees/{id}/location) */
+export function useRemoveEmployeeFromLocation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, unknown, string>({
+    mutationKey: ["employees", "removeFromLocation"],
+    mutationFn: (id: string) => EmployeeService.removeFromLocation(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["employees"] });
+    },
+  });
+}
+
 /** Хук для получения услуг сотрудника (GET /api/v1/employees/{id}/services) */
 export function useGetEmployeeServices(id: string | undefined) {
   return useQuery({
@@ -177,6 +190,8 @@ export function useGetEmployeeServices(id: string | undefined) {
 export interface ServiceStaffMember {
   employee: IEmployeeDto;
   price: number;
+  /** ID привязки (employee_service) для DELETE */
+  employeeServiceId: string;
 }
 
 /**
@@ -225,7 +240,7 @@ export function useServiceStaffMap(locationId: string | undefined) {
       const services = serviceQueries[i]?.data?.services || [];
       for (const svc of services) {
         if (!map.has(svc.id)) map.set(svc.id, []);
-        map.get(svc.id)!.push({ employee: emp, price: svc.price });
+        map.get(svc.id)!.push({ employee: emp, price: svc.price, employeeServiceId: svc.employee_service_id });
       }
     });
     return map;

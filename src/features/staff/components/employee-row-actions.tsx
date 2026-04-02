@@ -9,6 +9,7 @@ import {
   ArrowRightLeft,
   UserCheck,
   UserX,
+  Unlink,
 } from "lucide-react";
 import { Button } from "@/src/entities/button";
 import {
@@ -42,6 +43,7 @@ import {
   useTransferEmployee,
   useActivateEmployee,
   useDeactivateEmployee,
+  useRemoveEmployeeFromLocation,
 } from "@/src/shared/hooks/user-staff";
 
 interface EmployeeRowActionsProps {
@@ -65,6 +67,7 @@ export function EmployeeRowActions({
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
   const [transferDialogOpen, setTransferDialogOpen] = useState(false);
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
+  const [detachDialogOpen, setDetachDialogOpen] = useState(false);
 
   // Selected values
   const [selectedRole, setSelectedRole] = useState<TUserRole>(employee.role);
@@ -75,6 +78,7 @@ export function EmployeeRowActions({
   const transfer = useTransferEmployee();
   const activate = useActivateEmployee();
   const deactivate = useDeactivateEmployee();
+  const detach = useRemoveEmployeeFromLocation();
 
   // Locations для transfer (только owner видит список)
   const { data: locationsData } = useLocations();
@@ -89,6 +93,7 @@ export function EmployeeRowActions({
 
   const canChangeRole = isOwner && !isSelf;
   const canTransfer = isOwner && isNetworkPlan;
+  const canDetach = isOwner && !isSelf;
 
   // Handlers
   const handleChangeRole = () => {
@@ -114,6 +119,12 @@ export function EmployeeRowActions({
 
   const handleActivate = () => {
     activate.mutate(employee.id);
+  };
+
+  const handleDetach = () => {
+    detach.mutate(employee.id, {
+      onSuccess: () => setDetachDialogOpen(false),
+    });
   };
 
   return (
@@ -159,6 +170,17 @@ export function EmployeeRowActions({
             >
               <ArrowRightLeft className="mr-2 size-4" />
               {td("transfer")}
+            </DropdownMenuItem>
+          )}
+
+          {/* Detach from location — только owner, не себе */}
+          {canDetach && (
+            <DropdownMenuItem
+              onClick={() => setDetachDialogOpen(true)}
+              className="text-destructive focus:text-destructive"
+            >
+              <Unlink className="mr-2 size-4" />
+              {td("detach")}
             </DropdownMenuItem>
           )}
 
@@ -286,6 +308,38 @@ export function EmployeeRowActions({
               variant="destructive"
               onClick={handleDeactivate}
               disabled={deactivate.isPending}
+            >
+              {td("confirm")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog: Detach from location */}
+      <Dialog open={detachDialogOpen} onOpenChange={setDetachDialogOpen}>
+        <DialogContent
+          className="sm:max-w-sm"
+          onClick={e => e.stopPropagation()}
+        >
+          <DialogHeader>
+            <DialogTitle>{td("detachTitle")}</DialogTitle>
+            <DialogDescription>
+              {td("detachDesc", {
+                name: `${employee.first_name} ${employee.last_name}`,
+              })}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setDetachDialogOpen(false)}
+            >
+              {td("cancel")}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDetach}
+              disabled={detach.isPending}
             >
               {td("confirm")}
             </Button>

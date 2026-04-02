@@ -14,6 +14,7 @@ import { useCreateMasterService } from "@/src/shared/hooks/use-master-services";
 import { EUserRole, type TUserRole } from "@/src/shared/types/user";
 import type { IServiceDto } from "@/src/shared/services/service-service";
 import type { ServiceStaffMember } from "@/src/shared/hooks/user-staff";
+import { UnlinkStaffDialog } from "./unlink-staff-dialog";
 
 interface ServiceStaffTabProps {
   service: IServiceDto;
@@ -39,6 +40,11 @@ export function ServiceStaffTab({
 
   const [prices, setPrices] = useState<Record<string, string>>({});
   const [addingId, setAddingId] = useState<string | null>(null);
+  // Цель для диалога отвязки
+  const [unlinkTarget, setUnlinkTarget] = useState<{
+    employeeServiceId: string;
+    employeeName: string;
+  } | null>(null);
 
   // Все сотрудники локации
   const employeesParams = useMemo(() => {
@@ -116,7 +122,7 @@ export function ServiceStaffTab({
             {t("assigned")} ({assignedStaff.length})
           </p>
           <div className="border rounded-md divide-y">
-            {assignedStaff.map(({ employee, price }) => (
+            {assignedStaff.map(({ employee, price, employeeServiceId }) => (
               <div
                 key={employee.id}
                 className="flex items-center justify-between p-2.5"
@@ -140,7 +146,19 @@ export function ServiceStaffTab({
                     </p>
                   </div>
                 </div>
-                {/* TODO: Remove button — эндпоинт скоро появится */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-xs text-muted-foreground hover:text-destructive"
+                  onClick={() =>
+                    setUnlinkTarget({
+                      employeeServiceId,
+                      employeeName: `${employee.first_name} ${employee.last_name[0]}.`,
+                    })
+                  }
+                >
+                  {t("remove")}
+                </Button>
               </div>
             ))}
           </div>
@@ -225,6 +243,17 @@ export function ServiceStaffTab({
           </span>
         </div>
       </div>
+
+      {/* Диалог подтверждения отвязки */}
+      {unlinkTarget && (
+        <UnlinkStaffDialog
+          open={!!unlinkTarget}
+          onOpenChange={open => !open && setUnlinkTarget(null)}
+          employeeServiceId={unlinkTarget.employeeServiceId}
+          employeeName={unlinkTarget.employeeName}
+          serviceName={service.name}
+        />
+      )}
     </div>
   );
 }
