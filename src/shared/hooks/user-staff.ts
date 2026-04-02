@@ -240,13 +240,11 @@ export function useServiceStaffMap(locationId: string | undefined) {
       const services = serviceQueries[i]?.data?.services || [];
       for (const svc of services) {
         if (!map.has(svc.id)) map.set(svc.id, []);
-        map
-          .get(svc.id)!
-          .push({
-            employee: emp,
-            price: svc.price,
-            employeeServiceId: svc.employee_service_id,
-          });
+        map.get(svc.id)!.push({
+          employee: emp,
+          price: svc.price,
+          employeeServiceId: svc.employee_service_id,
+        });
       }
     });
     return map;
