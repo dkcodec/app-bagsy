@@ -14,6 +14,7 @@ export * from "./card";
 export * from "./collapsible";
 export * from "./dashboard-title";
 export * from "./dialog";
+export * from "./drawer";
 export * from "./form";
 export * from "./header-title";
 export * from "./input";

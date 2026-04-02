@@ -10,12 +10,16 @@
     "sidebarDescription": "Боковое меню көрсетеді.",
     "Main": {
       "calendar": "Күнтізбе",
+      "schedule": "Жұмыс графигі",
       "clients": "Клиенттері",
       "services": "Қызметтер",
       "staff": "Жұмысшылар",
       "locations": "Локациялар",
       "analytics": "Аналитика",
       "settings": "Параметрлер"
+    },
+    "LocationSelect": {
+      "label": "Локация"
     },
     "User": {
       "name": "Атауы",
@@ -39,9 +43,9 @@
       "panel": "Панель {name}"
     },
     "emptyLocations": {
-      "title": "Қызмет көрсету нүктелері жоқ",
-      "description": "Сізде әлі қызмет көрсету нүктелері жоқ. Күнтізбемен жұмыс істеу үшін бірінші нүктені қосыңыз.",
-      "addPointButton": "Нүкте қосу"
+      "title": "Қызмет көрсету локациялары жоқ",
+      "description": "Сізде әлі қызмет көрсету локациялары жоқ. Күнтізбемен жұмыс істеу үшін бірінші локацияны қосыңыз.",
+      "addPointButton": "Локация қосу"
     },
     "Settings": {
       "calendarSettings": "Кесте және күнтізбе параметрлері",
@@ -58,7 +62,7 @@
       "to": "До",
       "closed": "Жабық",
       "badgeVariant": "Жүктеме түрі",
-      "dot": "Нүктелер",
+      "dot": "Локациялар",
       "colored": "Түсті",
       "mixed": "Қосымша",
       "workingHoursTooltip": "Жұмыс уақыты - бұл уақыт, мұнда сотрудник клиенттерді қабылдай алады, олардың уақытын өзгертеді және өзінің жұмыс графигін өзгертеді.",
@@ -116,7 +120,17 @@
         "comment": "Пікір",
         "commentDescription": "Қосымша ақпарат",
         "add": "Жазбаны қосу",
-        "cancel": "Бас тарту"
+        "cancel": "Бас тарту",
+        "errors": {
+          "firstNameRequired": "Атыңызды енгізіңіз",
+          "lastNameRequired": "Тегіңізді енгізіңіз",
+          "phoneRequired": "Телефон нөмірін енгізіңіз",
+          "serviceRequired": "Қызметті таңдаңыз",
+          "startDateRequired": "Басталу күнін таңдаңыз",
+          "selectStaff": "Қызметкерді таңдаңыз",
+          "selectLocation": "Нүктені таңдаңыз",
+          "selectLocationFirst": "Алдымен нүктені таңдаңыз"
+        }
       },
       "EventDetailsDialog": {
         "edit": "Өңдеу",
@@ -244,6 +258,148 @@
       "errorRemovingAvatar": "Аватарды жою қатесі"
     }
   },
+  "Account": {
+    "title": "Аккаунт",
+    "tabs": {
+      "profile": "Профиль",
+      "subscription": "Жазылым",
+      "security": "Қауіпсіздік",
+      "appearance": "Сыртқы көрініс"
+    },
+    "Profile": {
+      "changePhoto": "Суретті өзгерту",
+      "removePhoto": "Суретті жою",
+      "personalInfo": "Жеке ақпарат",
+      "fullName": "Толық аты",
+      "firstName": "Аты",
+      "lastName": "Тегі",
+      "phone": "Телефон",
+      "email": "Email",
+      "notSet": "Көрсетілмеген",
+      "role": "Рөл",
+      "edit": "Өзгерту",
+      "add": "Қосу",
+      "save": "Сақтау",
+      "cancel": "Болдырмау",
+      "business": "Бизнес",
+      "businessName": "Бизнес атауы",
+      "location": "Локация",
+      "organizationId": "Ұйым",
+      "copy": "Көшіру",
+      "сopied": "Көшірілді",
+      "account": "Аккаунт",
+      "createdAt": "Құрылған",
+      "updatedAt": "Жаңартылған",
+      "deleteAccount": "Аккаунтты жою",
+      "deleteAccountDescription": "Бұл әрекетті қайтару мүмкін емес. Барлық деректер жойылады.",
+      "nameMinError": "Аты кемінде 2 таңбадан тұруы керек",
+      "surnameMinError": "Тегі кемінде 2 таңбадан тұруы керек",
+      "profileUpdatedSuccessfully": "Профиль сәтті жаңартылды",
+      "errorUpdatingProfile": "Профиль жаңарту қатесі",
+      "uploadError": "Сурет жүктеу қатесі",
+      "avatarRemovedSuccess": "Аватар жойылды",
+      "errorRemovingAvatar": "Аватарды жою қатесі"
+    },
+    "Subscription": {
+      "currentPlan": "Ағымдағы жоспар",
+      "active": "Белсенді",
+      "trial": "Сынақ",
+      "expired": "Мерзімі өтті",
+      "cancelled": "Бас тартылды",
+      "nextPayment": "Келесі төлем",
+      "usedOfMax": "{used} / {max}",
+      "amount": "Сома",
+      "bookings": "Жазбалар",
+      "staffSlots": "Шеберлер",
+      "locations": "Локациялар",
+      "unlimited": "∞",
+      "upgradePlan": "Жоспарды жақсарту",
+      "comparePlans": "Жоспарларды салыстыру",
+      "manualPaymentWarning": "Төлем әзірге қолмен жүргізіледі. Ұзарту үшін бізбен байланысыңыз",
+      "whatsApp": "WhatsApp",
+      "paymentHistory": "Төлем тарихы",
+      "date": "Күні",
+      "description": "Сипаттама",
+      "status": "Күйі",
+      "paid": "Төленді",
+      "noPayments": "Төлемдер жоқ",
+      "paymentMethod": "Төлем әдісі",
+      "noPaymentMethod": "Төлем әдісі байланыстырылмаған",
+      "addCard": "Карта байланыстыру",
+      "perMonth": "/ ай",
+      "popular": "Танымал",
+      "trialMonths": "Алғашқы {count} ай тегін",
+      "trialMonth": "Бірінші ай тегін",
+      "plans": {
+        "solo": {
+          "name": "Solo",
+          "description": "Жеке шеберлер үшін",
+          "locations": "1 локация",
+          "staff": "1 шебер"
+        },
+        "point": {
+          "name": "Point",
+          "description": "Шағын салондар үшін",
+          "locations": "1 локация",
+          "staff": "10 шеберге дейін"
+        },
+        "network": {
+          "name": "Network",
+          "description": "Салон желілері үшін",
+          "locations": "Шексіз локациялар",
+          "staff": "Шексіз шеберлер"
+        }
+      },
+      "features": {
+        "unlimitedBookings": "Шексіз жазбалар",
+        "basicCrm": "Негізгі CRM",
+        "notifications": "Хабарландырулар (SMS / WhatsApp / Email)",
+        "onlineBooking": "Жарнамасыз онлайн жазба",
+        "reminders": "Жазба еске салулары",
+        "allFromSolo": "Solo-дағы барлығы",
+        "advancedCrm": "Кеңейтілген CRM",
+        "analytics": "Аналитика және есептер",
+        "finance": "Қаржылық есеп",
+        "inventory": "Қойма есебі",
+        "allFromPoint": "Point-тағы барлығы",
+        "multiBranch": "Мультифилиалдылық",
+        "consolidatedAnalytics": "Барлық локациялар бойынша жиынтық аналитика",
+        "apiAccess": "API қолжетімділік",
+        "inDevelopment": "әзірленуде",
+        "planned": "жоспарда"
+      }
+    },
+    "Security": {
+      "password": "Құпия сөз",
+      "lastChanged": "Соңғы өзгерту",
+      "never": "ешқашан",
+      "changePassword": "Құпия сөзді өзгерту",
+      "activeSessions": "Белсенді сессиялар",
+      "currentSession": "ағымдағы сессия",
+      "revoke": "Жою",
+      "logoutAll": "Барлық құрылғылардан шығу",
+      "daysAgo": "{count} күн бұрын"
+    },
+    "Appearance": {
+      "theme": "Тема",
+      "light": "Жарық",
+      "dark": "Қараңғы",
+      "system": "Жүйелік",
+      "language": "Тіл",
+      "russian": "Русский",
+      "kazakh": "Қазақша",
+      "notifications": "Хабарландырулар",
+      "smsReminders": "Клиенттерге SMS-еске салу",
+      "smsRemindersDescription": "Жазбадан 2 сағат бұрын жіберу",
+      "dailyDigest": "Email дайджест",
+      "dailyDigestDescription": "Ертеңгі жазбалардың қысқаша мазмұны",
+      "notSupported": "Браузеріңіз хабарландыруларды қолдамайды",
+      "blocked": "Хабарландырулар бұғатталған. Браузер параметрлерінде рұқсат беріңіз",
+      "pushNotifications": "Push-хабарландырулар",
+      "pushDescription": "Жаңа жазбалар туралы хабарландырулар алу",
+      "calendar": "Күнтізбе"
+    }
+  },
   "Staff": {
     "title": "Жұмысшылар",
     "tableTitle": "Жұмысшылар",
@@ -268,19 +424,74 @@
     "accessDeniedDescription": "Жұмысшылар тізімін көруге құқығыңыз жоқ",
     "errorLoadingData": "Деректерді жүктеу қатесі",
     "unknownError": "Белгісіз қате",
+    "invite": "Шақыру",
+    "employeesCount": "қызметкер",
+    "staffLimit": "қызметкер лимиті",
     "filters": {
+      "searchByNameOrPhone": "Аты немесе телефон бойынша іздеу...",
+      "allRoles": "Барлық рөлдер",
+      "allStatuses": "Барлық күйлер",
+      "allLocations": "Барлық локациялар",
+      "active": "Белсенді",
+      "inactive": "Белсенді емес",
       "locationId": "Локация",
       "locationIdPlaceholder": "Локация UUID енгізіңіз",
       "networkCode": "Ұйым",
       "networkCodePlaceholder": "Желі кодын енгізіңіз",
       "role": "Рөл",
       "rolePlaceholder": "Рөлді таңдаңыз",
-      "allRoles": "Барлық рөлдер",
-      "phone": "Телефон",
-      "phonePlaceholder": "Телефон енгізіңіз",
+      "search": "Поиск",
+      "searchPlaceholder": "Тел. немесе фио енгізіңіз",
       "add": "Қосу",
       "clear": "Тазалау",
       "phones": "Телефондар"
+    },
+    "drawer": {
+      "profile": "Профиль",
+      "services": "Қызметтер",
+      "portfolio": "Портфолио",
+      "info": "Ақпарат",
+      "phone": "Телефон",
+      "location": "Локация",
+      "status": "Күйі",
+      "joined": "Кіру күні",
+      "permissions": "Қол жетімділік құқықтары",
+      "canProvideServices": "Қызмет көрсетеді",
+      "canProvideServicesDesc": "Клиенттерді қабылдай алады",
+      "canManageSchedule": "Кесте басқару",
+      "canManageScheduleDesc": "Локация жұмыс уақытын өзгерту",
+      "quickStats": "Статистика",
+      "servicesCount": "қызмет",
+      "thisWeek": "осы аптада",
+      "rating": "рейтинг",
+      "actions": "Әрекеттер",
+      "changeRole": "Рөлді өзгерту",
+      "transfer": "Локацияға ауыстыру",
+      "deactivate": "Белсенді емес",
+      "activate": "Белсенді",
+      "totalServices": "Барлық қызметтер",
+      "priceRange": "Баға диапазоны",
+      "min": "мин",
+      "noServices": "Байланысқан қызметтер жоқ",
+      "portfolioPlaceholder": "Портфолио жақында қолжетімді болады",
+      "viewProfile": "Профильді көру",
+      "changeRoleTitle": "Рөлді өзгерту",
+      "changeRoleDesc": "Қызметкер үшін жаңа рөлді таңдаңыз",
+      "transferTitle": "Басқа локацияға ауыстыру",
+      "transferDesc": "Ауыстыру үшін локацияны таңдаңыз",
+      "selectRole": "Рөлді таңдаңыз",
+      "selectLocation": "Локацияны таңдаңыз",
+      "save": "Сақтау",
+      "cancel": "Болдырмау",
+      "deactivateTitle": "Қызметкерді өшіру",
+      "deactivateDesc": "Қызметкерді өшіргіңіз келе ме? Оған жазыла алмайды.",
+      "activateTitle": "Қызметкерді белсендіру",
+      "activateDesc": "Қызметкерді белсендіргіңіз келе ме? Оған жазыла алады.",
+      "confirm": "Растау",
+      "cannotDeactivateSelf": "Өзіңізді өшіре алмайсыз",
+      "detach": "Локациядан ажырату",
+      "detachTitle": "Локациядан ажырату",
+      "detachDesc": "{name} ағымдағы локациядан ажыратылады. Осы қызметкерге барлық жазбалар жойылады."
     },
     "roles": {
       "owner": "Иесі",
@@ -329,8 +540,8 @@
     }
   },
   "Locations": {
-    "title": "Қызмет көрсету нүктелері",
-    "tableTitle": "Қызмет көрсету нүктелері",
+    "title": "Қызмет көрсету локациялары",
+    "tableTitle": "Қызмет көрсету локациялары",
     "code": "Код",
     "name": "Атауы",
     "address": "Мекенжай",
@@ -341,8 +552,65 @@
     "noData": "Көрсету үшін деректер жоқ",
     "errorLoading": "Деректерді жүктеу қатесі",
     "accessDenied": "Қол жетімсіз",
-    "accessDeniedDescription": "Нүктелер тізімін көруге құқығыңыз жоқ",
-    "addPoint": "Нүкте қосу",
+    "accessDeniedDescription": "Локациялар тізімін көруге құқығыңыз жоқ",
+    "addPoint": "Локация қосу",
+    "detail": {
+      "edit": "Өңдеу",
+      "phone": "Телефон",
+      "scheduleType": "Кесте түрі",
+      "slotDuration": "Слот ұзақтығы",
+      "minutesShort": "мин",
+      "workingHours": "Жұмыс уақыты",
+      "closed": "Жабық",
+      "staffCount": "Қызметкерлер",
+      "servicesCount": "Қызметтер",
+      "bookingLink": "Жазылу сілтемесі",
+      "bookingLinkHint": "Бұл сілтемені клиенттермен бөлісіңіз",
+      "copyLink": "Көшіру",
+      "linkCopied": "Сілтеме көшірілді",
+      "qrCode": "QR",
+      "technicalId": "ID",
+      "createdAt": "Құрылған",
+      "backToAll": "Барлық локациялар",
+      "noSchedule": "Кесте баптаулмаған",
+      "scheduleTypes": {
+        "fixed": "Бекітілген",
+        "mixed": "Аралас"
+      },
+      "delete": "Жою",
+      "deleteTitle": "Локацияны жою",
+      "deleteDescription": "Сіз \"{name}\" локациясын жойғыңыз келетініне сенімдісіз бе? Бұл әрекетті болдырмау мүмкін емес.",
+      "deleteConfirm": "Иә, жою",
+      "deleteCancel": "Болдырмау",
+      "deleteSuccess": "Локация жойылды",
+      "deleteError": "Локацияны жою кезінде қате"
+    },
+    "editDialog": {
+      "title": "Локацияны өңдеу",
+      "description": "Локация туралы ақпаратты өзгертіңіз",
+      "save": "Сақтау",
+      "saving": "Сақтау...",
+      "success": "Локация жаңартылды",
+      "error": "Локацияны жаңарту кезінде қате"
+    },
+    "network": {
+      "locationCount": "{count} локация",
+      "addLocation": "Локация қосу",
+      "staff": "қызм.",
+      "services": "қызмет"
+    },
+    "toggleActive": {
+      "deactivateTitle": "Локацияны өшіру",
+      "deactivateDescription": "\"{name}\" өшіргіңіз келетініне сенімдісіз бе? Клиенттер бұл локацияға жазыла алмайды.",
+      "deactivateConfirm": "Өшіру",
+      "deactivateSuccess": "Локация өшірілді",
+      "activateTitle": "Локацияны қосу",
+      "activateDescription": "\"{name}\" қосу керек пе? Локация жазылу үшін қайтадан қолжетімді болады.",
+      "activateConfirm": "Қосу",
+      "activateSuccess": "Локация қосылды",
+      "cancel": "Болдырмау",
+      "error": "Күйді жаңарту кезінде қате"
+    },
     "schedule": {
       "title": "Кесте",
       "allDay": "Күні бойы",
@@ -351,8 +619,8 @@
       "noSchedule": "Кесте көрсетілмеген"
     },
     "addPointDialog": {
-      "title": "Жаңа нүкте қосу",
-      "description": "Қызмет көрсету нүктесі туралы ақпаратты толтырыңыз"
+      "title": "Жаңа локация қосу",
+      "description": "Қызмет көрсету локациясы туралы ақпаратты толтырыңыз"
     },
     "addPointForm": {
       "name": "Атауы",
@@ -365,16 +633,16 @@
       "scheduleTypes": {
         "mixed": {
           "label": "Аралас",
-          "description": "Нүктенің өз кестесі, шеберлердің — өздерінікі",
-          "hint": "Әр шебер нүкте кестесінен бөлек өз жұмыс кестесін реттей алады"
+          "description": "Локацияның өз кестесі, шеберлердің — өздерінікі",
+          "hint": "Әр шебер локация кестесінен бөлек өз жұмыс кестесін реттей алады"
         },
         "fixed": {
           "label": "Тұрақты",
-          "description": "Барлық шеберлер нүкте кестесі бойынша жұмыс істейді",
-          "hint": "Шеберлер өз кестесін өзгерте алмайды — ол нүкте кестесімен бірдей болады"
+          "description": "Барлық шеберлер локация кестесі бойынша жұмыс істейді",
+          "hint": "Шеберлер өз кестесін өзгерте алмайды — ол локация кестесімен бірдей болады"
         }
       },
-      "soloScheduleNote": "сіздің кестеңіз бен нүкте кестесі автоматты түрде синхрондалады",
+      "soloScheduleNote": "сіздің кестеңіз бен локация кестесі автоматты түрде синхрондалады",
       "slotDuration": "Слот ұзақтығы",
       "slotDurationPlaceholder": "Ұзақтығын таңдаңыз",
       "slotDurationHint": "Жазылу мүмкін болатын аралықтар. Мысалы, әр 30 минут немесе әр 5 минут сайын",
@@ -399,7 +667,7 @@
       "submit": "Құру",
       "submitting": "Құрылуда...",
       "cancel": "Болдырмау",
-      "success": "Нүкте сәтті құрылды",
+      "success": "Локация сәтті құрылды",
       "errors": {
         "nameMin": "Атауы кемінде 2 таңбадан тұруы керек",
         "nameMax": "Атауы 100 таңбадан аспауы керек",
@@ -415,7 +683,25 @@
         "streetMax": "Көше атауы 200 таңбадан аспауы керек",
         "addressRequired": "Іздеуден мекенжайды таңдау қажет",
         "networkCodeRequired": "Желі кодын анықтау мүмкін болмады",
-        "submitError": "Нүктені құру кезінде қате"
+        "submitError": "Локацияны құру кезінде қате"
+      }
+    },
+    "organizationProfile": {
+      "title": "Желіге біріктіру керек пе?",
+      "description": "Сізде бірнеше локация бар — оларды желіге біріктіре аласыз. Бұл міндетті емес, бірақ барлық локацияларды бір бренд астында басқаруға көмектеседі.",
+      "name": "Желі атауы",
+      "namePlaceholder": "Мысалы: Beauty Network",
+      "orgDescription": "Сипаттама",
+      "orgDescriptionPlaceholder": "Желіңіздің қысқаша сипаттамасы",
+      "skip": "Өткізіп жіберу",
+      "submit": "Желі құру",
+      "submitting": "Құрылуда...",
+      "success": "Желі сәтті құрылды",
+      "errors": {
+        "nameMin": "Атау кемінде 2 таңбадан тұруы керек",
+        "nameMax": "Атау 100 таңбадан аспауы керек",
+        "descriptionMax": "Сипаттама 500 таңбадан аспауы керек",
+        "submitError": "Желіні құру кезінде қате"
       }
     }
   },
@@ -490,6 +776,53 @@
         "submitError": "Қызмет құру кезінде қате"
       }
     },
+    "serviceCount": "{count} қызмет",
+    "drawer": {
+      "detailsTab": "Мәліметтер",
+      "staffTab": "Қызметкерлер",
+      "save": "Сақтау",
+      "saving": "Сақтауда...",
+      "saveSuccess": "Қызмет жаңартылды",
+      "saveError": "Жаңарту қатесі",
+      "deleteBtn": "Жою",
+      "sortOrder": "Сұрыптау реті"
+    },
+    "actions": {
+      "edit": "Өңдеу",
+      "manageStaff": "Қызметкерлерді басқару",
+      "duplicate": "Көшірмелеу",
+      "delete": "Жою",
+      "duplicateSuccess": "Қызмет көшірмеленді",
+      "duplicateError": "Көшірмелеу қатесі"
+    },
+    "deleteDialog": {
+      "title": "Қызметті жою",
+      "description": "\"{name}\" қызметін жойғыңыз келетініне сенімдісіз бе? Бұл әрекетті қайтару мүмкін емес.",
+      "cancel": "Болдырмау",
+      "confirm": "Жою",
+      "success": "Қызмет жойылды",
+      "error": "Жою қатесі"
+    },
+    "staffTab": {
+      "assigned": "Тағайындалған",
+      "available": "Қолжетімді қызметкерлер",
+      "remove": "Алып тастау",
+      "add": "Қосу",
+      "assign": "+ Тағайындау",
+      "priceRange": "Баға диапазоны",
+      "duration": "Ұзақтығы",
+      "noStaff": "Қолжетімді қызметкерлер жоқ",
+      "notSet": "Көрсетілмеген",
+      "pricePlaceholder": "Баға",
+      "addSuccess": "Қызметкер қызметке байланыстырылды",
+      "addError": "Қызметкерді байланыстыру қатесі",
+      "unlinkTitle": "Байланысты жоюды растаңыз",
+      "unlinkDescription": "{name} — «{service}» қызметіне жазыла алмайды",
+      "unlinkConfirm": "Байланысты жою",
+      "unlinkCancel": "Болдырмау",
+      "unlinkSuccess": "Қызметкер қызметтен ажыратылды",
+      "unlinkError": "Ажырату қатесі"
+    },
     "attachMaster": {
       "dialogTitle": "Қызметке шеберді байланыстыру",
       "dialogDescription": "Қызметке шеберді байланыстыру: {serviceName}",
@@ -511,6 +844,79 @@
       "priceMin": "Баға кемінде 1 болуы керек",
       "serviceIdRequired": "Қызмет ID міндетті",
       "masterPhoneRequired": "Шеберді таңдаңыз"
+    }
+  },
+  "Schedule": {
+    "title": "Жұмыс графигі",
+    "description": "Ай күндері бойынша жұмыс графигін баптау",
+    "noAccess": "Графикті баптауға қол жетімсіз",
+    "mySchedule": "Менің графигім",
+    "pointSchedule": "Локация графигі",
+    "monthGridTitle": "Ай күндері",
+    "editorTitle": "Таңдалған күндердің графигі",
+    "selectedCount": "Таңдалды: {count}",
+    "selectedDay": "Таңдалды: 1 күн — {day}",
+    "selectedDays": "Таңдалды: {count} күн",
+    "clearSelection": "Тазалау",
+    "shiftHint": "Ауқымды таңдау үшін Shift басып тұрыңыз",
+    "saveCount": "{count} күнді сақтау",
+    "dayOff": "Демалыс",
+    "customBadge": "Өзгертілген",
+    "fixedScheduleInfo": "Сіздің локация бекітілген графикті пайдаланады — барлығы бір кесте бойынша жұмыс істейді",
+    "Weekdays": {
+      "mon": "Дс",
+      "tue": "Сс",
+      "wed": "Ср",
+      "thu": "Бс",
+      "fri": "Жм",
+      "sat": "Сн",
+      "sun": "Жс"
+    },
+    "MonthNav": {
+      "prev": "Алдыңғы ай",
+      "next": "Келесі ай",
+      "today": "Бүгін"
+    },
+    "Header": {
+      "title": "Жұмыс графигі",
+      "mySchedule": "Менің графигім",
+      "pointSchedule": "Локация графигі",
+      "fixedBadge": "Бекітілген",
+      "mixedBadge": "Аралас",
+      "scheduleTypeFixedHint": "Локация графигі бекітілген, сіз оны өзгерте алмайсыз",
+      "scheduleTypeMixedHint": "Локация графигі аралас — шебер әр айға өз графигін өзі орнатады",
+      "selectLocation": "Локацияны таңдаңыз"
+    },
+    "save": "Сақтау",
+    "Editor": {
+      "selectDaysHint": "Графикті орнату үшін күнтізбеден күндерді таңдаңыз",
+      "dayIsClosed": "Күн демалыс деп белгіленген",
+      "makeOpen": "Жұмыс күні ету",
+      "makeClosed": "Демалыс күні ету",
+      "open": "Ашық",
+      "closed": "Жабық",
+      "workHours": "Жұмыс сағаттары",
+      "breaks": "Үзілістер",
+      "noBreaks": "Үзілістер жоқ",
+      "from": "Бастап",
+      "to": "Дейін",
+      "addBreak": "Үзіліс қосу",
+      "addWorkRange": "Интервал қосу",
+      "mixedTimesWarning": "Таңдалған күндердің уақыты әртүрлі. Өзгерістер барлық таңдалған күндерге қолданылады.",
+      "endBeforeStart": "Аяқталу уақыты басталу уақытынан кеш болуы керек",
+      "overlappingRanges": "Жұмыс интервалдары қиылыспауы керек",
+      "breakOutsideWork": "Үзіліс жұмыс уақыты ішінде болуы керек",
+      "overlappingBreaks": "Үзілістер қиылыспауы керек"
+    },
+    "savedSuccess": "Кесте сақталды",
+    "savedError": "Кестені сақтау қатесі",
+    "dayOffSuccess": "Демалыс сақталды",
+    "Presets": {
+      "allWeekdays": "Барлық жұмыс күндері",
+      "weekdays": "5/2",
+      "evenDays": "Жұп күндер",
+      "oddDays": "Тақ күндер",
+      "clear": "Тазалау"
     }
   }
 }

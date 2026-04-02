@@ -6,6 +6,8 @@ import {
   type GetLocationsParams,
   type CreateLocationRequestDto,
   type CreateLocationResponseDto,
+  type UpdateLocationRequestDto,
+  type ILocationDto,
 } from "../services/location-service";
 import { useCurrentUser } from "./use-users";
 import { EUserRole } from "../types/user";
@@ -73,9 +75,6 @@ export function useLocationCategories() {
   });
 }
 
-/** @deprecated Используй useLocationCategories */
-export const usePointCategories = useLocationCategories;
-
 /**
  * Хук для создания новой локации обслуживания (POST /api/v1/locations)
  * Инвалидирует кэш списка локаций после успешного создания
@@ -97,5 +96,39 @@ export function useCreateLocation() {
   });
 }
 
-/** @deprecated Используй useLocations */
-export const useNetworkLocations = useLocations;
+/**
+ * Хук для обновления локации (PUT /api/v1/locations/{id})
+ * Инвалидирует кэш списка и конкретной локации
+ */
+export function useUpdateLocation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    ILocationDto,
+    unknown,
+    { id: string; data: UpdateLocationRequestDto }
+  >({
+    mutationKey: ["locations", "update"],
+    mutationFn: ({ id, data }) => LocationService.updateLocation(id, data),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["locations"] });
+      queryClient.invalidateQueries({ queryKey: ["locations", id] });
+    },
+  });
+}
+
+/**
+ * Хук для удаления локации (DELETE /api/v1/locations/{id})
+ * Инвалидирует кэш списка локаций
+ */
+export function useDeleteLocation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, unknown, string>({
+    mutationKey: ["locations", "delete"],
+    mutationFn: (id: string) => LocationService.deleteLocation(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["locations"] });
+    },
+  });
+}

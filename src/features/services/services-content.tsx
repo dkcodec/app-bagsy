@@ -1,179 +1,113 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { useLocationServices } from "@/src/shared/hooks/use-services";
-import { useLocations } from "@/src/shared/hooks/use-network-locations";
-import { useCurrentUser } from "@/src/shared/hooks/use-users";
-import { EUserRole } from "@/src/shared/types/user";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Skeleton,
-  Button,
-} from "@/src/entities";
+import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
+
+import { Button } from "@/src/entities";
+import {
+  useLocationServices,
+  useServiceCategories,
+} from "@/src/shared/hooks/use-services";
+import { useLocation } from "@/src/shared/hooks/use-network-locations";
+import { useCurrentUser } from "@/src/shared/hooks/use-users";
+import { useServiceStaffMap } from "@/src/shared/hooks/user-staff";
+import { useCalendarStore } from "@/src/features/calendar/calendar-context/store";
+import { EUserRole } from "@/src/shared/types/user";
+
 import { ErrorMessage } from "./components/error-message";
-import { ServicesTableHeader } from "./components/services-table-header";
-import { ServicesTableRow } from "./components/services-table-row";
-import { LocationSelect } from "./components/location-select";
 import { AddServiceDialog } from "./components/add-service-dialog";
+import { ServiceList } from "./components/service-list";
+import { useIsMobile } from "@/src/shared";
 
 /**
- * Компонент таблицы услуг локации обслуживания
+ * Компонент страницы услуг — оркестратор.
+ * locationId берётся из глобального calendar store (переключатель в сайдбаре).
  */
 export function ServicesContent() {
   const t = useTranslations("Services");
+  const isMobile = useIsMobile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { data: currentUser } = useCurrentUser();
 
-  // Определяем, нужно ли загружать локации сети (только для Owner)
-  const shouldLoadLocations =
-    currentUser && currentUser.role === EUserRole.OWNER;
+  // locationId из глобального стора (устанавливается в сайдбаре)
+  const locationId = useCalendarStore(s => s.locationId);
+  const setLocationId = useCalendarStore(s => s.setLocationId);
 
-  // Загружаем локации организации для Owner
-  const { data: locationsData } = useLocations();
-
-  // Вычисляем selectedLocationId
-  const selectedLocationId = useMemo(() => {
-    // Для MANAGER используем location_id из currentUser
-    if (currentUser?.role === EUserRole.MANAGER) {
-      return currentUser.location_id;
-    }
-
-    // Для Owner используем первую локацию из списка
-    if (
-      shouldLoadLocations &&
-      locationsData &&
-      locationsData.locations.length > 0
-    ) {
-      return locationsData.locations[0].id;
-    }
-
-    return undefined;
-  }, [currentUser, locationsData, shouldLoadLocations]);
-
-  // Локальное состояние для выбранной локации (для селектора)
-  const [localSelectedLocationId, setLocalSelectedLocationId] = useState<
-    string | undefined
-  >(selectedLocationId);
-
-  // Синхронизируем локальное состояние с вычисленным значением
+  // Для MANAGER: fallback на currentUser.location_id
   useEffect(() => {
-    if (selectedLocationId) {
-      setLocalSelectedLocationId(selectedLocationId);
+    if (
+      currentUser?.role === EUserRole.MANAGER &&
+      currentUser.location_id &&
+      !locationId
+    ) {
+      setLocationId(currentUser.location_id);
     }
-  }, [selectedLocationId]);
+  }, [currentUser, locationId, setLocationId]);
 
-  // Используем локальное состояние для запросов (если есть селектор) или вычисленное значение
-  const locationIdForQuery =
-    shouldLoadLocations && localSelectedLocationId
-      ? localSelectedLocationId
-      : selectedLocationId;
+  // Данные услуг
+  const { data, isLoading, error } = useLocationServices(locationId);
 
-  // Получение данных услуг
-  const { data, isLoading, error } = useLocationServices(locationIdForQuery);
+  // Категории услуг (нужны для группировки)
+  const { data: locationData } = useLocation(locationId);
+  const { data: categoriesData } = useServiceCategories(
+    locationData?.category_id
+  );
 
-  // Определение колонок таблицы
-  const tableColumns = [
-    { field: "name", labelKey: "table.name", sortable: false },
-    { field: "description", labelKey: "table.description", sortable: false },
-    { field: "duration", labelKey: "table.duration", sortable: false },
-    { field: "color", labelKey: "table.color", sortable: false },
-    { field: "price", labelKey: "table.price", sortable: false },
-    //{ field: "status", labelKey: "table.status", sortable: false },
-    { field: "masters", labelKey: "table.masters", sortable: false },
-  ];
+  // Карта serviceId → сотрудники (для аватарок в таблице и drawer)
+  const { staffMap } = useServiceStaffMap(locationId);
+
+  if (error) return <ErrorMessage error={error} />;
+
+  const services = data?.services || [];
+  const categories = categoriesData?.categories || [];
 
   return (
-    <div className="flex flex-col md:p-4">
-      {/* Селектор локации (только для owner) */}
-      {shouldLoadLocations && (
-        <div className="p-4">
-          <LocationSelect
-            value={localSelectedLocationId}
-            onValueChange={setLocalSelectedLocationId}
-          />
+    <div className="flex flex-col gap-4 p-4">
+      {/* Заголовок: кол-во + кнопка */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-end gap-3">
+          {!isLoading && services.length > 0 && (
+            <span className="text-xs text-muted-foreground pb-3">
+              {t("serviceCount", { count: services.length })}
+            </span>
+          )}
         </div>
-      )}
 
-      {/* Таблица */}
-      <Card className="border-none bg-background">
-        <CardHeader className="flex flex-row justify-between items-center px-6 py-2">
-          <CardTitle>{t("tableTitle")}</CardTitle>
+        {isMobile ? (
           <Button
+            size="icon"
             onClick={() => setIsDialogOpen(true)}
-            size="sm"
-            className="flex items-center gap-2"
-            disabled={!locationIdForQuery}
+            disabled={!locationId}
           >
             <Plus className="h-4 w-4" />
+          </Button>
+        ) : (
+          <Button
+            size="sm"
+            onClick={() => setIsDialogOpen(true)}
+            disabled={!locationId}
+          >
+            <Plus className="mr-1 h-4 w-4" />
             {t("addService")}
           </Button>
-        </CardHeader>
+        )}
+      </div>
 
-        <CardContent>
-          {/* Состояние загрузки */}
-          {error ? (
-            /* Ошибка загрузки */
-            <ErrorMessage error={error} />
-          ) : (
-            <>
-              {/* Таблица */}
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <ServicesTableHeader columns={tableColumns} />
-                  </TableHeader>
-                  <TableBody>
-                    {isLoading ? (
-                      <TableRow>
-                        {Array.from({ length: tableColumns.length }).map(
-                          (_, i) => (
-                            <TableCell key={i} className="h-12 w-full">
-                              <Skeleton className="h-12 w-full" />
-                            </TableCell>
-                          )
-                        )}
-                      </TableRow>
-                    ) : !data?.services || data.services.length === 0 ? (
-                      <TableRow>
-                        <TableCell
-                          colSpan={tableColumns.length}
-                          className="text-center py-8 text-muted-foreground"
-                        >
-                          {t("noData")}
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      data.services.map(service => (
-                        <ServicesTableRow
-                          key={service.id}
-                          service={service}
-                          locationId={locationIdForQuery}
-                        />
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
+      {/* Список услуг */}
+      <ServiceList
+        services={services}
+        categories={categories}
+        locationId={locationId || ""}
+        isLoading={isLoading}
+        staffMap={staffMap}
+      />
 
-      {/* Диалог добавления услуги */}
+      {/* Диалог добавления */}
       <AddServiceDialog
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
-        locationId={locationIdForQuery}
+        locationId={locationId}
       />
     </div>
   );

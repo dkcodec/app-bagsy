@@ -64,6 +64,18 @@ Backend создает (`POST /api/v1/services`):
 
 ---
 
+## Управление расписанием (в ЛК)
+
+Frontend (app.bagsy.kz/schedule):
+
+- Два таба: "График точки" и "Мой график"
+- **Fixed** (`schedule_type: "fixed"`): таб "Мой график" — read-only (информер: "Ваш график определяется расписанием точки")
+- **Mixed** (`schedule_type: "mixed"`): оба таба редактируемые, badge "Своё" для переопределённых дней сотрудника
+- Права: `can_manage_location_schedule` → редактирование графика точки; `can_provide_services` → просмотр/редактирование своего
+- Подробнее: `docs/SCHEDULE_PAGE.md`
+
+---
+
 ## Добавление мастеров (в ЛК)
 
 Frontend (app.bagsy.kz/staff → [Добавить сотрудника]):

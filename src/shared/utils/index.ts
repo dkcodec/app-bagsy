@@ -23,3 +23,6 @@ export * from "./cookies";
 
 // Форматирование ролей (ru/kz)
 export * from "./format-role";
+
+// Утилиты для расписания (splitWorkByBreaks, timeToMinutes)
+export * from "./schedule";

@@ -2,6 +2,7 @@
 
 Базовый URL: `NEXT_PUBLIC_API_URL` (например `https://api.bagsy.kz`)
 Авторизация: `Authorization: Bearer <access_token>` (помечено как 🔒)
+Swagger: `https://stage-backoffice.bagsy.kz/swagger/doc.json`
 
 ---
 
@@ -42,8 +43,8 @@ Errors:   400, 401, 500
 ⚠️ Только лендинг (bagsy.kz), НЕ в ЛК.
 
 ```
-Request:  { phone, password, first_name, last_name, plan_code }
-Response: { message, phone, expires_in, retry_after }
+Request:  { phone, password, organization_name }
+Response: { registration_id, retry_after }
 Errors:   400, 409, 500
 ```
 
@@ -52,7 +53,7 @@ Errors:   400, 409, 500
 ⚠️ Только лендинг.
 
 ```
-Request:  { phone, code }
+Request:  { phone, otp_code }
 Response: { access_token, refresh_token }
 ```
 
@@ -62,7 +63,7 @@ Response: { access_token, refresh_token }
 
 ```
 Request:  { phone }
-Response: { message, expires_in, retry_after }
+Response: { retry_after }
 ```
 
 ### `GET /api/v1/auth/verify/{token}`
@@ -71,7 +72,7 @@ Response: { message, expires_in, retry_after }
 
 ```
 Params:   token (path)
-Response: { phone, purpose, organization_id, location_id }
+Response: { phone, purpose, org_id, location_id }
 Errors:   400, 404, 500
 ```
 
@@ -91,43 +92,50 @@ Errors:   400, 403, 404, 500
 
 ```
 Request:  { token, new_password }
-Response: { access_token, refresh_token }
+Response: { message }
 Errors:   400, 401, 500
 ```
 
 ---
 
-## Bookings
+## Appointments (бронирования)
 
-### `POST /api/v1/bookings`
+### `POST /api/v1/appointments`
 
-Создание записи на услугу.
+Создание записи на услугу (требует OTP-подтверждения).
 
 ```
-Request:  { phone, first_name, last_name, comment?, employee_id, location_id, service_id, start_at }
-Response: { id: string }
+Request:  { client_phone, location_id, employee_id, service_id, date, time }
+Response: { appointment_id, status: "pending" }
 Errors:   400, 409, 500
 ```
 
-### `POST /api/v1/bookings/slots`
+### `POST /api/v1/appointments/slots`
 
-Получение доступных слотов.
+Получение доступных слотов, сгруппированных по сотрудникам.
 
 ```
-Request:  { location_id, service_id, start_date, end_date, employee_id? }
-Response: {
-  location_id, service_id, duration_minutes,
-  master_slots: [{ employee_id, employee_name, price, slots: [{ start_at, end_at }] }]
-}
+Request:  { location_id, service_id, date_from, date_to }
+Response: { slots: [{ employee_id, employee_name, price, slots: [{ start_at, end_at }] }] }
 Errors:   400, 404, 500
 ```
 
-### 🔒 `GET /api/v1/bookings/calendar`
+### 🔒 `POST /api/v1/appointments/direct`
 
-Календарь записей за период.
+Прямое создание записи сотрудником (без OTP, сразу confirmed).
 
 ```
-Params:   from (required), to (required), location_id?, employee_id?, status?
+Request:  { client_phone, location_id, employee_id, service_id, date, time }
+Response: { appointment_id, status: "confirmed" }
+Errors:   400, 401, 403, 409, 500
+```
+
+### 🔒 `GET /api/v1/appointments/calendar`
+
+Календарь записей за период (макс. 35 дней).
+
+```
+Params:   from (required), to (required), location_id?, employee_id?, include_cancelled?
 Response: {
   calendar: [{
     appointment_id, status, start_at, end_at, duration_minutes, price,
@@ -140,29 +148,29 @@ Response: {
 Errors:   400, 401, 403, 500
 ```
 
-### `POST /api/v1/bookings/{id}/confirm`
+### `POST /api/v1/appointments/{id}/confirm`
 
 Подтверждение записи OTP-кодом.
 
 ```
 Params:   id (path)
-Request:  { code: string }
+Request:  { otp_code: string }
 Response: 204 No Content
 Errors:   400, 404, 500
 ```
 
-### 🔒 `POST /api/v1/bookings/{id}/cancel`
+### 🔒 `POST /api/v1/appointments/{id}/cancel`
 
-Отмена записи.
+Отмена записи (только сотрудники).
 
 ```
 Params:   id (path)
-Request:  { reason?: string }
+Request:  { cancellation_reason?: string }
 Response: 204 No Content
 Errors:   400, 403, 404, 500
 ```
 
-### `POST /api/v1/bookings/{id}/resend-otp`
+### `POST /api/v1/appointments/{id}/resend-otp`
 
 Повторная отправка OTP подтверждения.
 
@@ -178,28 +186,50 @@ Errors:   400, 404, 500
 
 ### 🔒 `GET /api/v1/employees`
 
-Список сотрудников с фильтрацией.
+Список сотрудников с фильтрацией и пагинацией.
 
 ```
-Params:   location_id?, role?, phone_search?, limit?, offset?
+Params:   location_id?, role[]?, search?, active?, limit?, offset?, order_by?, sort_order?
 Response: { employees: [IEmployeeDto], total: number }
+Errors:   400, 401, 403, 500
 ```
 
 ### 🔒 `GET /api/v1/employees/me`
 
-Текущий сотрудник (замена `/users/me`).
+Текущий авторизованный сотрудник.
 
 ```
-Response: IEmployeeDto
+Response: {
+  id, phone, first_name, last_name, avatar_url, role,
+  location_id, active, created_at, updated_at,
+  organization: {
+    id, name,
+    subscription: {
+      plan: "solo"|"point"|"network",
+      status: string,
+      current_period_end: string,
+      limits: {
+        locations: { used, max },
+        employees: { used, max },
+        bookings_monthly: { used, max }
+      },
+      features: {
+        multi_location, sms_notifications, custom_branding, api_access
+      }
+    }
+  },
+  permissions: { can_provide_services, can_manage_location_schedule }
+}
 ```
 
 ### 🔒 `PUT /api/v1/employees/me`
 
-Обновление профиля.
+Обновление своего профиля.
 
 ```
-Request:  { first_name, last_name, avatar_id? }
+Request:  { first_name?, last_name?, avatar_id? }
 Response: IEmployeeDto
+Errors:   400, 401, 404, 410, 500
 ```
 
 ### 🔒 `POST /api/v1/employees/invite`
@@ -208,7 +238,7 @@ Response: IEmployeeDto
 
 ```
 Request:  { phone, first_name, last_name, role: "manager"|"staff", location_id }
-Response: { message, phone, expires_in }
+Response: { invitation_id, retry_after }
 Errors:   400, 401, 403, 409, 429, 500
 ```
 
@@ -218,7 +248,7 @@ Errors:   400, 401, 403, 409, 429, 500
 
 ```
 Request:  { token, password }
-Response: { access_token, refresh_token }
+Response: { access_token, refresh_token, employee }
 Errors:   400, 404, 409, 410, 500
 ```
 
@@ -228,13 +258,100 @@ Errors:   400, 404, 409, 410, 500
 
 ```
 Request:  { phone }
-Response: { message, phone, expires_in, retry_after }
+Response: { retry_after }
 Errors:   400, 401, 403, 404, 429, 500
+```
+
+### 🔒 `POST /api/v1/employees/{id}/activate`
+
+Активация сотрудника. Owner — любого, Manager — staff своей локации.
+
+```
+Params:   id (path, UUID)
+Response: 200
+Errors:   403, 404, 500
+```
+
+### 🔒 `POST /api/v1/employees/{id}/deactivate`
+
+Деактивация сотрудника. Только Owner.
+
+```
+Params:   id (path, UUID)
+Response: 200
+Errors:   403, 404, 500
+```
+
+### 🔒 `PATCH /api/v1/employees/{id}/role`
+
+Смена роли. Только Owner.
+
+```
+Params:   id (path, UUID)
+Request:  { role: "owner"|"manager"|"staff" }
+Response: 200
+Errors:   400, 403, 404, 500
+```
+
+### 🔒 `PATCH /api/v1/employees/{id}/permissions`
+
+Смена разрешений. Owner — любому, Manager — staff своей локации.
+
+```
+Params:   id (path, UUID)
+Request:  { can_provide_services?, can_manage_location_schedule? }
+Response: 200
+Errors:   403, 404, 500
+```
+
+### 🔒 `POST /api/v1/employees/{id}/transfer`
+
+Перевод сотрудника в другую локацию. Только Owner.
+
+```
+Params:   id (path, UUID)
+Request:  { location_id }
+Response: 200
+Errors:   400, 403, 404, 500
+```
+
+### 🔒 `GET /api/v1/employees/{id}/services`
+
+Список услуг сотрудника с индивидуальными ценами.
+
+```
+Params:   id (path, UUID)
+Response: { services: [{ service_id, service_name, price, ... }] }
+Errors:   400, 404, 500
 ```
 
 ---
 
 ## Locations
+
+### 🔒 `GET /api/v1/locations`
+
+Список локаций организации.
+
+```
+Params:   active?, limit?, offset?, order_by?, sort_order?
+Response: { locations: [ILocationDto], total }
+Errors:   400, 401, 403, 500
+```
+
+### 🔒 `GET /api/v1/locations/{id}`
+
+Получение локации по ID.
+
+```
+Params:   id (path, UUID)
+Response: ILocationDto {
+  id, name, description, phone, slug, category_id,
+  schedule_type, slot_duration_minutes, active, created_at,
+  address: { city, street, building, details },
+  coordinates: { latitude, longitude }
+}
+```
 
 ### 🔒 `POST /api/v1/locations`
 
@@ -248,24 +365,46 @@ Request: {
   slot_duration_minutes: 5|10|15|30|60,
   address: { city, street, building, details? }
 }
-Response: { id: string, prompt_org_profile: boolean }
-Errors:   400, 403, 500
+Response: { id, prompt_org_profile: boolean }
+Errors:   400, 401, 403, 500
 ```
 
-### 🔒 `GET /api/v1/locations`
+`prompt_org_profile` — бэкенд сигнализирует что organization.name не заполнено.
 
-Список локаций организации.
+### `GET /api/v1/locations/slug/{slug}`
 
-```
-Response: { locations: [ILocationDto] }
-```
-
-### 🔒 `GET /api/v1/locations/{id}`
-
-Получение локации по ID.
+Публичный эндпоинт — локация по slug + расписание на 7 дней.
 
 ```
-Response: ILocationDto
+Params:   slug (path)
+Response: ILocationDto + schedule: [{ id, date, start_time, end_time }]
+Errors:   404, 500
+```
+
+### 🔒 `PUT /api/v1/locations/{id}`
+
+Обновление локации. Все поля опциональны. Только Owner.
+
+```
+Params:   id (path, UUID)
+Request: {
+  name?, phone?, schedule_type?, slot_duration_minutes?,
+  latitude?, longitude?, active?,
+  address?: { city?, street?, building?, details? }
+}
+Response: 204 No Content
+Errors:   400, 401, 403, 404, 500
+```
+
+> ⚠️ `description` пока отсутствует в swagger — будет добавлен.
+
+### 🔒 `DELETE /api/v1/locations/{id}`
+
+Удаление локации.
+
+```
+Params:   id (path, UUID)
+Response: 204 No Content
 ```
 
 ### `GET /api/v1/locations/categories`
@@ -273,19 +412,23 @@ Response: ILocationDto
 Категории бизнеса для создания локации.
 
 ```
-Response: { categories: [{ id: string, name: string, slug: string, sort_order: number }] }
+Response: { categories: [{ id, name, slug, sort_order }] }
 ```
 
 ---
 
 ## Services
 
-### 🔒 `GET /api/v1/services/{location_id}`
+### 🔒 `GET /api/v1/services/{id}`
 
-Список услуг локации.
+Список услуг локации (id = location_id).
 
 ```
-Response: { services: [IServiceDto] }
+Params:   id (path, UUID локации)
+Response: { services: [{
+  id, name, description, category_id, color,
+  duration_minutes, min_price, max_price, sort_order, active
+}] }
 ```
 
 ### 🔒 `POST /api/v1/services`
@@ -293,8 +436,27 @@ Response: { services: [IServiceDto] }
 Создание услуги.
 
 ```
-Request:  { name, description, location_id, category_id, subcategory_id?, duration_minutes, color }
-Response: IServiceDto
+Request:  { name, description?, location_id, category_id, subcategory_id?, duration_minutes, color }
+Response: { id, ... }
+```
+
+### 🔒 `PUT /api/v1/services/{id}`
+
+Обновление услуги.
+
+```
+Params:   id (path, UUID)
+Request:  { name?, description?, duration_minutes?, color?, sort_order? }
+Response: serviceResponse
+```
+
+### 🔒 `DELETE /api/v1/services/{id}`
+
+Удаление услуги.
+
+```
+Params:   id (path, UUID)
+Response: 204 No Content
 ```
 
 ### `GET /api/v1/service-categories`
@@ -312,12 +474,73 @@ Response: { categories: [{ id, name, sort_order, children: [...] }] }
 
 ### 🔒 `POST /api/v1/employee-services`
 
-Привязка сотрудника к услуге.
+Привязка сотрудника к услуге с индивидуальной ценой.
 
 ```
-Request:  { employee_id: string, price: string, service_id: string }
-Response: { id: string }
-Errors:   400, 401, 403, 409, 500
+Request:  { employee_id, service_id, price }
+Response: { id }
+Errors:   400, 403, 404, 422, 500
+```
+
+---
+
+## Schedules
+
+### 🔒 `GET /api/v1/employee-schedules/{employeeID}`
+
+Расписание сотрудника за период.
+
+```
+Params:   employeeID (path, UUID), start (YYYY-MM-DD), end (YYYY-MM-DD)
+Response: { slots: [{ date, is_working, ranges: [{ start, end }], breaks: [{ start, end }] }] }
+```
+
+### 🔒 `PUT /api/v1/employee-schedules/{employeeID}`
+
+Установка расписания сотрудника (заменяет все слоты за период).
+
+```
+Params:   employeeID (path, UUID)
+Request:  { start, end, slots: [{ date, is_working, ranges, breaks }] }
+Response: 204 No Content
+Errors:   400, 401, 403, 404, 422, 500
+```
+
+### 🔒 `DELETE /api/v1/employee-schedules/{employeeID}`
+
+Удаление расписания сотрудника за период.
+
+```
+Params:   employeeID (path, UUID), start (YYYY-MM-DD), end (YYYY-MM-DD)
+Response: 204 No Content
+```
+
+### 🔒 `GET /api/v1/location-schedules/{locationID}`
+
+Расписание локации за период.
+
+```
+Params:   locationID (path, UUID), start (YYYY-MM-DD), end (YYYY-MM-DD)
+Response: { slots: [...] }
+```
+
+### 🔒 `PUT /api/v1/location-schedules/{locationID}`
+
+Установка расписания локации.
+
+```
+Params:   locationID (path, UUID)
+Request:  { start, end, slots: [...] }
+Response: 204 No Content
+```
+
+### 🔒 `DELETE /api/v1/location-schedules/{locationID}`
+
+Удаление расписания локации за период.
+
+```
+Params:   locationID (path, UUID), start (YYYY-MM-DD), end (YYYY-MM-DD)
+Response: 204 No Content
 ```
 
 ---
@@ -326,17 +549,45 @@ Errors:   400, 401, 403, 409, 500
 
 ### 🔒 `POST /api/v1/media/upload`
 
-Загрузка медиафайла (аватар и т.д.).
+Генерация presigned URL для загрузки файла.
 
 ```
-Request:  FormData { file, purpose: "avatars" }
-Response: { id: string, url: string }
+Request:  { filename, mime_type, purpose: "avatars"|"organizations"|"locations"|"services"|"service-categories", size_bytes }
+Response: { asset_id, upload_url, upload_fields: Record<string, string> }
 ```
 
-### 🔒 `DELETE /api/v1/media/avatar`
+### 🔒 `POST /api/v1/media/{id}/confirm`
 
-Удаление аватара.
+Подтверждение загрузки файла.
 
 ```
-Response: 204 No Content
+Params:   id (path, asset_id)
+Response: 200
 ```
+
+---
+
+## Organizations
+
+### 🔒 `PUT /api/v1/organizations/me`
+
+Обновление профиля организации (название и описание сети).
+Используется при создании сети — когда владелец решает объединить локации под одним брендом.
+
+```
+Request:  { name: string, description?: string }
+Response: { id: string, name: string, description: string }
+Errors:   400, 401, 403, 404, 500
+```
+
+---
+
+## Планы подписки (захардкожены на фронте)
+
+| Plan    | Цена         | Точки | Мастера | Триал           |
+| ------- | ------------ | ----- | ------- | --------------- |
+| Solo    | 5 000 ₸/мес  | 1     | 1       | 2 мес бесплатно |
+| Point   | 9 000 ₸/мес  | 1     | до 10   | 1 мес бесплатно |
+| Network | 25 000 ₸/мес | ∞     | ∞       | 1 мес бесплатно |
+
+⚠️ API для подписок/оплат пока нет. Оплата производится вручную через WhatsApp.

@@ -3,7 +3,7 @@ import type {
   IEmployeeDto,
   IEmployeePermissions,
   TUserRole,
-  UpdateEmployeeProfileRequest,
+  UpdateEmployeeAccountRequest,
 } from "../types/user";
 import type { IEmployeesResponse } from "../types/staff";
 
@@ -50,6 +50,45 @@ export interface ResendInviteResponse {
 }
 
 // ============================================================
+// Employee services types (связь сотрудник-услуга)
+// ============================================================
+
+/** Услуга сотрудника (из GET /api/v1/employees/{id}/services) */
+export interface IEmployeeServiceItem {
+  /** UUID услуги (это service.id, не employee_service.id) */
+  id: string;
+  /** UUID привязки сотрудник-услуга (для DELETE /api/v1/employee-services/{id}) */
+  employee_service_id: string;
+  category_id: string;
+  name: string;
+  description: string;
+  duration_minutes: number;
+  color: string;
+  sort_order: number;
+  active: boolean;
+  /** Индивидуальная цена сотрудника */
+  price: number;
+}
+
+/** Ответ GET /api/v1/employees/{id}/services */
+export interface IEmployeeServicesResponse {
+  services: IEmployeeServiceItem[];
+}
+
+/** Запрос POST /api/v1/employee-services — привязка сотрудника к услуге */
+export interface CreateEmployeeServiceRequest {
+  employee_id: string;
+  service_id: string;
+  /** Цена в тенге (строка) */
+  price: string;
+}
+
+/** Ответ POST /api/v1/employee-services */
+export interface CreateEmployeeServiceResponse {
+  id: string;
+}
+
+// ============================================================
 // List params
 // ============================================================
 
@@ -57,7 +96,7 @@ export interface ResendInviteResponse {
 export interface GetEmployeesParams {
   location_id?: string;
   role?: TUserRole[];
-  phone_search?: string;
+  search?: string;
   active?: boolean;
   limit?: number;
   offset?: number;
@@ -87,7 +126,7 @@ export class EmployeeService {
 
   /** Обновление профиля (PUT /api/v1/employees/me) */
   static async updateMe(
-    data: UpdateEmployeeProfileRequest
+    data: UpdateEmployeeAccountRequest
   ): Promise<IEmployeeDto> {
     return apiClient.put<IEmployeeDto>("api/v1/employees/me", data);
   }
@@ -102,8 +141,8 @@ export class EmployeeService {
       query: {
         ...(params?.location_id && { location_id: params.location_id }),
         ...(params?.role && params.role.length > 0 && { role: params.role }),
-        ...(params?.phone_search?.trim() && {
-          phone_search: params.phone_search,
+        ...(params?.search?.trim() && {
+          search: params.search,
         }),
         ...(params?.active !== undefined && { active: params.active }),
         ...(params?.limit && { limit: params.limit }),
@@ -178,11 +217,49 @@ export class EmployeeService {
     );
   }
 
+  /** Услуги сотрудника с ценами (GET /api/v1/employees/{id}/services) */
+  static async getEmployeeServices(
+    id: string
+  ): Promise<IEmployeeServicesResponse> {
+    return apiClient.get<IEmployeeServicesResponse>(
+      `api/v1/employees/${encodeURIComponent(id)}/services`
+    );
+  }
+
   /** Перевод на другую точку (POST /api/v1/employees/{id}/transfer) */
   static async transfer(id: string, location_id: string): Promise<void> {
     await apiClient.post(
       `api/v1/employees/${encodeURIComponent(id)}/transfer`,
       { location_id }
+    );
+  }
+
+  /** Отвязка сотрудника от точки (DELETE /api/v1/employees/{id}/location) — только owner */
+  static async removeFromLocation(id: string): Promise<void> {
+    await apiClient.delete(
+      `api/v1/employees/${encodeURIComponent(id)}/location`
+    );
+  }
+
+  // ——— Employee-Service links ———
+
+  /** Привязка сотрудника к услуге (POST /api/v1/employee-services) */
+  static async createEmployeeService(
+    data: CreateEmployeeServiceRequest
+  ): Promise<CreateEmployeeServiceResponse> {
+    return apiClient.post<CreateEmployeeServiceResponse>(
+      "api/v1/employee-services",
+      data
+    );
+  }
+
+  /**
+   * Отвязка сотрудника от услуги (DELETE /api/v1/employee-services/{id})
+   * TODO: эндпоинт на беке ещё не готов — подключить когда появится
+   */
+  static async removeEmployeeService(id: string): Promise<void> {
+    return apiClient.delete<void>(
+      `api/v1/employee-services/${encodeURIComponent(id)}`
     );
   }
 }

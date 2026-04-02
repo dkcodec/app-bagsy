@@ -70,7 +70,7 @@ export function LocationSelect({ value, onValueChange }: LocationSelectProps) {
           <SelectContent>
             {locationsData.locations.map(location => (
               <SelectItem key={location.id} value={location.id}>
-                {location.name} ({location.id.slice(0, 4)}...)
+                {location.name}
               </SelectItem>
             ))}
           </SelectContent>

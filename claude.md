@@ -19,9 +19,9 @@
 
 ```
 app/[locale]/(auth)/     — Логин, инвайт
-app/[locale]/(sidebar)/  — Основные страницы (dashboard, staff, locations, services, settings, profile)
+app/[locale]/(sidebar)/  — Основные страницы (dashboard, staff, locations, services, account)
 src/widgets/             — Составные UI (сайдбар, календарь)
-src/features/            — Бизнес-логика (auth, calendar, dashboard, staff, locations, services, profile, settings)
+src/features/            — Бизнес-логика (auth, calendar, dashboard, staff, locations, services, account)
 src/entities/            — UI-примитивы (shadcn/ui обёртки)
 src/shared/api/          — HTTP-клиент (fetch, auto-refresh 401)
 src/shared/services/     — API-сервисы
@@ -77,6 +77,8 @@ src/shared/providers/    — QueryProvider, ThemeProvider
 - `PLANS.md` — тарифы
 - `FLOW_SOLO/POINT/NETWORK.md` — пользовательские флоу
 - `FLOW_ADD_MASTER.md` — добавление мастера
+- `ACCOUNT_PAGE.md` — страница аккаунта (профиль, подписка, безопасность, внешний вид)
+- `SCHEDULE_PAGE.md` — страница расписания (календарь, editor, пресеты, права, мобилка)
 
 ## Важно
 

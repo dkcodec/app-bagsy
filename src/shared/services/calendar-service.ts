@@ -9,7 +9,7 @@ const MAX_DATE_RANGE_DAYS = 35;
 
 /**
  * Сервис календаря. Инкапсулирует эндпоинты и валидацию данных.
- * Эндпоинт: GET /api/v1/bookings/calendar
+ * Эндпоинт: GET /api/v1/appointments/calendar
  */
 export class CalendarService {
   /**
@@ -52,7 +52,7 @@ export class CalendarService {
       queryParams.include_cancelled = "true";
     }
 
-    return apiClient.get<CalendarApiResponse>("api/v1/bookings/calendar", {
+    return apiClient.get<CalendarApiResponse>("api/v1/appointments/calendar", {
       query: queryParams,
     });
   }

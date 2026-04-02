@@ -23,6 +23,8 @@
 | date-fns          | 4      | Даты                        |
 | Leaflet           | —      | Карты (выбор адреса)        |
 | @dnd-kit          | —      | Drag & Drop в календаре     |
+| vaul              | —      | Bottom sheet (Drawer)       |
+| sonner            | —      | Toast-уведомления           |
 
 ---
 
@@ -36,8 +38,7 @@ app/                          # Next.js App Router (страницы)
 │   ├── staff/                # Сотрудники
 │   ├── locations/            # Локации
 │   ├── services/             # Услуги
-│   ├── profile/              # Профиль
-│   └── settings/             # Настройки
+│   └── account/              # Аккаунт (профиль + настройки, 4 таба)
 
 src/
 ├── widgets/                  # Составные UI-блоки
@@ -52,10 +53,10 @@ src/
 │   ├── staff/                # Таблица сотрудников, RegisterStaffForm
 │   ├── locations/            # Таблица локаций, AddLocationForm, карта
 │   ├── services/             # Таблица услуг, AddServiceForm, LocationSelect
-│   ├── profile/              # Профиль пользователя
-│   └── settings/             # Тема, локаль, push-уведомления
+│   ├── schedule/             # Расписание: календарь, editor, пресеты, bottom sheet
+│   └── account/              # Аккаунт: профиль, подписка, безопасность, внешний вид
 ├── entities/                 # UI-примитивы (shadcn/ui обёртки)
-│   └── *.tsx                 # Button, Dialog, Input, Table, etc.
+│   └── *.tsx                 # Button, Dialog, Drawer, Input, Table, etc.
 └── shared/                   # Общая инфраструктура
     ├── api/client.ts         # HTTP-клиент (fetch, auto-refresh 401 + proactive refresh)
     ├── services/             # API-сервисы
@@ -82,28 +83,31 @@ src/
 | `src/shared/services/location-service.ts` | Локации                                            |
 | `src/shared/services/service-service.ts`  | Услуги + категории                                 |
 | `src/shared/services/master-service.ts`   | Привязка сотрудников к услугам                     |
+| `src/shared/services/schedule-service.ts` | Расписание (employee/location schedules)           |
 | `src/shared/services/media-service.ts`    | Загрузка медиа (S3 presigned URL)                  |
 
 ### Хуки (React Query)
 
-| Файл                                      | Хуки                                                                |
-| ----------------------------------------- | ------------------------------------------------------------------- |
-| `src/shared/hooks/use-auth.ts`            | useLogin, useLogout, usePasswordReset                               |
-| `src/shared/hooks/use-users.ts`           | useCurrentUser, useUpdateProfile                                    |
-| `src/shared/hooks/use-calendar.ts`        | useCalendar (main hook)                                             |
-| `src/shared/hooks/user-staff.ts`          | useGetEmployees, useInviteEmployee                                  |
-| `src/shared/hooks/use-services.ts`        | useLocationServices, useServiceCategories, useCreateService         |
-| `src/shared/hooks/use-network-points.ts`  | useLocations, useLocation, useCreateLocation, useLocationCategories |
-| `src/shared/hooks/use-bagsies.ts`         | useCreateBooking, useCancelBooking                                  |
-| `src/shared/hooks/use-master-services.ts` | useCreateMasterService                                              |
+| Файл                                           | Хуки                                                                                                                                                        |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/shared/hooks/use-auth.ts`                 | useLogin, useLogout, usePasswordReset                                                                                                                       |
+| `src/shared/hooks/use-users.ts`                | useCurrentUser, useUpdateProfile                                                                                                                            |
+| `src/shared/hooks/use-calendar.ts`             | useCalendar (main hook)                                                                                                                                     |
+| `src/shared/hooks/user-staff.ts`               | useGetEmployees, useInviteEmployee, useGetEmployeeServices, useActivateEmployee, useDeactivateEmployee, useChangeEmployeePermissions, useChangeEmployeeRole |
+| `src/shared/hooks/use-services.ts`             | useLocationServices, useServiceCategories, useCreateService                                                                                                 |
+| `src/shared/hooks/use-network-points.ts`       | useLocations, useLocation, useCreateLocation, useLocationCategories                                                                                         |
+| `src/shared/hooks/use-bagsies.ts`              | useCreateBooking, useCancelBooking                                                                                                                          |
+| `src/shared/hooks/use-master-services.ts`      | useCreateMasterService                                                                                                                                      |
+| `src/shared/hooks/use-schedule-permissions.ts` | useSchedulePermissions (scope, rights по plan/type)                                                                                                         |
 
 ### Типы
 
-| Файл                           | Содержимое                                     |
-| ------------------------------ | ---------------------------------------------- |
-| `src/shared/types/user.ts`     | EUserRole, IEmployeeDto, IUserDto (deprecated) |
-| `src/shared/types/calendar.ts` | IEvent, CalendarApiResponse, TCalendarView     |
-| `src/shared/types/staff.ts`    | IStaffDto (deprecated)                         |
+| Файл                           | Содержимое                                           |
+| ------------------------------ | ---------------------------------------------------- |
+| `src/shared/types/user.ts`     | EUserRole, IEmployeeDto, IUserDto (deprecated)       |
+| `src/shared/types/calendar.ts` | IEvent, CalendarApiResponse, TCalendarView           |
+| `src/shared/types/staff.ts`    | IStaffDto (deprecated)                               |
+| `src/shared/types/schedule.ts` | ScheduleScope, DaySchedule, MonthSchedule, TimeRange |
 
 ### Утилиты
 
@@ -113,6 +117,7 @@ src/
 | `src/shared/utils/jwt.ts`                 | decodeJwt (client-side)                            |
 | `src/shared/utils/calendar-api-mapper.ts` | API → IEvent маппинг                               |
 | `src/shared/utils/formater.ts`            | parseTimestamp, formatTimestamp, toTimestampWithTz |
+| `src/shared/utils/avatar.ts`              | getInitials (имя + фамилия → инициалы)             |
 
 ---
 

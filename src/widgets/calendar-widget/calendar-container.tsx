@@ -7,6 +7,7 @@ import { useCalendar } from "@/src/features/calendar";
 
 import { DndProviderWrapper } from "./dnd";
 import { CalendarHeader } from "./header";
+import { CalendarColorLegend } from "./color-legend";
 import { CalendarMonthView } from "./month-view";
 import { CalendarAgendaView } from "./agenda-view";
 import { CalendarDayView, CalendarWeekView } from "./week-and-day-view";
@@ -142,6 +143,8 @@ export const CalendarContainer = memo(function CalendarContainer({
           />
         )}
       </DndProviderWrapper>
+
+      <CalendarColorLegend />
     </div>
   );
 });

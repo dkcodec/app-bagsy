@@ -7,7 +7,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../forms/dropdown-menu";
@@ -24,7 +23,7 @@ import type { IEmployeeDto } from "@/src/shared/types/user";
 import { Skeleton } from "@/src/entities/skeleton";
 
 export function NavUser({ user }: { user?: IEmployeeDto }) {
-  const { isMobile } = useSidebar();
+  const { isMobile, setOpenMobile } = useSidebar();
   const t = useTranslations("Sidebar.User");
 
   const logout = useLogout();
@@ -74,11 +73,15 @@ export function NavUser({ user }: { user?: IEmployeeDto }) {
             align="end"
             sideOffset={4}
           >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div
-                className="flex items-center gap-2 px-1 py-1.5 text-left text-sm cursor-pointer"
-                onClick={() => router.push("/profile")}
-              >
+            {/* Клик по профилю → переход в аккаунт + закрытие меню */}
+            <DropdownMenuItem
+              className="p-0 cursor-pointer"
+              onClick={() => {
+                setOpenMobile(false);
+                router.push("/account");
+              }}
+            >
+              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   {user?.avatar_url ? (
                     <AvatarImage
@@ -97,7 +100,7 @@ export function NavUser({ user }: { user?: IEmployeeDto }) {
                   <span className="truncate text-xs">{user?.phone}</span>
                 </div>
               </div>
-            </DropdownMenuLabel>
+            </DropdownMenuItem>
             {/* <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem className="cursor-pointer">
@@ -108,7 +111,10 @@ export function NavUser({ user }: { user?: IEmployeeDto }) {
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="cursor-pointer"
-              onClick={() => logout.mutate()}
+              onClick={() => {
+                setOpenMobile(false);
+                logout.mutate();
+              }}
             >
               <LogOut />
               {t("logout")}

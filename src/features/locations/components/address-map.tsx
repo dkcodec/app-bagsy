@@ -94,7 +94,7 @@ export function AddressMap({
 
   return (
     <div
-      className={`h-[300px] w-full rounded-md overflow-hidden border ${className || ""}`}
+      className={`h-[300px] w-full rounded-md overflow-hidden border relative z-0 ${className || ""}`}
     >
       <MapContainer
         center={center}

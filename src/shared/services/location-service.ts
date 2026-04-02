@@ -10,18 +10,12 @@ export interface ILocationCategory {
   sort_order: number;
 }
 
-/** @deprecated Используй ILocationCategory */
-export type IPointCategory = ILocationCategory;
-
 /**
  * Ответ API для получения списка категорий локаций
  */
 export interface ILocationCategoriesResponse {
   categories: ILocationCategory[];
 }
-
-/** @deprecated Используй ILocationCategoriesResponse */
-export type IPointCategoriesResponse = ILocationCategoriesResponse;
 
 /**
  * Адрес локации (из swagger)
@@ -102,6 +96,22 @@ export interface CreateLocationResponseDto {
 }
 
 /**
+ * Данные для обновления локации (PUT /api/v1/locations/{id})
+ * Все поля опциональны
+ */
+export interface UpdateLocationRequestDto {
+  name?: string;
+  description?: string;
+  phone?: string;
+  latitude?: number;
+  longitude?: number;
+  schedule_type?: string;
+  slot_duration_minutes?: number;
+  active?: boolean;
+  address?: Partial<ILocationAddress>;
+}
+
+/**
  * Сервис локаций (locations).
  */
 export class LocationService {
@@ -146,9 +156,6 @@ export class LocationService {
     );
   }
 
-  /** @deprecated Используй getLocationCategories */
-  static getPointCategories = LocationService.getLocationCategories;
-
   /**
    * Создание новой локации обслуживания (POST /api/v1/locations)
    */
@@ -156,5 +163,25 @@ export class LocationService {
     data: CreateLocationRequestDto
   ): Promise<CreateLocationResponseDto> {
     return apiClient.post<CreateLocationResponseDto>("api/v1/locations", data);
+  }
+
+  /**
+   * Обновление локации (PUT /api/v1/locations/{id})
+   */
+  static async updateLocation(
+    id: string,
+    data: UpdateLocationRequestDto
+  ): Promise<ILocationDto> {
+    return apiClient.put<ILocationDto>(
+      `api/v1/locations/${encodeURIComponent(id)}`,
+      data
+    );
+  }
+
+  /**
+   * Удаление локации (DELETE /api/v1/locations/{id})
+   */
+  static async deleteLocation(id: string): Promise<void> {
+    await apiClient.delete(`api/v1/locations/${encodeURIComponent(id)}`);
   }
 }
