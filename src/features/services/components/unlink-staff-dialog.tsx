@@ -51,7 +51,10 @@ export function UnlinkStaffDialog({
         <DialogHeader>
           <DialogTitle>{t("unlinkTitle")}</DialogTitle>
           <DialogDescription>
-            {t("unlinkDescription", { name: employeeName, service: serviceName })}
+            {t("unlinkDescription", {
+              name: employeeName,
+              service: serviceName,
+            })}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-2 sm:gap-0">
