@@ -43,7 +43,11 @@ export function useLogout() {
     mutationFn: () => AuthService.logout(),
     onSuccess: () => {
       queryClient.clear(); // Полностью очищаем весь кэш при логауте
-      useCalendarStore.persist.clearStorage(); // Сбрасываем locationId из localStorage
+      useCalendarStore.persist.clearStorage(); // Очищаем localStorage
+      useCalendarStore.setState({
+        locationId: undefined,
+        badgeVariant: "colored",
+      }); // Сбрасываем in-memory состояние
       router.refresh();
     },
   });
