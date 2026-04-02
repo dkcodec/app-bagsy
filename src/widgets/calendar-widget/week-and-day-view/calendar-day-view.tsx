@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, memo } from "react";
-import { Calendar, Clock, User } from "lucide-react";
+import { Calendar, Clock, Phone, User } from "lucide-react";
 import { parseISO, areIntervalsOverlapping, format, isSameDay } from "date-fns";
 import { ru, kk } from "date-fns/locale";
 
@@ -25,6 +25,7 @@ import {
 
 import type { IEvent } from "@/src/shared/types/calendar";
 import { useLocale, useTranslations } from "next-intl";
+import { formatPhone } from "@/src/shared";
 
 interface IProps {
   singleDayEvents: IEvent[];
@@ -302,15 +303,22 @@ export const CalendarDayView = memo(function CalendarDayView({
                       <div className="flex items-center gap-1.5 text-muted-foreground">
                         <Calendar className="size-3.5" />
                         <span className="text-sm">
-                          {/* {format(new Date(), "MMM d, yyyy")} */}
+                          {format(new Date(), "MMM d, yyyy")}
                         </span>
                       </div>
 
                       <div className="flex items-center gap-1.5 text-muted-foreground">
                         <Clock className="size-3.5" />
                         <span className="text-sm">
-                          {format(parseISO(event.startDate), "h:mm a")} -{" "}
-                          {format(parseISO(event.endDate), "h:mm a")}
+                          {format(parseISO(event.startDate), "HH:MM")} -{" "}
+                          {format(parseISO(event.endDate), "HH:MM")}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Phone className="size-3.5" />
+                        <span className="text-sm">
+                          {formatPhone(event.customerPhone)}
                         </span>
                       </div>
                     </div>
