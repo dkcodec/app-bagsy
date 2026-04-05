@@ -165,8 +165,10 @@ export function isWorkingHour(
   hour: number,
   workingHours: TWorkingHours
 ) {
-  const dayIndex = day.getDay() as keyof typeof workingHours;
-  const dayHours = workingHours[dayIndex];
+  const key = format(day, "yyyy-MM-dd");
+  const dayHours = workingHours[key];
+  // Нет данных для этой даты — выходной, закрашиваем полностью
+  if (!dayHours) return false;
   return hour >= dayHours.from && hour < dayHours.to;
 }
 

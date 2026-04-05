@@ -160,6 +160,7 @@ Toast-уведомления через Sonner: `savedSuccess`, `savedError`, `d
 ### Partial save (dirty days)
 
 `save(data, days?)` отправляет **только изменённые дни**:
+
 - `start`/`end` сужается до `min(days)..max(days)` — API перезаписывает только этот диапазон
 - Слоты фильтруются по указанным дням
 - `dirtyDaysRef` в `schedule-content.tsx` трекает какие дни менялись (через `markDirty`)

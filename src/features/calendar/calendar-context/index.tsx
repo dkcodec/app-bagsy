@@ -62,6 +62,9 @@ export function CalendarProvider({
     (s: CalendarState) => s.setLocalEvents
   );
   const loadSchedule = useCalendarStore((s: CalendarState) => s.loadSchedule);
+  const loadedScheduleRange = useCalendarStore(
+    (s: CalendarState) => s.loadedScheduleRange
+  );
   const setSelectedDate = useCalendarStore(
     (s: CalendarState) => s.setSelectedDate
   );
@@ -161,6 +164,25 @@ export function CalendarProvider({
       prevSelectedDateRef.current = selectedDateValue;
     }
   }, [selectedDateValue]);
+
+  // Перезагружаем расписание когда selectedDate выходит за загруженный диапазон
+  useEffect(() => {
+    if (!locationIdToUse || !selectedDateValue) return;
+    if (!loadedScheduleRange) return; // Ещё не загружали — первый loadSchedule сработает по locationId
+    const dateStr = selectedDateValue.toISOString().slice(0, 10);
+    if (
+      dateStr < loadedScheduleRange.from ||
+      dateStr > loadedScheduleRange.to
+    ) {
+      loadSchedule(locationIdToUse, selectedEmployeeId);
+    }
+  }, [
+    selectedDateValue,
+    loadedScheduleRange,
+    locationIdToUse,
+    selectedEmployeeId,
+    loadSchedule,
+  ]);
 
   return <>{children}</>;
 }
