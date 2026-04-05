@@ -394,7 +394,7 @@ export function ScheduleContent() {
       onApplyToSelected={applyToSelected}
       readOnly={readOnly}
       currentMonth={currentMonth}
-      locationSchedule={locationScheduleData}
+      locationSchedule={activeScope === "staff" ? locationScheduleData : null}
       onSave={handleSave}
       onMarkDayOff={handleMarkDayOff}
       isSaving={isSaving}
@@ -469,7 +469,7 @@ export function ScheduleContent() {
         </div>
       ) : (
         /* Основной layout */
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-4 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_400px] gap-4 items-start">
           {/* Левая колонка — календарь + пресеты */}
           <div className="flex flex-col gap-3">
             <Card>
@@ -513,6 +513,9 @@ export function ScheduleContent() {
                 onApplyToSelected={applyToSelected}
                 onApplyToDays={applyToDays}
                 onSelectDays={setSelectedDays}
+                onMarkAutoOpened={days =>
+                  days.forEach(d => autoOpenedDaysRef.current.add(d))
+                }
                 readOnly={readOnly}
                 isMobile={isMobile}
                 onAfterPreset={isMobile ? () => setSheetOpen(true) : undefined}

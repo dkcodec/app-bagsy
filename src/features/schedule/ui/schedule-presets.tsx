@@ -20,6 +20,8 @@ export interface SchedulePresetsProps {
   readOnly?: boolean;
   /** Мобильный режим — горизонтальный скролл. */
   isMobile?: boolean;
+  /** Регистрация авто-открытых дней (для отката при deselect). */
+  onMarkAutoOpened: (days: number[]) => void;
   /** Вызывается после применения пресета (для открытия drawer на мобилке). */
   onAfterPreset?: () => void;
 }
@@ -50,6 +52,7 @@ export function SchedulePresets({
   onSelectDays,
   readOnly = false,
   isMobile = false,
+  onMarkAutoOpened,
   onAfterPreset,
 }: SchedulePresetsProps) {
   const t = useTranslations("Schedule.Presets");
@@ -65,9 +68,17 @@ export function SchedulePresets({
       onApplyToDays([d], isWeekend ? closedSchedule : workDaySchedule);
       if (!isWeekend) workDays.push(d);
     });
+    onMarkAutoOpened(workDays);
     onSelectDays(workDays);
     onAfterPreset?.();
-  }, [daysInMonth, firstDayOffset, onSelectDays, onApplyToDays, onAfterPreset]);
+  }, [
+    daysInMonth,
+    firstDayOffset,
+    onSelectDays,
+    onApplyToDays,
+    onMarkAutoOpened,
+    onAfterPreset,
+  ]);
 
   /* По чётным: чётные — рабочие, нечётные — выходные. */
   const applyEvenDays = useCallback(() => {
@@ -76,9 +87,16 @@ export function SchedulePresets({
     days.forEach(d => {
       onApplyToDays([d], d % 2 === 0 ? workDaySchedule : closedSchedule);
     });
+    onMarkAutoOpened(workDays);
     onSelectDays(workDays);
     onAfterPreset?.();
-  }, [daysInMonth, onSelectDays, onApplyToDays, onAfterPreset]);
+  }, [
+    daysInMonth,
+    onSelectDays,
+    onApplyToDays,
+    onMarkAutoOpened,
+    onAfterPreset,
+  ]);
 
   /* По нечётным: нечётные — рабочие, чётные — выходные. */
   const applyOddDays = useCallback(() => {
@@ -87,9 +105,16 @@ export function SchedulePresets({
     days.forEach(d => {
       onApplyToDays([d], d % 2 !== 0 ? workDaySchedule : closedSchedule);
     });
+    onMarkAutoOpened(workDays);
     onSelectDays(workDays);
     onAfterPreset?.();
-  }, [daysInMonth, onSelectDays, onApplyToDays, onAfterPreset]);
+  }, [
+    daysInMonth,
+    onSelectDays,
+    onApplyToDays,
+    onMarkAutoOpened,
+    onAfterPreset,
+  ]);
 
   if (readOnly) return null;
 

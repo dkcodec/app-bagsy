@@ -10,7 +10,7 @@ import {
   format,
 } from "date-fns";
 import { ScheduleService } from "@/src/shared/services/schedule-service";
-import { splitWorkByBreaks } from "@/src/shared/utils/schedule";
+import { splitWorkByBreaks, mergeAdjacentWork } from "@/src/shared/utils/schedule";
 import type {
   MonthSchedule,
   ScheduleScope,
@@ -51,10 +51,12 @@ function slotsToMonthSchedule(
     }
   }
 
-  /* Сортируем интервалы по start внутри каждого дня. */
+  /* Сортируем интервалы и склеиваем split work-ranges обратно. */
   for (let d = 1; d <= daysInMonth; d++) {
     result[d].workRanges.sort((a, b) => a.start.localeCompare(b.start));
     result[d].breaks.sort((a, b) => a.start.localeCompare(b.start));
+    /* Обратная операция к splitWorkByBreaks — юзер видит [9-18] вместо [9-13, 14-18]. */
+    result[d].workRanges = mergeAdjacentWork(result[d].workRanges, result[d].breaks);
   }
 
   return result;

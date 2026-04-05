@@ -143,7 +143,7 @@ export function MonthGrid({
           hasSchedule && daySchedule.workRanges[0]
             ? formatCellTime(
                 daySchedule.workRanges[0].start,
-                daySchedule.workRanges[0].end,
+                daySchedule.workRanges[daySchedule.workRanges.length - 1].end,
                 isMobile
               )
             : null;

@@ -79,7 +79,7 @@ src/features/schedule/
 - **Клик** — toggle выбора дня (прошедшие дни заблокированы)
 - **Shift+клик** — выбор диапазона от последнего выбранного
 - Автоматическое открытие закрытых дней при выборе (дефолт 09:00–18:00)
-- `autoOpenedDaysRef` отслеживает авто-открытые дни для отката при deselect
+- `autoOpenedDaysRef` отслеживает авто-открытые дни для отката при deselect (включая shift+клик и пресеты)
 
 ---
 
@@ -91,7 +91,7 @@ src/features/schedule/
 
 - Мелко: "Выбрано: N дн."
 - Крупнее (при single select): "Вторник, 31 марта"
-- Badge "Своё" для mixed staff — когда расписание сотрудника отличается от расписания точки
+- Badge "Своё" — только для mixed staff scope, когда расписание сотрудника отличается от расписания точки (не показывается при редактировании точки)
 
 ### Содержимое
 
@@ -118,6 +118,7 @@ src/features/schedule/
 - На мобилке — горизонтальный скролл (`overflow-x-auto flex-nowrap`)
 - На десктопе — flex-wrap + подсказка "Shift+клик для выделения диапазона"
 - После применения пресета на мобилке — автоматически открывается bottom sheet
+- Пресеты регистрируют рабочие дни в `autoOpenedDaysRef` через `onMarkAutoOpened` — при deselect без сохранения дни откатываются
 - Скрыты в read-only режиме
 
 ---
@@ -133,11 +134,14 @@ src/features/schedule/
 
 ## Валидация
 
-При сохранении (`handleSave`) проверяется:
+При сохранении (`handleSave`) проверяется **только для изменённых (dirty) дней**:
 
 1. **end <= start** — время окончания раньше или равно началу → toast `endBeforeStart`
 2. **Пересечение рабочих интервалов** → toast `overlappingRanges`
 3. **Перерыв вне рабочих часов** — перерыв не помещается внутрь ни одного рабочего интервала → toast `breakOutsideWork`
+4. **Пересечение перерывов** → toast `overlappingBreaks`
+
+`validateSchedule(schedule, days?)` принимает опциональный фильтр дней. Нетронутые дни не валидируются — это избегает ложных ошибок из-за round-trip маппинга.
 
 Toast-уведомления через Sonner: `savedSuccess`, `savedError`, `dayOffSuccess`.
 
@@ -153,13 +157,33 @@ Toast-уведомления через Sonner: `savedSuccess`, `savedError`, `d
 - Scope `"staff"` → `GET/PUT /api/v1/employee-schedules/{employeeID}`
 - Параметры `start` / `end` — первый и последний день месяца (`YYYY-MM-DD`)
 
+### Partial save (dirty days)
+
+`save(data, days?)` отправляет **только изменённые дни**:
+- `start`/`end` сужается до `min(days)..max(days)` — API перезаписывает только этот диапазон
+- Слоты фильтруются по указанным дням
+- `dirtyDaysRef` в `schedule-content.tsx` трекает какие дни менялись (через `markDirty`)
+- Если `days` не указан — отправляется весь месяц (fallback)
+
+### Round-trip маппинг
+
+При отправке на бэк `splitWorkByBreaks()` разрезает work-ranges по перерывам:
+`work 9-18 + break 13-14` → `[work 9-13, rest 13-14, work 14-18]`
+
+При загрузке обратно `mergeAdjacentWork()` склеивает обратно:
+`[work 9-13, work 14-18] + break 13-14` → `[work 9-18]` + `break 13-14`
+
+Склеивание происходит **только** если промежуток между work-ranges точно совпадает с break. Два независимых work-range (например `9-13` и `15-18` без break в промежутке) остаются как есть.
+
 ### Dual fetch для mixed staff
 
 При `activeScope === "staff"` и `schedule_type === "mixed"` — дополнительный запрос расписания точки для определения badge "Своё" (кастомный override).
 
 ### Локальный стейт
 
-`localSchedule` — копия серверных данных для редактирования. Синхронизируется с сервером при загрузке и смене месяца. `isDirty` отслеживает наличие несохранённых изменений.
+`localSchedule` — копия серверных данных для редактирования. Синхронизируется с сервером при загрузке и смене месяца.
+
+`dirtyDaysRef: Set<number>` трекает номера изменённых дней. `isDirty` — derived state (`dirtyDaysRef.current.size > 0`). При сохранении/сбросе/sync — очищается через `clearDirty()`.
 
 ---
 
