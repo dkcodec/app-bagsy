@@ -91,9 +91,17 @@ export function EmployeeRowActions({
   const isSoloPlan = plan === ESubscriptionPlan.SOLO;
   const isNetworkPlan = plan === ESubscriptionPlan.NETWORK;
 
+  const isManager = currentUser?.role === EUserRole.MANAGER;
   const canChangeRole = isOwner && !isSelf;
-  const canTransfer = isOwner && isNetworkPlan;
-  const canDetach = isOwner && !isSelf;
+  const canTransfer = isOwner && isNetworkPlan && !isSelf;
+  // Detach: только network план. Owner — любого (кроме себя), Manager — только staff своей локации
+  const canDetach =
+    isNetworkPlan &&
+    !isSelf &&
+    (isOwner ||
+      (isManager &&
+        employee.role === EUserRole.STAFF &&
+        employee.location_id === currentUser?.location_id));
 
   // Handlers
   const handleChangeRole = () => {
