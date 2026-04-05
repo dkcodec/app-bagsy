@@ -120,6 +120,8 @@
         "comment": "Пікір",
         "commentDescription": "Қосымша ақпарат",
         "add": "Жазбаны қосу",
+        "notLinkedService": "Байланыстырылмаған",
+        "notLinkedMaster": "Байланыстырылмаған",
         "cancel": "Бас тарту",
         "errors": {
           "firstNameRequired": "Атыңызды енгізіңіз",

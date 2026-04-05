@@ -1,6 +1,13 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { isSameDay, startOfWeek, endOfWeek, format } from "date-fns";
+import {
+  isSameDay,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  format,
+} from "date-fns";
 
 import type {
   IEvent,
@@ -13,77 +20,47 @@ import { ScheduleService } from "@/src/shared/services/schedule-service";
 import type { ScheduleSlotDto } from "@/src/shared/types/schedule";
 import { parseScheduleTime } from "@/src/shared/utils/datetime";
 
-const WORKING_HOURS: TWorkingHours = {
-  0: { from: 8, to: 17 },
-  1: { from: 8, to: 17 },
-  2: { from: 8, to: 17 },
-  3: { from: 8, to: 17 },
-  4: { from: 8, to: 17 },
-  5: { from: 8, to: 17 },
-  6: { from: 0, to: 0 },
-};
-
 const VISIBLE_HOURS: TVisibleHours = { from: 7, to: 18 };
 
 function clampHour(hour: number) {
   return Math.min(24, Math.max(0, hour));
 }
 
-function emptyWorkingHours(): TWorkingHours {
-  // JS Date.getDay(): 0..6 (вс..сб)
-  return {
-    0: { from: 0, to: 0 },
-    1: { from: 0, to: 0 },
-    2: { from: 0, to: 0 },
-    3: { from: 0, to: 0 },
-    4: { from: 0, to: 0 },
-    5: { from: 0, to: 0 },
-    6: { from: 0, to: 0 },
-  };
-}
-
-/** Маппинг ScheduleSlotDto[] → TWorkingHours (группировка work-слотов по дню недели) */
+/** Маппинг ScheduleSlotDto[] → TWorkingHours (work-слоты по дате, перерывы между ними закрашиваются) */
 export function mapScheduleSlotsToWorkingHours(
   slots: ScheduleSlotDto[]
 ): TWorkingHours | null {
-  const result = emptyWorkingHours();
-  const seen = new Set<number>();
+  const result: TWorkingHours = {};
+  let hasWork = false;
 
   for (const slot of slots) {
     if (slot.type !== "work") continue;
+    hasWork = true;
 
-    // date = "YYYY-MM-DD" → определяем день недели
-    const date = new Date(slot.date + "T00:00:00");
-    const dow = date.getDay(); // 0=вс, 6=сб
-
+    const dateKey = slot.date; // "YYYY-MM-DD"
     const from = parseScheduleTime(slot.start_time).hour;
     let to = parseScheduleTime(slot.end_time).hour;
     // "00:00" в end_time → конец дня (24:00)
     if (to === 0 && from > 0) to = 24;
 
-    if (!seen.has(dow)) {
-      result[dow] = { from, to };
-      seen.add(dow);
-    } else {
-      // Несколько рабочих слотов в один день — расширяем диапазон
-      result[dow] = {
-        from: Math.min(result[dow].from, from),
-        to: Math.max(result[dow].to, to),
-      };
-    }
+    if (!result[dateKey]) result[dateKey] = [];
+    result[dateKey].push({ from, to });
   }
 
-  // Если нет ни одного work-слота — расписание не настроено, оставляем дефолты
-  return seen.size > 0 ? result : null;
+  // Сортируем интервалы по времени начала
+  for (const key of Object.keys(result)) {
+    result[key].sort((a, b) => a.from - b.from);
+  }
+
+  return hasWork ? result : null;
 }
 
 function deriveVisibleHoursFromWorkingHours(
   workingHours: TWorkingHours
 ): TVisibleHours | null {
-  // Если рабочие часы не заданы — не трогаем visibleHours
-  const active = Object.values(workingHours ?? {}).filter(
-    v => v && v.to > v.from
-  );
+  // Собираем все рабочие интервалы из всех дней
+  const allRanges = Object.values(workingHours ?? {}).flat();
+  const active = allRanges.filter(v => v && v.to > v.from);
   if (!active.length) return null;
 
   const minFrom = Math.min(...active.map(v => v.from));
@@ -106,6 +83,8 @@ export type CalendarState = {
   setWorkingHours: (
     updater: TWorkingHours | ((prev: TWorkingHours) => TWorkingHours)
   ) => void;
+  /** Загруженный диапазон дат расписания */
+  loadedScheduleRange: { from: string; to: string } | null;
   loadWorkingHours: (locationId: string | undefined) => Promise<void>;
   /** Загрузить расписание конкретного сотрудника (или вернуть расписание локации если "all") */
   loadSchedule: (
@@ -146,7 +125,8 @@ export const useCalendarStore = create<CalendarState>()(
         set({ badgeVariant: variant }),
       masters: [],
       setMasters: (masters: IEmployeeDto[]) => set({ masters }),
-      workingHours: WORKING_HOURS,
+      workingHours: {},
+      loadedScheduleRange: null,
       setWorkingHours: (
         updater: TWorkingHours | ((prev: TWorkingHours) => TWorkingHours)
       ) =>
@@ -168,13 +148,14 @@ export const useCalendarStore = create<CalendarState>()(
       ) => {
         if (!locationId) return;
         try {
-          const now = new Date();
-          const weekStart = format(
-            startOfWeek(now, { weekStartsOn: 1 }),
+          // Запрашиваем месяц selectedDate + overflow дни для недельного вида
+          const selectedDate = get().selectedDate;
+          const rangeFrom = format(
+            startOfWeek(startOfMonth(selectedDate), { weekStartsOn: 1 }),
             "yyyy-MM-dd"
           );
-          const weekEnd = format(
-            endOfWeek(now, { weekStartsOn: 1 }),
+          const rangeTo = format(
+            endOfWeek(endOfMonth(selectedDate), { weekStartsOn: 1 }),
             "yyyy-MM-dd"
           );
 
@@ -183,22 +164,27 @@ export const useCalendarStore = create<CalendarState>()(
             employeeId === "all"
               ? await ScheduleService.getLocationSchedule(
                   locationId,
-                  weekStart,
-                  weekEnd
+                  rangeFrom,
+                  rangeTo
                 )
               : await ScheduleService.getEmployeeSchedule(
                   employeeId,
-                  weekStart,
-                  weekEnd
+                  rangeFrom,
+                  rangeTo
                 );
 
-          const workingHours = mapScheduleSlotsToWorkingHours(slots);
-          if (!workingHours) return; // Нет данных — оставляем текущие
+          const newHours = mapScheduleSlotsToWorkingHours(slots);
+          if (!newHours) return; // Нет данных — оставляем текущие
 
-          set({ workingHours });
+          // Мерджим с существующими данными чтобы не терять соседние месяцы
+          const merged = { ...get().workingHours, ...newHours };
+          set({
+            workingHours: merged,
+            loadedScheduleRange: { from: rangeFrom, to: rangeTo },
+          });
 
           if (get().isVisibleHoursAuto) {
-            const vis = deriveVisibleHoursFromWorkingHours(workingHours);
+            const vis = deriveVisibleHoursFromWorkingHours(merged);
             if (vis) set({ visibleHours: vis });
           }
         } catch {

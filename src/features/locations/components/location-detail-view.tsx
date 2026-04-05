@@ -87,7 +87,7 @@ export function LocationDetailView({
   }, [location.address]);
 
   const bookingUrl = `bagsy.kz/appointment/${location.slug}`;
-  const bookingFullUrl = `https://bagsy.kz/appointment/${location.slug}`;
+  const bookingFullUrl = `${process.env.NEXT_PUBLIC_DOMAIN}appointment/${location.slug}`;
 
   // Копирование ссылки
   const handleCopyLink = async () => {

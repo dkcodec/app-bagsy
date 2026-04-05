@@ -119,6 +119,8 @@
         "comment": "Комментарий",
         "commentDescription": "Дополнительная информация",
         "add": "Добавить запись",
+        "notLinkedService": "Не привязана",
+        "notLinkedMaster": "Не привязан",
         "cancel": "Отмена",
         "errors": {
           "firstNameRequired": "Введите имя",

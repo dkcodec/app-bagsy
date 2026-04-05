@@ -86,3 +86,35 @@ export function splitWorkByBreaks(
 
   return result;
 }
+
+/**
+ * Обратная операция к splitWorkByBreaks.
+ * Склеивает смежные work-ranges, между которыми есть break.
+ *
+ * Пример: workRanges [9-13, 14-18], breaks [13-14]
+ *   → workRanges [9-18], breaks [13-14]
+ */
+export function mergeAdjacentWork(
+  workRanges: TimeRange[],
+  breaks: TimeRange[]
+): TimeRange[] {
+  if (workRanges.length <= 1 || breaks.length === 0) return workRanges;
+
+  const sorted = [...workRanges].sort(
+    (a, b) => timeToMinutes(a.start) - timeToMinutes(b.start)
+  );
+  const breakSet = new Set(breaks.map(b => `${b.start}-${b.end}`));
+
+  const merged: TimeRange[] = [sorted[0]];
+  for (let i = 1; i < sorted.length; i++) {
+    const prev = merged[merged.length - 1];
+    const curr = sorted[i];
+    /* Если между prev.end и curr.start есть break — склеиваем. */
+    if (breakSet.has(`${prev.end}-${curr.start}`)) {
+      prev.end = curr.end;
+    } else {
+      merged.push(curr);
+    }
+  }
+  return merged;
+}

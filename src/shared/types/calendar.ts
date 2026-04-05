@@ -35,7 +35,8 @@ export const EVENT_COLOR_BG: Record<TEventColor, string> = {
 };
 
 export type TBadgeVariant = "dot" | "colored" | "mixed";
-export type TWorkingHours = { [key: number]: { from: number; to: number } };
+/** Ключ — "YYYY-MM-DD", значение — массив рабочих интервалов (перерывы между ними закрашиваются) */
+export type TWorkingHours = Record<string, { from: number; to: number }[]>;
 export type TVisibleHours = { from: number; to: number };
 
 /** Событие календаря (внутренний формат фронта) */
