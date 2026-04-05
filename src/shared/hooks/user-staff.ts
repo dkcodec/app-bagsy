@@ -199,17 +199,15 @@ export interface ServiceStaffMember {
  * Загружает сотрудников локации, затем для каждого — его услуги,
  * и строит обратную map serviceId → [{employee, price}]
  */
-export function useServiceStaffMap(locationId: string | undefined) {
-  // Загружаем ВСЕХ сотрудников локации (включая owner)
+export function useServiceStaffMap(
+  locationId: string | undefined,
+  roles?: TUserRole[]
+) {
   const { data: employeesData } = useGetEmployees(
     locationId
       ? {
           location_id: locationId,
-          role: [
-            EUserRole.STAFF,
-            EUserRole.MANAGER,
-            EUserRole.OWNER,
-          ] as TUserRole[],
+          role: roles ?? [EUserRole.STAFF, EUserRole.MANAGER, EUserRole.OWNER],
         }
       : undefined
   );

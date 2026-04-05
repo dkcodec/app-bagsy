@@ -13,7 +13,7 @@ import { useLocation } from "@/src/shared/hooks/use-network-locations";
 import { useCurrentUser } from "@/src/shared/hooks/use-users";
 import { useServiceStaffMap } from "@/src/shared/hooks/user-staff";
 import { useCalendarStore } from "@/src/features/calendar/calendar-context/store";
-import { EUserRole } from "@/src/shared/types/user";
+import { EUserRole, TUserRole } from "@/src/shared/types/user";
 
 import { ErrorMessage } from "./components/error-message";
 import { AddServiceDialog } from "./components/add-service-dialog";
@@ -54,8 +54,17 @@ export function ServicesContent() {
     locationData?.category_id
   );
 
+  const isStaff = currentUser?.role === EUserRole.STAFF;
+  const isManager = currentUser?.role === EUserRole.MANAGER;
+
+  const staffMapRoles: TUserRole[] = isStaff
+    ? [EUserRole.STAFF]
+    : isManager
+      ? [EUserRole.STAFF, EUserRole.MANAGER]
+      : [EUserRole.STAFF, EUserRole.MANAGER, EUserRole.OWNER];
+
   // Карта serviceId → сотрудники (для аватарок в таблице и drawer)
-  const { staffMap } = useServiceStaffMap(locationId);
+  const { staffMap } = useServiceStaffMap(locationId, staffMapRoles);
 
   if (error) return <ErrorMessage error={error} />;
 

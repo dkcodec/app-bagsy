@@ -106,14 +106,15 @@ Optimistic update: при переключении сразу обновляет
 
 ## DropdownMenu (`employee-row-actions.tsx`)
 
-| Пункт        | Условие отображения      | Действие                |
-| ------------ | ------------------------ | ----------------------- |
-| View Profile | всегда                   | открыть drawer          |
-| Change Role  | owner + не сам себя      | Dialog: select role     |
-| Transfer     | owner + network-план     | Dialog: select location |
-| ---          | —                        | separator               |
-| Deactivate   | не solo-план + активен   | Dialog подтверждения    |
-| Activate     | не solo-план + неактивен | Dialog подтверждения    |
+| Пункт        | Условие отображения                                                    | Действие                |
+| ------------ | ---------------------------------------------------------------------- | ----------------------- |
+| View Profile | всегда                                                                 | открыть drawer          |
+| Change Role  | owner + не сам себя                                                    | Dialog: select role     |
+| Transfer     | owner + network-план + не сам себя                                     | Dialog: select location |
+| Detach       | network-план + не сам себя + (owner ИЛИ manager для staff своей точки) | Dialog подтверждения    |
+| ---          | —                                                                      | separator               |
+| Deactivate   | не solo-план + активен                                                 | Dialog подтверждения    |
+| Activate     | не solo-план + неактивен                                               | Dialog подтверждения    |
 
 ## Оптимистичные обновления
 

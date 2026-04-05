@@ -17,7 +17,7 @@ import {
 } from "@/src/shared/hooks/user-staff";
 import { useCalendar } from "@/src/features/calendar/calendar-context";
 import { toTimestampWithTz } from "@/src/shared/utils/formater";
-import { EUserRole } from "@/src/shared/types/user";
+import { EUserRole, type TUserRole } from "@/src/shared/types/user";
 import {
   createAddAppointmentSchema,
   type TAddAppointmentFormData,
@@ -89,8 +89,15 @@ export function AddEventDrawer({
   const isMobile = useIsMobile();
 
   const isStaff = currentUser?.role === EUserRole.STAFF;
+  const isManager = currentUser?.role === EUserRole.MANAGER;
   // manager и выше: выбор мастера из employees; для STAFF — только свой id (поле скрыто)
   const showMasterSelect = !isStaff && masters.length > 0;
+  // Роли для запроса привязок: staff → [staff], manager → [staff, manager], owner → все
+  const staffMapRoles: TUserRole[] = isStaff
+    ? [EUserRole.STAFF]
+    : isManager
+      ? [EUserRole.STAFF, EUserRole.MANAGER]
+      : [EUserRole.STAFF, EUserRole.MANAGER, EUserRole.OWNER];
   // Solo plan / один мастер — автовыбор
   const defaultEmployeeId = showMasterSelect
     ? masters.length === 1
@@ -117,19 +124,25 @@ export function AddEventDrawer({
   const watchedEmployeeId = form.watch("employee_id");
   const watchedServiceId = form.watch("service_id");
 
-  // Услуги выбранного мастера
+  // Для staff — один запрос по своему id, для остальных — по выбранному мастеру
+  const employeeIdForServices = isStaff
+    ? currentUser?.id
+    : watchedEmployeeId || undefined;
   const { data: employeeServicesData } = useGetEmployeeServices(
-    watchedEmployeeId || undefined
+    employeeIdForServices
   );
   const linkedServiceIds = useMemo(
     () => new Set(employeeServicesData?.services.map(s => s.id)),
     [employeeServicesData]
   );
 
-  // Мастера привязанные к услугам (map serviceId → employees)
-  const { staffMap } = useServiceStaffMap(locationId);
+  // Мастера привязанные к услугам — только для manager+ (staff не выбирает мастера)
+  const { staffMap } = useServiceStaffMap(
+    !isStaff ? locationId : undefined,
+    staffMapRoles
+  );
   const linkedEmployeeIds = useMemo(() => {
-    if (!watchedServiceId) return null; // услуга не выбрана — нет ограничений
+    if (!watchedServiceId) return null;
     const staff = staffMap.get(watchedServiceId);
     return new Set(staff?.map(s => s.employee.id) ?? []);
   }, [watchedServiceId, staffMap]);
@@ -279,9 +292,9 @@ export function AddEventDrawer({
                       {servicesData?.services
                         ?.filter(s => s.active)
                         .map(s => {
-                          // Мастер выбран, но услуга не привязана к нему
+                          // Сотрудник определён, но услуга не привязана к нему
                           const isUnlinked =
-                            !!watchedEmployeeId &&
+                            !!employeeIdForServices &&
                             linkedServiceIds.size > 0 &&
                             !linkedServiceIds.has(s.id);
                           return (
