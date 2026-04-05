@@ -26,7 +26,7 @@ function clampHour(hour: number) {
   return Math.min(24, Math.max(0, hour));
 }
 
-/** Маппинг ScheduleSlotDto[] → TWorkingHours (группировка work-слотов по дате "YYYY-MM-DD") */
+/** Маппинг ScheduleSlotDto[] → TWorkingHours (work-слоты по дате, перерывы между ними закрашиваются) */
 export function mapScheduleSlotsToWorkingHours(
   slots: ScheduleSlotDto[]
 ): TWorkingHours | null {
@@ -43,15 +43,13 @@ export function mapScheduleSlotsToWorkingHours(
     // "00:00" в end_time → конец дня (24:00)
     if (to === 0 && from > 0) to = 24;
 
-    if (!result[dateKey]) {
-      result[dateKey] = { from, to };
-    } else {
-      // Несколько рабочих слотов в один день — расширяем диапазон
-      result[dateKey] = {
-        from: Math.min(result[dateKey].from, from),
-        to: Math.max(result[dateKey].to, to),
-      };
-    }
+    if (!result[dateKey]) result[dateKey] = [];
+    result[dateKey].push({ from, to });
+  }
+
+  // Сортируем интервалы по времени начала
+  for (const key of Object.keys(result)) {
+    result[key].sort((a, b) => a.from - b.from);
   }
 
   return hasWork ? result : null;
@@ -60,10 +58,9 @@ export function mapScheduleSlotsToWorkingHours(
 function deriveVisibleHoursFromWorkingHours(
   workingHours: TWorkingHours
 ): TVisibleHours | null {
-  // Если рабочие часы не заданы — не трогаем visibleHours
-  const active = Object.values(workingHours ?? {}).filter(
-    v => v && v.to > v.from
-  );
+  // Собираем все рабочие интервалы из всех дней
+  const allRanges = Object.values(workingHours ?? {}).flat();
+  const active = allRanges.filter(v => v && v.to > v.from);
   if (!active.length) return null;
 
   const minFrom = Math.min(...active.map(v => v.from));

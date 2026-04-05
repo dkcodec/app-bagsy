@@ -166,10 +166,11 @@ export function isWorkingHour(
   workingHours: TWorkingHours
 ) {
   const key = format(day, "yyyy-MM-dd");
-  const dayHours = workingHours[key];
+  const ranges = workingHours[key];
   // Нет данных для этой даты — выходной, закрашиваем полностью
-  if (!dayHours) return false;
-  return hour >= dayHours.from && hour < dayHours.to;
+  if (!ranges || ranges.length === 0) return false;
+  // Час рабочий если попадает хотя бы в один рабочий интервал (перерывы между ними — закрашены)
+  return ranges.some(r => hour >= r.from && hour < r.to);
 }
 
 export function getVisibleHours(

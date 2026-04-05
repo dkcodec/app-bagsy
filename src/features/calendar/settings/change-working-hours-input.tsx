@@ -2,14 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { Info, Moon } from "lucide-react";
-import { useCalendar } from "@/src/features/calendar/calendar-context";
-
 import { Switch } from "@/src/entities/switch";
 import { TimeInput } from "@/src/entities/time-input";
 
 import type { TimeValue } from "react-aria-components";
 import { useTranslations } from "next-intl";
-import type { TWorkingHours } from "@/src/shared/types/calendar";
+/** Настройки видимых часов по дням недели (0=пн..6=вс) — для UI настроек, не путать с TWeeklyHoursConfig */
+type TWeeklyHoursConfig = Record<number, { from: number; to: number }>;
 import {
   Popover,
   PopoverContent,
@@ -27,7 +26,7 @@ const DAYS_OF_WEEK = [
 ];
 
 interface ChangeWorkingHoursInputProps {
-  onWorkingHoursChange?: (workingHours: TWorkingHours) => void;
+  onWorkingHoursChange?: (workingHours: TWeeklyHoursConfig) => void;
   isMobile?: boolean;
 }
 
@@ -35,12 +34,19 @@ export function ChangeWorkingHoursInput({
   onWorkingHoursChange,
   isMobile = false,
 }: ChangeWorkingHoursInputProps) {
-  const { workingHours } = useCalendar();
   const t = useTranslations("Dashboard.Settings");
 
-  const [localWorkingHours, setLocalWorkingHours] = useState({
-    ...workingHours,
-  });
+  // Дефолтные часы для UI настроек (по дням недели 0=пн..6=вс)
+  const [localWorkingHours, setLocalWorkingHours] =
+    useState<TWeeklyHoursConfig>({
+      0: { from: 9, to: 17 },
+      1: { from: 9, to: 17 },
+      2: { from: 9, to: 17 },
+      3: { from: 9, to: 17 },
+      4: { from: 9, to: 17 },
+      5: { from: 0, to: 0 },
+      6: { from: 0, to: 0 },
+    });
   const [isOpen, setIsOpen] = useState(false);
   // Уведомляем родительский компонент об изменениях
   useEffect(() => {
