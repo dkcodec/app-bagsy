@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -11,6 +11,10 @@ import { useCreateAppointment } from "@/src/shared/hooks";
 import { useLocationServices } from "@/src/shared/hooks/use-services";
 import { useCurrentUser } from "@/src/shared/hooks/use-users";
 import { useIsMobile } from "@/src/shared/hooks/use-mobile";
+import {
+  useGetEmployeeServices,
+  useServiceStaffMap,
+} from "@/src/shared/hooks/user-staff";
 import { useCalendar } from "@/src/features/calendar/calendar-context";
 import { toTimestampWithTz } from "@/src/shared/utils/formater";
 import { EUserRole } from "@/src/shared/types/user";
@@ -109,6 +113,27 @@ export function AddEventDrawer({
     },
   });
 
+  // --- Привязки услуг ↔ мастеров ---
+  const watchedEmployeeId = form.watch("employee_id");
+  const watchedServiceId = form.watch("service_id");
+
+  // Услуги выбранного мастера
+  const { data: employeeServicesData } = useGetEmployeeServices(
+    watchedEmployeeId || undefined
+  );
+  const linkedServiceIds = useMemo(
+    () => new Set(employeeServicesData?.services.map(s => s.id)),
+    [employeeServicesData]
+  );
+
+  // Мастера привязанные к услугам (map serviceId → employees)
+  const { staffMap } = useServiceStaffMap(locationId);
+  const linkedEmployeeIds = useMemo(() => {
+    if (!watchedServiceId) return null; // услуга не выбрана — нет ограничений
+    const staff = staffMap.get(watchedServiceId);
+    return new Set(staff?.map(s => s.employee.id) ?? []);
+  }, [watchedServiceId, staffMap]);
+
   const onSubmit = async (values: TAddAppointmentFormData) => {
     const employeeId = isStaff ? currentUser?.id : values.employee_id;
     if (!employeeId) {
@@ -183,28 +208,39 @@ export function AddEventDrawer({
                       <SelectValue placeholder={t("staffDescription")} />
                     </SelectTrigger>
                     <SelectContent>
-                      {masters.map(master => (
-                        <SelectItem
-                          key={master.id}
-                          value={master.id}
-                          className="flex-1"
-                        >
-                          <div className="flex items-center gap-2">
-                            <Avatar className="size-6">
-                              <AvatarImage
-                                src={master.avatar_url}
-                                alt={`${master.first_name} ${master.last_name}`}
-                              />
-                              <AvatarFallback className="text-xxs">
-                                {`${master.first_name[0]}${master.last_name[0]}`}
-                              </AvatarFallback>
-                            </Avatar>
-                            <p className="truncate">
-                              {master.first_name} {master.last_name}
-                            </p>
-                          </div>
-                        </SelectItem>
-                      ))}
+                      {masters.map(master => {
+                        const isUnlinked =
+                          linkedEmployeeIds !== null &&
+                          !linkedEmployeeIds.has(master.id);
+                        return (
+                          <SelectItem
+                            key={master.id}
+                            value={master.id}
+                            disabled={isUnlinked}
+                            className="flex-1"
+                          >
+                            <div className="flex items-center gap-2">
+                              <Avatar className="size-6">
+                                <AvatarImage
+                                  src={master.avatar_url}
+                                  alt={`${master.first_name} ${master.last_name}`}
+                                />
+                                <AvatarFallback className="text-xxs">
+                                  {`${master.first_name[0]}${master.last_name[0]}`}
+                                </AvatarFallback>
+                              </Avatar>
+                              <p className="truncate">
+                                {master.first_name} {master.last_name}
+                              </p>
+                              {isUnlinked && (
+                                <span className="text-xs text-muted-foreground ml-auto">
+                                  {t("notLinkedMaster")}
+                                </span>
+                              )}
+                            </div>
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -242,16 +278,32 @@ export function AddEventDrawer({
                     <SelectContent>
                       {servicesData?.services
                         ?.filter(s => s.active)
-                        .map(s => (
-                          <SelectItem key={s.id} value={s.id}>
-                            <span className="flex items-center gap-2">
-                              <span
-                                className={`size-2.5 shrink-0 rounded-full ${EVENT_COLOR_BG[s.color as TEventColor] ?? "bg-gray-600"}`}
-                              />
-                              {s.name}
-                            </span>
-                          </SelectItem>
-                        ))}
+                        .map(s => {
+                          // Мастер выбран, но услуга не привязана к нему
+                          const isUnlinked =
+                            !!watchedEmployeeId &&
+                            linkedServiceIds.size > 0 &&
+                            !linkedServiceIds.has(s.id);
+                          return (
+                            <SelectItem
+                              key={s.id}
+                              value={s.id}
+                              disabled={isUnlinked}
+                            >
+                              <span className="flex items-center gap-2">
+                                <span
+                                  className={`size-2.5 shrink-0 rounded-full ${EVENT_COLOR_BG[s.color as TEventColor] ?? "bg-gray-600"}`}
+                                />
+                                {s.name}
+                                {isUnlinked && (
+                                  <span className="text-xs text-muted-foreground ml-auto">
+                                    {t("notLinkedService")}
+                                  </span>
+                                )}
+                              </span>
+                            </SelectItem>
+                          );
+                        })}
                     </SelectContent>
                   </Select>
                 )}
