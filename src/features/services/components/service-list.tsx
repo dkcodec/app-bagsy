@@ -8,6 +8,8 @@ import type { IServiceDto } from "@/src/shared/services/service-service";
 import type { IServiceCategory } from "@/src/shared/services/service-service";
 import { useCreateService } from "@/src/shared/hooks/use-services";
 import type { ServiceStaffMember } from "@/src/shared/hooks/user-staff";
+import { useCurrentUser } from "@/src/shared/hooks/use-users";
+import { EUserRole } from "@/src/shared/types/user";
 import { ServiceRow } from "./service-row";
 import { ServiceDrawer, type DrawerTab } from "./service-drawer";
 import { DeleteServiceDialog } from "./delete-service-dialog";
@@ -32,6 +34,8 @@ export function ServiceList({
 }: ServiceListProps) {
   const t = useTranslations("Services");
   const createService = useCreateService();
+  const { data: currentUser } = useCurrentUser();
+  const isStaff = currentUser?.role === EUserRole.STAFF;
 
   // Drawer state
   const [drawerService, setDrawerService] = useState<IServiceDto | null>(null);
@@ -115,8 +119,10 @@ export function ServiceList({
   return (
     <>
       <div className="border rounded-lg overflow-hidden">
-        {/* Заголовки колонок */}
-        <div className="hidden md:grid md:grid-cols-[6px_1fr_90px_110px_100px_32px] gap-3 items-center px-4 py-2 border-b bg-muted/30">
+        {/* Заголовки колонок (staff — без мастеров и действий) */}
+        <div
+          className={`hidden md:grid gap-3 items-center px-4 py-2 border-b bg-muted/30 ${isStaff ? "md:grid-cols-[6px_1fr_90px_110px]" : "md:grid-cols-[6px_1fr_90px_110px_100px_32px]"}`}
+        >
           <span />
           <span className="text-xs text-muted-foreground">
             {t("table.name")}
@@ -127,10 +133,14 @@ export function ServiceList({
           <span className="text-xs text-muted-foreground">
             {t("table.price")}
           </span>
-          <span className="text-xs text-muted-foreground">
-            {t("table.masters")}
-          </span>
-          <span />
+          {!isStaff && (
+            <>
+              <span className="text-xs text-muted-foreground">
+                {t("table.masters")}
+              </span>
+              <span />
+            </>
+          )}
         </div>
 
         {/* Группы по категориям */}
@@ -150,6 +160,7 @@ export function ServiceList({
                 key={service.id}
                 service={service}
                 staff={staffMap.get(service.id) || []}
+                isStaff={isStaff}
                 onRowClick={() => openDrawer(service, "details")}
                 onAssignClick={() => openDrawer(service, "staff")}
                 onEdit={() => openDrawer(service, "details")}

@@ -57,14 +57,17 @@ interface ServiceDetailsTabProps {
   service: IServiceDto;
   /** Закрыть drawer после удаления */
   onClose?: () => void;
+  /** Только просмотр (для staff) */
+  readOnly?: boolean;
 }
 
 /**
- * Таб "Детали" в drawer услуги — форма редактирования
+ * Таб "Детали" в drawer услуги — форма редактирования (или просмотр для staff)
  */
 export function ServiceDetailsTab({
   service,
   onClose,
+  readOnly,
 }: ServiceDetailsTabProps) {
   const t = useTranslations("Services.drawer");
   const tForm = useTranslations("Services.addServiceForm");
@@ -125,7 +128,10 @@ export function ServiceDetailsTab({
               <FormItem>
                 <FormLabel>{tForm("name")}</FormLabel>
                 <FormControl>
-                  <Input {...field} disabled={updateMutation.isPending} />
+                  <Input
+                    {...field}
+                    disabled={readOnly || updateMutation.isPending}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -143,7 +149,7 @@ export function ServiceDetailsTab({
                   <Textarea
                     {...field}
                     rows={3}
-                    disabled={updateMutation.isPending}
+                    disabled={readOnly || updateMutation.isPending}
                   />
                 </FormControl>
                 <FormMessage />
@@ -163,7 +169,7 @@ export function ServiceDetailsTab({
                     <Input
                       type="number"
                       step={15}
-                      disabled={updateMutation.isPending}
+                      disabled={readOnly || updateMutation.isPending}
                       {...field}
                       onChange={e => {
                         const v = parseInt(e.target.value, 10);
@@ -187,7 +193,7 @@ export function ServiceDetailsTab({
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
-                      disabled={updateMutation.isPending}
+                      disabled={readOnly || updateMutation.isPending}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -223,7 +229,7 @@ export function ServiceDetailsTab({
                   <Input
                     type="number"
                     className="w-24"
-                    disabled={updateMutation.isPending}
+                    disabled={readOnly || updateMutation.isPending}
                     {...field}
                     onChange={e => {
                       const v = parseInt(e.target.value, 10);
@@ -237,40 +243,44 @@ export function ServiceDetailsTab({
             )}
           />
 
-          {/* Кнопки */}
-          <div className="flex gap-2 pt-2">
-            <Button
-              type="submit"
-              className="flex-2"
-              disabled={updateMutation.isPending}
-            >
-              {updateMutation.isPending ? (
-                <>
-                  <Loader className="mr-2 size-4 animate-spin" />
-                  {t("saving")}
-                </>
-              ) : (
-                t("save")
-              )}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1 text-destructive hover:text-destructive"
-              onClick={() => setDeleteOpen(true)}
-            >
-              {t("deleteBtn")}
-            </Button>
-          </div>
+          {/* Кнопки (скрыты для staff) */}
+          {!readOnly && (
+            <div className="flex gap-2 pt-2">
+              <Button
+                type="submit"
+                className="flex-2"
+                disabled={updateMutation.isPending}
+              >
+                {updateMutation.isPending ? (
+                  <>
+                    <Loader className="mr-2 size-4 animate-spin" />
+                    {t("saving")}
+                  </>
+                ) : (
+                  t("save")
+                )}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1 text-destructive hover:text-destructive"
+                onClick={() => setDeleteOpen(true)}
+              >
+                {t("deleteBtn")}
+              </Button>
+            </div>
+          )}
         </form>
       </Form>
 
-      <DeleteServiceDialog
-        service={service}
-        open={deleteOpen}
-        onOpenChange={setDeleteOpen}
-        onSuccess={onClose}
-      />
+      {!readOnly && (
+        <DeleteServiceDialog
+          service={service}
+          open={deleteOpen}
+          onOpenChange={setDeleteOpen}
+          onSuccess={onClose}
+        />
+      )}
     </>
   );
 }

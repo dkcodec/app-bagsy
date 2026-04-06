@@ -18,6 +18,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/src/entities/tabs";
 import type { IServiceDto } from "@/src/shared/services/service-service";
 import type { ServiceStaffMember } from "@/src/shared/hooks/user-staff";
 import { useIsMobile } from "@/src/shared/hooks/use-mobile";
+import { useCurrentUser } from "@/src/shared/hooks/use-users";
+import { EUserRole } from "@/src/shared/types/user";
 import { ServiceDetailsTab } from "./service-details-tab";
 import { ServiceStaffTab } from "./service-staff-tab";
 
@@ -51,6 +53,8 @@ export function ServiceDrawer({
 }: ServiceDrawerProps) {
   const t = useTranslations("Services.drawer");
   const isMobile = useIsMobile();
+  const { data: currentUser } = useCurrentUser();
+  const isStaff = currentUser?.role === EUserRole.STAFF;
 
   if (!service) return null;
 
@@ -58,13 +62,15 @@ export function ServiceDrawer({
 
   // Общий заголовок
   const headerContent = (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 overflow-hidden">
       <div
         className="size-2 rounded-full shrink-0"
         style={{ backgroundColor: service.color }}
       />
-      <div className="min-w-0">
-        <p className="text-base font-semibold leading-tight">{service.name}</p>
+      <div className="min-w-0 flex-1">
+        <p className="text-base font-semibold leading-tight truncate">
+          {service.name}
+        </p>
         {service.description && (
           <p className="text-xs text-muted-foreground truncate">
             {service.description}
@@ -74,8 +80,13 @@ export function ServiceDrawer({
     </div>
   );
 
-  // Общие табы
-  const tabsContent = (
+  // Staff — только просмотр деталей, без табов
+  // Owner/Manager — полные табы с редактированием и привязкой сотрудников
+  const tabsContent = isStaff ? (
+    <div className="flex-1 overflow-y-auto">
+      <ServiceDetailsTab service={service} readOnly />
+    </div>
+  ) : (
     <Tabs
       key={`${service.id}-${defaultTab}`}
       defaultValue={defaultTab}

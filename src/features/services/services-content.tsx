@@ -83,24 +83,26 @@ export function ServicesContent() {
           )}
         </div>
 
-        {isMobile ? (
-          <Button
-            size="icon"
-            onClick={() => setIsDialogOpen(true)}
-            disabled={!locationId}
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
-        ) : (
-          <Button
-            size="sm"
-            onClick={() => setIsDialogOpen(true)}
-            disabled={!locationId}
-          >
-            <Plus className="mr-1 h-4 w-4" />
-            {t("addService")}
-          </Button>
-        )}
+        {/* Кнопка добавления скрыта для staff */}
+        {!isStaff &&
+          (isMobile ? (
+            <Button
+              size="icon"
+              onClick={() => setIsDialogOpen(true)}
+              disabled={!locationId}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              onClick={() => setIsDialogOpen(true)}
+              disabled={!locationId}
+            >
+              <Plus className="mr-1 h-4 w-4" />
+              {t("addService")}
+            </Button>
+          ))}
       </div>
 
       {/* Список услуг */}

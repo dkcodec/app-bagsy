@@ -11,6 +11,8 @@ import { ServiceRowActions } from "./service-row-actions";
 interface ServiceRowProps {
   service: IServiceDto;
   staff: ServiceStaffMember[];
+  /** Staff роль — скрываем мастеров и действия */
+  isStaff?: boolean;
   onRowClick: () => void;
   onAssignClick: () => void;
   onEdit: () => void;
@@ -45,6 +47,7 @@ const getInitials = (first: string, last: string) =>
 export function ServiceRow({
   service,
   staff,
+  isStaff,
   onRowClick,
   onAssignClick,
   onEdit,
@@ -57,7 +60,7 @@ export function ServiceRow({
 
   return (
     <div
-      className="grid grid-cols-[6px_1fr_80px_32px] md:grid-cols-[6px_1fr_90px_110px_100px_32px] gap-3 items-center px-4 py-3 cursor-pointer hover:bg-muted/50 transition-colors border-b last:border-b-0"
+      className={`grid gap-3 items-center px-4 py-3 cursor-pointer hover:bg-muted/50 transition-colors border-b last:border-b-0 ${isStaff ? "grid-cols-[6px_1fr_80px] md:grid-cols-[6px_1fr_90px_110px]" : "grid-cols-[6px_1fr_80px_32px] md:grid-cols-[6px_1fr_90px_110px_100px_32px]"}`}
       onClick={onRowClick}
     >
       {/* Цветная точка */}
@@ -88,45 +91,48 @@ export function ServiceRow({
         {price || t("notSet")}
       </span>
 
-      {/* Сотрудники — аватарки + кнопка "+" (скрыта на мобилке) */}
-      <div
-        className="hidden md:flex items-center"
-        onClick={e => {
-          e.stopPropagation();
-          onAssignClick();
-        }}
-      >
-        {staff.length > 0 ? (
-          <AvatarGroup max={3} spacing={8}>
-            {staff.map(({ employee }) => (
-              <Avatar key={employee.id} className="size-6">
-                <AvatarImage
-                  src={employee.avatar_url}
-                  alt={`${employee.first_name} ${employee.last_name}`}
-                />
-                <AvatarFallback className="text-[9px] font-medium">
-                  {getInitials(employee.first_name, employee.last_name)}
-                </AvatarFallback>
-              </Avatar>
-            ))}
-          </AvatarGroup>
-        ) : (
-          <span className="text-xs text-primary cursor-pointer hover:underline flex items-center gap-0.5">
-            <Plus className="size-3" />
-            {t("assign")}
-          </span>
-        )}
-      </div>
+      {/* Сотрудники + действия (скрыты для staff) */}
+      {!isStaff && (
+        <>
+          <div
+            className="hidden md:flex items-center"
+            onClick={e => {
+              e.stopPropagation();
+              onAssignClick();
+            }}
+          >
+            {staff.length > 0 ? (
+              <AvatarGroup max={3} spacing={8}>
+                {staff.map(({ employee }) => (
+                  <Avatar key={employee.id} className="size-6">
+                    <AvatarImage
+                      src={employee.avatar_url}
+                      alt={`${employee.first_name} ${employee.last_name}`}
+                    />
+                    <AvatarFallback className="text-[9px] font-medium">
+                      {getInitials(employee.first_name, employee.last_name)}
+                    </AvatarFallback>
+                  </Avatar>
+                ))}
+              </AvatarGroup>
+            ) : (
+              <span className="text-xs text-primary cursor-pointer hover:underline flex items-center gap-0.5">
+                <Plus className="size-3" />
+                {t("assign")}
+              </span>
+            )}
+          </div>
 
-      {/* Действия */}
-      <div onClick={e => e.stopPropagation()}>
-        <ServiceRowActions
-          onEdit={onEdit}
-          onManageStaff={onManageStaff}
-          onDuplicate={onDuplicate}
-          onDelete={onDelete}
-        />
-      </div>
+          <div onClick={e => e.stopPropagation()}>
+            <ServiceRowActions
+              onEdit={onEdit}
+              onManageStaff={onManageStaff}
+              onDuplicate={onDuplicate}
+              onDelete={onDelete}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }
