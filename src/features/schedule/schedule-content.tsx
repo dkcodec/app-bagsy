@@ -366,12 +366,17 @@ export function ScheduleContent() {
     }
   }, [localSchedule, selectedDays, save, t, clearDirty]);
 
-  /* Перейти к сегодня. */
+  /* Перейти к сегодня — сбрасываем несохранённые изменения, выбираем сегодня. */
   const goToday = useCallback(() => {
     const now = new Date();
+    setLocalSchedule(serverSchedule);
+    clearDirty();
+    autoOpenedDaysRef.current.clear();
+    setSelectedDays([]);
     setCurrentMonth(now);
-    setSelectedDays([now.getDate()]);
-  }, []);
+    // Выбираем сегодняшний день через toggleDay после сброса
+    queueMicrotask(() => toggleDay(now.getDate()));
+  }, [serverSchedule, clearDirty, toggleDay]);
 
   /* Смещение первого дня для пресетов. */
   const year = currentMonth.getFullYear();
@@ -463,13 +468,13 @@ export function ScheduleContent() {
 
       {isLoading ? (
         /* Скелетоны при загрузке */
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-4 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-[minmax(250px,1fr)_minmax(210px,350px)] gap-4 items-start">
           <ScheduleCalendarSkeleton />
           {!isMobile && <ScheduleEditorSkeleton />}
         </div>
       ) : (
         /* Основной layout */
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_400px] gap-4 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-[minmax(250px,1fr)_minmax(210px,350px)] gap-4 items-start">
           {/* Левая колонка — календарь + пресеты */}
           <div className="flex flex-col gap-3">
             <Card>

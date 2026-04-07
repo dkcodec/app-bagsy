@@ -73,7 +73,8 @@ export function ServiceStaffTab({
     return list.filter(
       emp =>
         !assignedIds.has(emp.id) &&
-        (emp.role !== EUserRole.OWNER || emp.permissions?.can_provide_services)
+        emp.permissions?.can_provide_services &&
+        emp.role !== EUserRole.OWNER
     );
   }, [employeesData, assignedIds]);
 

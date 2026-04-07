@@ -19,6 +19,9 @@ import type {
   IEmployeePermissions,
   TUserRole,
 } from "../types/user";
+import { useTranslations } from "next-intl";
+import { toast } from "sonner";
+import { getApiErrorKey } from "../utils/api-error";
 
 /**
  * Хук для получения списка сотрудников (GET /api/v1/employees)
@@ -126,6 +129,7 @@ export function useChangeEmployeeRole() {
 
 /** Хук для смены прав доступа (PATCH /api/v1/employees/{id}/permissions) */
 export function useChangeEmployeePermissions() {
+  const t = useTranslations();
   const queryClient = useQueryClient();
 
   return useMutation<
@@ -143,8 +147,14 @@ export function useChangeEmployeePermissions() {
         permissions,
       }));
     },
+    onSuccess: () => {
+      toast.success(t("employee.permissionsUpdated"));
+    },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
+    },
+    onError: error => {
+      toast.error(t(`apiErrors.${getApiErrorKey(error)}`));
     },
   });
 }

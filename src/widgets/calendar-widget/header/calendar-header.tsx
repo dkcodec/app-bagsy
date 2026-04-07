@@ -10,6 +10,8 @@ import { AddEventDrawer } from "@/src/features/calendar/event-dialogs";
 
 import type { IEvent, TCalendarView } from "@/src/shared/types/calendar";
 import { useTranslations } from "next-intl";
+import { useCurrentUser } from "@/src/shared/hooks/use-users";
+import { EUserRole } from "@/src/shared/types/user";
 
 interface IProps {
   view: TCalendarView;
@@ -20,6 +22,8 @@ interface IProps {
 export function CalendarHeader({ view, events, onViewChange }: IProps) {
   const t = useTranslations("Dashboard.Calendar.Header");
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { data: currentUser } = useCurrentUser();
+  const isStaff = currentUser?.role === EUserRole.STAFF;
 
   return (
     <>
@@ -73,7 +77,8 @@ export function CalendarHeader({ view, events, onViewChange }: IProps) {
               </Button>
             </div>
 
-            <MasterSelect />
+            {/* Staff видит только свой календарь — селект мастера не нужен */}
+            {!isStaff && <MasterSelect />}
           </div>
 
           <Button
