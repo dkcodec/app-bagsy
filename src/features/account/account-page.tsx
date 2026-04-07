@@ -10,6 +10,7 @@ import { ProfileTab } from "./tabs/profile-tab";
 import { SubscriptionTab } from "./tabs/subscription-tab";
 import { SecurityTab } from "./tabs/security-tab";
 import { AppearanceTab } from "./tabs/appearance-tab";
+import { EUserRole } from "@/src/shared/types/user";
 
 /**
  * Главная страница аккаунта с табами:
@@ -23,6 +24,8 @@ export function AccountPage() {
   const { data: user, isLoading } = useCurrentUser();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+
+  const isOwner = user?.role === EUserRole.OWNER;
 
   /* Читаем начальный таб из URL ?tab=..., fallback на profile */
   const initialTab = searchParams.get("tab") as Tab | null;
@@ -67,7 +70,7 @@ export function AccountPage() {
         >
           {/* Underline-стиль табов, скролл на мобилке */}
           <TabsList className="w-full justify-start rounded-none border-b border-border bg-transparent p-0 h-auto mb-6 overflow-x-auto no-scrollbar">
-            {TABS.map(tab => (
+            {TABS.filter(tab => tab !== "subscription" || isOwner).map(tab => (
               <TabsTrigger
                 key={tab}
                 value={tab}
@@ -84,9 +87,11 @@ export function AccountPage() {
               <ProfileTab user={user} isLoading={isLoading} />
             </TabsContent>
 
-            <TabsContent value="subscription" className="mt-0">
-              <SubscriptionTab user={user} isLoading={isLoading} />
-            </TabsContent>
+            {isOwner && (
+              <TabsContent value="subscription" className="mt-0">
+                <SubscriptionTab user={user} isLoading={isLoading} />
+              </TabsContent>
+            )}
 
             <TabsContent value="security" className="mt-0">
               <SecurityTab user={user} isLoading={isLoading} />

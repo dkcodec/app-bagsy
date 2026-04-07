@@ -55,13 +55,10 @@ export function ServicesContent() {
   );
 
   const isStaff = currentUser?.role === EUserRole.STAFF;
-  const isManager = currentUser?.role === EUserRole.MANAGER;
 
   const staffMapRoles: TUserRole[] = isStaff
     ? [EUserRole.STAFF]
-    : isManager
-      ? [EUserRole.STAFF, EUserRole.MANAGER]
-      : [EUserRole.STAFF, EUserRole.MANAGER, EUserRole.OWNER];
+    : [EUserRole.STAFF, EUserRole.MANAGER, EUserRole.OWNER];
 
   // Карта serviceId → сотрудники (для аватарок в таблице и drawer)
   const { staffMap } = useServiceStaffMap(locationId, staffMapRoles);
