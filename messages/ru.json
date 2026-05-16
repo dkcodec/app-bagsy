@@ -823,7 +823,8 @@
       "unlinkConfirm": "Отвязать",
       "unlinkCancel": "Отмена",
       "unlinkSuccess": "Сотрудник отвязан от услуги",
-      "unlinkError": "Ошибка отвязки"
+      "unlinkError": "Ошибка отвязки",
+      "permissionsUpdated": "Разрешения обновлены"
     },
     "attachMaster": {
       "dialogTitle": "Привязать мастера к услуге",
