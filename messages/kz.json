@@ -823,7 +823,8 @@
       "unlinkConfirm": "Байланысты жою",
       "unlinkCancel": "Болдырмау",
       "unlinkSuccess": "Қызметкер қызметтен ажыратылды",
-      "unlinkError": "Ажырату қатесі"
+      "unlinkError": "Ажырату қатесі",
+      "permissionsUpdated": "Қызметкердің құқықтары жаңартылды"
     },
     "attachMaster": {
       "dialogTitle": "Қызметке шеберді байланыстыру",
