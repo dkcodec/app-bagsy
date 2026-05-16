@@ -148,7 +148,7 @@ export function useChangeEmployeePermissions() {
       }));
     },
     onSuccess: () => {
-      toast.success(t("employee.permissionsUpdated"));
+      toast.success(t("staffTab.permissionsUpdated"));
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
