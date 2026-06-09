@@ -37,3 +37,9 @@ export * from "./use-debounce";
 
 // Права на редактирование графика (точка/мастер)
 export * from "./use-schedule-permissions";
+
+// Аналитика
+export * from "./use-analytics";
+
+// Анимация чисел (для KPI)
+export * from "./use-count-up";
