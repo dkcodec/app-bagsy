@@ -15,8 +15,5 @@ export * from "./appointment";
 // Dashboard features
 export * from "./dashboard";
 
-// Settings features
-export * from "./settings";
-
-// Profile features
-export * from "./profile";
+// Account features (profile + settings merged)
+export * from "./account";

@@ -1,10 +1,9 @@
 import type {
   CalendarApiResponse,
-  CalendarApiItem,
+  CalendarEntryResponse,
   IEvent,
   TEventColor,
 } from "../types/calendar";
-// В календарных событиях храним только masterPhone (мастер подтягивается отдельно)
 
 /**
  * Маппинг цвета из API в TEventColor
@@ -27,25 +26,30 @@ function mapColorToEventColor(color: string): TEventColor {
 }
 
 /**
- * Преобразует элемент календаря из API в IEvent
+ * Преобразует элемент календаря из нового API (плоский формат) в IEvent
  */
-function mapCalendarItemToEvent(item: CalendarApiItem): IEvent {
-  const { bagsy_info, service_info } = item;
-
+function mapCalendarEntryToEvent(entry: CalendarEntryResponse): IEvent {
   return {
-    id: parseInt(bagsy_info.id, 10) || 0,
-    clientPhone: bagsy_info.client_phone,
-    masterPhone: bagsy_info.master_phone,
-    pointCode: bagsy_info.point_code,
-    price: bagsy_info.price,
-    createdAt: bagsy_info.created_at,
-    updatedAt: bagsy_info.updated_at,
-    status: bagsy_info.status,
-    startDate: bagsy_info.start_at,
-    endDate: bagsy_info.end_at,
-    title: service_info.name,
-    color: mapColorToEventColor(service_info.color),
-    comment: bagsy_info.comment || "",
+    id: entry.appointment_id,
+    customerPhone: entry.customer_phone,
+    customerName: entry.customer_name,
+    customerId: entry.customer_id,
+    employeeId: entry.employee_id,
+    employeeName: entry.employee_name,
+    locationId: entry.location_id,
+    locationName: entry.location_name,
+    startDate: entry.start_at,
+    endDate: entry.end_at,
+    durationMinutes: entry.duration_minutes,
+    title: entry.service_name,
+    serviceId: entry.service_id,
+    price: entry.price,
+    status: entry.status,
+    color: mapColorToEventColor(entry.service_color),
+    comment: entry.customer_comment || "",
+    // Deprecated поля для обратной совместимости
+    clientPhone: entry.customer_phone,
+    masterPhone: entry.employee_id,
   };
 }
 
@@ -55,5 +59,5 @@ function mapCalendarItemToEvent(item: CalendarApiItem): IEvent {
 export function mapCalendarApiResponseToEvents(
   response: CalendarApiResponse
 ): IEvent[] {
-  return response.calendar.map(mapCalendarItemToEvent);
+  return response.calendar.map(mapCalendarEntryToEvent);
 }

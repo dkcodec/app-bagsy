@@ -4,9 +4,9 @@ import {
   ChartSpline,
   ClipboardList,
   Contact,
-  Settings,
   Users,
   BriefcaseBusiness,
+  Clock,
 } from "lucide-react";
 
 import { NavUser } from "./nav-user";
@@ -18,7 +18,9 @@ import {
   SidebarRail,
 } from "@/src/entities/sidebar";
 import { ThemeLogo } from "../ui/theme-logo";
+import { PwaInstallPrompt } from "../ui/pwa-install-prompt";
 import { NavMain } from "./nav-main";
+import { NavLocationSwitcher } from "./nav-location-switcher";
 import Link from "next/link";
 import { useCurrentUser } from "@/src/shared/hooks/use-users";
 import type { TUserRole } from "@/src/shared/types/user";
@@ -42,6 +44,11 @@ const navData: { navMain: NavItem[] } = {
       icon: Calendar,
       isActive: true,
     },
+    {
+      name: "schedule",
+      url: "/schedule",
+      icon: Clock,
+    },
     // {
     //   name: "clients",
     //   url: "/clients",
@@ -56,33 +63,20 @@ const navData: { navMain: NavItem[] } = {
       name: "staff",
       url: "/staff",
       icon: Users,
-      allowedRoles: [
-        EUserRole.ADMIN,
-        EUserRole.NET_MANAGER,
-        EUserRole.SELF_OWNER,
-        EUserRole.MANAGER,
-      ],
+      allowedRoles: [EUserRole.OWNER, EUserRole.MANAGER],
     },
     {
-      name: "points",
-      url: "/points",
+      name: "locations",
+      url: "/locations",
       icon: BriefcaseBusiness,
-      allowedRoles: [
-        EUserRole.ADMIN,
-        EUserRole.NET_MANAGER,
-        EUserRole.SELF_OWNER,
-        EUserRole.MANAGER,
-      ],
+      allowedRoles: [EUserRole.OWNER, EUserRole.MANAGER],
     },
-    // {
-    //   name: "analytics",
-    //   url: "/analytics",
-    //   icon: ChartSpline,
-    // },
     {
-      name: "settings",
-      url: "/settings",
-      icon: Settings,
+      name: "analytics",
+      url: "/analytics",
+      icon: ChartSpline,
+      // Доступ внутри определяется ролью+планом (см. getAnalyticsAccess).
+      // Staff и Solo Owner редиректятся на /analytics/me автоматически.
     },
   ],
 };
@@ -112,9 +106,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </Link>
       </SidebarHeader>
       <SidebarContent className="flex flex-col">
+        {/* Глобальный переключатель точки для Owner с >1 локацией */}
+        <NavLocationSwitcher />
         <NavMain main={filteredNav} />
       </SidebarContent>
       <SidebarFooter>
+        <PwaInstallPrompt />
         <NavUser user={userData} />
       </SidebarFooter>
       <SidebarRail />

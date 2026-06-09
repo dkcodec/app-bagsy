@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "dev-network": "next dev --hostname 10.200.6.202 --port 3010",
+    "dev": "next dev --webpack",
+    "dev-network": "next dev --hostname 192.168.1.28",
     "dev-all": "next dev --hostname 0.0.0.0 --port 3000",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
@@ -38,6 +38,7 @@
     "@radix-ui/react-toggle": "^1.1.10",
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "@serwist/next": "^9.5.3",
     "@tabler/icons-react": "^3.34.1",
     "@tailwindcss/postcss": "^4.1.18",
     "@tanstack/react-query": "^5.89.0",
@@ -60,6 +61,7 @@
     "react-dom": "^19.2.3",
     "react-hook-form": "^7.63.0",
     "react-leaflet": "^5.0.0",
+    "react-qrcode-logo": "^4.0.0",
     "recharts": "^2.15.4",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
@@ -82,6 +84,8 @@
     "husky": "^9.1.7",
     "postcss": "^8.5.6",
     "prettier": "^3.6.2",
+    "serwist": "^9.5.3",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4.1.18",
     "typescript": "^5"
   }

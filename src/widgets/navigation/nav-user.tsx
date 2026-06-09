@@ -7,7 +7,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../forms/dropdown-menu";
@@ -20,11 +19,11 @@ import {
 import { useLogout } from "@/src/shared/hooks/use-auth";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import type { IUserDto } from "@/src/shared/types/user";
+import type { IEmployeeDto } from "@/src/shared/types/user";
 import { Skeleton } from "@/src/entities/skeleton";
 
-export function NavUser({ user }: { user?: IUserDto }) {
-  const { isMobile } = useSidebar();
+export function NavUser({ user }: { user?: IEmployeeDto }) {
+  const { isMobile, setOpenMobile } = useSidebar();
   const t = useTranslations("Sidebar.User");
 
   const logout = useLogout();
@@ -43,17 +42,19 @@ export function NavUser({ user }: { user?: IUserDto }) {
                 {user?.avatar_url ? (
                   <AvatarImage
                     src={user?.avatar_url}
-                    alt={user?.name ?? "avatar"}
+                    alt={user?.first_name ?? "avatar"}
                   />
                 ) : null}
                 <AvatarFallback className="rounded-lg">
-                  {`${user?.name?.[0].toUpperCase() || ""}${user?.surname?.[0].toUpperCase() || ""}`}
+                  {`${user?.first_name?.[0].toUpperCase() || ""}${user?.last_name?.[0].toUpperCase() || ""}`}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 {user ? (
                   <>
-                    <span className="truncate font-semibold">{user?.name}</span>
+                    <span className="truncate font-semibold">
+                      {user?.first_name}
+                    </span>
                     <span className="truncate text-xs">{user?.phone}</span>
                   </>
                 ) : (
@@ -72,28 +73,34 @@ export function NavUser({ user }: { user?: IUserDto }) {
             align="end"
             sideOffset={4}
           >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div
-                className="flex items-center gap-2 px-1 py-1.5 text-left text-sm cursor-pointer"
-                onClick={() => router.push("/profile")}
-              >
+            {/* Клик по профилю → переход в аккаунт + закрытие меню */}
+            <DropdownMenuItem
+              className="p-0 cursor-pointer"
+              onClick={() => {
+                setOpenMobile(false);
+                router.push("/account");
+              }}
+            >
+              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   {user?.avatar_url ? (
                     <AvatarImage
                       src={user?.avatar_url}
-                      alt={user?.name ?? "avatar"}
+                      alt={user?.first_name ?? "avatar"}
                     />
                   ) : null}
                   <AvatarFallback className="rounded-lg">
-                    {`${user?.name?.[0].toUpperCase()}${user?.surname?.[0].toUpperCase()}`}
+                    {`${user?.first_name?.[0].toUpperCase()}${user?.last_name?.[0].toUpperCase()}`}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{user?.name}</span>
+                  <span className="truncate font-semibold">
+                    {user?.first_name}
+                  </span>
                   <span className="truncate text-xs">{user?.phone}</span>
                 </div>
               </div>
-            </DropdownMenuLabel>
+            </DropdownMenuItem>
             {/* <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem className="cursor-pointer">
@@ -104,7 +111,10 @@ export function NavUser({ user }: { user?: IUserDto }) {
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="cursor-pointer"
-              onClick={() => logout.mutate()}
+              onClick={() => {
+                setOpenMobile(false);
+                logout.mutate();
+              }}
             >
               <LogOut />
               {t("logout")}

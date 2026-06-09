@@ -5,7 +5,8 @@ import {
   clearAuthTokens,
 } from "../utils/cookies";
 
-export type VerifyAuthTokenPurpose = "register" | "password_change";
+/** Назначение action-токена (инвайт или сброс пароля) */
+export type VerifyAuthTokenPurpose = "password_reset" | "staff_invitation";
 
 export interface LoginRequestDto {
   phone: string;
@@ -15,69 +16,47 @@ export interface LoginRequestDto {
 export interface LoginResponseDto {
   access_token: string;
   refresh_token: string;
-  message?: string;
-  code?: number;
 }
 
-export interface RegisterRequestDto {
+/** Ответ на проверку action-токена */
+export interface VerifyAuthTokenResponseDto {
   phone: string;
-  password: string;
-  token: string;
+  purpose: VerifyAuthTokenPurpose;
+  organization_id: string;
+  location_id: string;
 }
 
-export interface RegisterResponseDto {
+/** Запрос сброса пароля (шаг 1) */
+export interface PasswordResetRequestDto {
+  phone: string;
+}
+
+export interface PasswordResetResponseDto {
+  message: string;
+}
+
+/** Подтверждение сброса пароля (шаг 2) */
+export interface PasswordResetConfirmRequestDto {
+  token: string;
+  new_password: string;
+}
+
+export interface PasswordResetConfirmResponseDto {
   access_token: string;
   refresh_token: string;
-  message?: string;
-  code?: number;
 }
 
-export interface VerifyAuthTokenResponseDto {
-  network_code: string;
-  phone: string;
-  point_code: string;
-  purpose: VerifyAuthTokenPurpose;
-}
-
-export interface PasswordChangeRequestDto {
-  password: string;
-  token: string;
-}
-
-export interface PasswordChangeResponseDto {
-  message?: string;
-  code?: number;
-}
-
-export interface PasswordChangeRequestRequestDto {
-  phone: string;
-}
-
-export interface PasswordChangeRequestResponseDto {
-  message?: string;
-  code?: number;
-}
 /**
- * Сервис авторизации. Инкапсулирует эндпоинты и маппинг данных
+ * Сервис авторизации. Инкапсулирует эндпоинты и маппинг данных.
+ * Эндпоинты регистрации (register, register/verify, register/resend)
+ * используются на лендинге bagsy.kz, НЕ в ЛК.
  */
 export class AuthService {
   /**
    * Авторизация пользователя
    */
   static async login(payload: LoginRequestDto): Promise<LoginResponseDto> {
-    return apiClient.post<LoginResponseDto>("v1/auth/login", payload);
-  }
-
-  /**
-   * Регистрация пароля пользователя
-   */
-  static async registerConfirm(
-    payload: RegisterRequestDto
-  ): Promise<RegisterResponseDto> {
-    return apiClient.post<RegisterResponseDto>(
-      "v1/auth/staff/register/confirm",
-      payload
-    );
+    return apiClient.post<LoginResponseDto>("api/v1/auth/login", payload);
   }
 
   /**
@@ -89,56 +68,61 @@ export class AuthService {
       throw new Error("Refresh token not found");
     }
 
-    return apiClient.post<LoginResponseDto>(
-      "v1/auth/refresh",
-      {},
-      {
-        body: JSON.stringify({
-          refresh_token: refreshToken,
-        }),
-      }
-    );
+    return apiClient.post<LoginResponseDto>("api/v1/auth/refresh", {
+      refresh_token: refreshToken,
+    });
   }
 
   /**
-   * Проверка валидности токена авторизации
+   * Проверка валидности action-токена (для инвайта или сброса пароля)
    */
   static async verifyAuthToken(
     token: string
   ): Promise<VerifyAuthTokenResponseDto> {
     return apiClient.get<VerifyAuthTokenResponseDto>(
-      `v1/auth/verify-auth-token/${token}`
+      `api/v1/auth/verify/${token}`
     );
   }
 
   /**
-   * Изменение пароля пользователя
+   * Запрос на сброс пароля (отправляет ссылку)
    */
-  static async passwordChange(
-    payload: PasswordChangeRequestDto
-  ): Promise<PasswordChangeResponseDto> {
-    return apiClient.post<PasswordChangeResponseDto>(
-      "v1/auth/password/change/confirm",
+  static async passwordReset(
+    payload: PasswordResetRequestDto
+  ): Promise<PasswordResetResponseDto> {
+    return apiClient.post<PasswordResetResponseDto>(
+      "api/v1/auth/password/reset",
       payload
     );
   }
 
   /**
-   * Запрос на изменение пароля
+   * Подтверждение сброса пароля (устанавливает новый пароль)
    */
-  static async passwordChangeRequest(
-    payload: PasswordChangeRequestRequestDto
-  ): Promise<PasswordChangeRequestResponseDto> {
-    return apiClient.post<PasswordChangeRequestResponseDto>(
-      "v1/auth/password/change",
+  static async passwordResetConfirm(
+    payload: PasswordResetConfirmRequestDto
+  ): Promise<PasswordResetConfirmResponseDto> {
+    return apiClient.post<PasswordResetConfirmResponseDto>(
+      "api/v1/auth/password/reset/confirm",
       payload
     );
   }
 
   /**
-   * Выход из системы
+   * Выход из системы — инвалидация refresh токена на бэке + очистка кук
    */
   static async logout(): Promise<void> {
+    const refreshToken = await getRefreshToken();
+    // Отправляем logout на бэк, если есть refresh token
+    if (refreshToken) {
+      try {
+        await apiClient.post("api/v1/auth/logout", {
+          refresh_token: refreshToken,
+        });
+      } catch {
+        // Даже если logout на бэке упал, очищаем куки локально
+      }
+    }
     await clearAuthTokens();
   }
 

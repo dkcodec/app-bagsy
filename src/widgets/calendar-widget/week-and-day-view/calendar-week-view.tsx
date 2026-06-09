@@ -1,3 +1,4 @@
+import { useState, useCallback } from "react";
 import {
   startOfWeek,
   addDays,
@@ -12,7 +13,7 @@ import { useCalendar } from "@/src/features/calendar";
 
 import { ScrollArea } from "@/src/entities/scroll-area";
 
-import { AddEventDialog } from "@/src/features/calendar/event-dialogs";
+import { AddEventDrawer } from "@/src/features/calendar/event-dialogs";
 import { EventBlock } from "./event-block";
 import { DroppableTimeBlock } from "@/src/widgets/calendar-widget/dnd";
 import { CalendarTimeline } from "./calendar-time-line";
@@ -39,6 +40,19 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
   const { selectedDate, workingHours, visibleHours } = useCalendar();
   const locale = useLocale();
   const isMobile = useIsMobile();
+
+  // Состояние для drawer добавления записи
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerStartDate, setDrawerStartDate] = useState<Date | undefined>();
+  const [drawerStartTime, setDrawerStartTime] = useState<
+    { hour: number; minute: number } | undefined
+  >();
+
+  const openDrawer = useCallback((date: Date, hour: number, minute: number) => {
+    setDrawerStartDate(date);
+    setDrawerStartTime({ hour, minute });
+    setDrawerOpen(true);
+  }, []);
 
   const { hours, earliestEventHour, latestEventHour } = getVisibleHours(
     visibleHours,
@@ -128,12 +142,10 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
                           )}
 
                           <DroppableTimeBlock date={day} hour={hour} minute={0}>
-                            <AddEventDialog
-                              startDate={day}
-                              startTime={{ hour, minute: 0 }}
-                            >
-                              <div className="absolute inset-x-0 top-0 h-[24px] cursor-pointer transition-colors hover:bg-accent" />
-                            </AddEventDialog>
+                            <div
+                              className="absolute inset-x-0 top-0 h-[24px] cursor-pointer transition-colors hover:bg-accent"
+                              onClick={() => openDrawer(day, hour, 0)}
+                            />
                           </DroppableTimeBlock>
 
                           <DroppableTimeBlock
@@ -141,12 +153,10 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
                             hour={hour}
                             minute={15}
                           >
-                            <AddEventDialog
-                              startDate={day}
-                              startTime={{ hour, minute: 15 }}
-                            >
-                              <div className="absolute inset-x-0 top-[24px] h-[24px] cursor-pointer transition-colors hover:bg-accent" />
-                            </AddEventDialog>
+                            <div
+                              className="absolute inset-x-0 top-[24px] h-[24px] cursor-pointer transition-colors hover:bg-accent"
+                              onClick={() => openDrawer(day, hour, 15)}
+                            />
                           </DroppableTimeBlock>
 
                           <div className="pointer-events-none absolute inset-x-0 top-1/2 border-b border-dashed"></div>
@@ -156,12 +166,10 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
                             hour={hour}
                             minute={30}
                           >
-                            <AddEventDialog
-                              startDate={day}
-                              startTime={{ hour, minute: 30 }}
-                            >
-                              <div className="absolute inset-x-0 top-[48px] h-[24px] cursor-pointer transition-colors hover:bg-accent" />
-                            </AddEventDialog>
+                            <div
+                              className="absolute inset-x-0 top-[48px] h-[24px] cursor-pointer transition-colors hover:bg-accent"
+                              onClick={() => openDrawer(day, hour, 30)}
+                            />
                           </DroppableTimeBlock>
 
                           <DroppableTimeBlock
@@ -169,12 +177,10 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
                             hour={hour}
                             minute={45}
                           >
-                            <AddEventDialog
-                              startDate={day}
-                              startTime={{ hour, minute: 45 }}
-                            >
-                              <div className="absolute inset-x-0 top-[72px] h-[24px] cursor-pointer transition-colors hover:bg-accent" />
-                            </AddEventDialog>
+                            <div
+                              className="absolute inset-x-0 top-[72px] h-[24px] cursor-pointer transition-colors hover:bg-accent"
+                              onClick={() => openDrawer(day, hour, 45)}
+                            />
                           </DroppableTimeBlock>
                         </div>
                       );
@@ -232,6 +238,14 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
           </div>
         </div>
       </ScrollArea>
+
+      {/* Один drawer на весь компонент */}
+      <AddEventDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        startDate={drawerStartDate}
+        startTime={drawerStartTime}
+      />
     </div>
   );
 }

@@ -1,61 +1,57 @@
 import { apiClient } from "../api";
 
 /**
- * Подкатегория услуги
- */
-export interface IServiceSubcategory {
-  id: number;
-  name: string;
-  description: string;
-  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
-  created_at: string;
-  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
-  updated_at: string;
-}
-
-/**
- * Категория услуги с подкатегориями
+ * Категория услуги с дочерними подкатегориями (GET /api/v1/service-categories)
+ * Дерево: categories → children (рекурсивно)
  */
 export interface IServiceCategory {
-  id: number;
+  id: string;
   name: string;
-  description: string;
-  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
-  created_at: string;
-  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
-  updated_at: string;
-  subcategories: IServiceSubcategory[];
+  sort_order: number;
+  children: IServiceCategory[];
 }
 
 /**
- * Ответ API для получения списка категорий услуг
+ * Ответ API для получения дерева категорий услуг
  */
 export interface IServiceCategoriesResponse {
   categories: IServiceCategory[];
-  count: number;
 }
 
 /**
- * Услуга точки обслуживания
+ * Услуга локации обслуживания
  */
 export interface IServiceDto {
   id: string;
   name: string;
   description: string;
-  point_code: string;
-  category_id: number;
-  subcategory_id: number;
+  location_id: string;
+  category_id: string;
+  subcategory_id?: string;
   duration_minutes: number;
   color: string;
   active: boolean;
   min_price: number;
   max_price: number;
+  sort_order: number;
 }
 
 /**
- * Ответ API для получения списка услуг точки
+ * Данные для обновления услуги (PUT /api/v1/services/{id})
+ * Все поля опциональны
  */
-export interface IPointServicesResponse {
+export interface UpdateServiceRequestDto {
+  name?: string;
+  description?: string;
+  duration_minutes?: number;
+  color?: string;
+  sort_order?: number;
+}
+
+/**
+ * Ответ API для получения списка услуг локации
+ */
+export interface ILocationServicesResponse {
   services: IServiceDto[];
 }
 
@@ -65,45 +61,68 @@ export interface IPointServicesResponse {
 export interface CreateServiceRequestDto {
   name: string;
   description: string;
-  point_code: string;
-  category_id: number;
-  subcategory_id: number;
+  location_id: string;
+  category_id: string;
+  subcategory_id?: string;
   duration_minutes: number;
   color: string;
 }
 
 /**
- * Сервис услуг точки обслуживания.
+ * Сервис услуг локации обслуживания.
  */
 export class ServiceService {
   /**
-   * Получение списка активных услуг для указанной точки
+   * Получение списка активных услуг для указанной локации
    */
-  static async getPointServices(
-    pointCode: string
-  ): Promise<IPointServicesResponse> {
-    return apiClient.get<IPointServicesResponse>(
-      `v1/services/${encodeURIComponent(pointCode)}`
+  static async getLocationServices(
+    locationId: string
+  ): Promise<ILocationServicesResponse> {
+    return apiClient.get<ILocationServicesResponse>(
+      `api/v1/services/${encodeURIComponent(locationId)}`
     );
   }
 
   /**
-   * Получение списка категорий услуг и их подкатегорий для указанной точки
+   * Получение дерева категорий услуг по типу бизнеса (GET /api/v1/service-categories)
+   * @param locationCategoryId — UUID категории локации
    */
   static async getServiceCategories(
-    pointCode: string
+    locationCategoryId: string
   ): Promise<IServiceCategoriesResponse> {
     return apiClient.get<IServiceCategoriesResponse>(
-      `v1/service-categories/${encodeURIComponent(pointCode)}`
+      "api/v1/service-categories",
+      { query: { location_category_id: locationCategoryId } }
     );
   }
 
   /**
-   * Создание новой услуги для точки обслуживания
+   * Создание новой услуги для локации обслуживания
    */
   static async createService(
     data: CreateServiceRequestDto
   ): Promise<IServiceDto> {
-    return apiClient.post<IServiceDto>("v1/services", data);
+    return apiClient.post<IServiceDto>("api/v1/services", data);
+  }
+
+  /**
+   * Обновление услуги (PUT /api/v1/services/{id})
+   * Все поля опциональны
+   */
+  static async updateService(
+    id: string,
+    data: UpdateServiceRequestDto
+  ): Promise<void> {
+    return apiClient.put<void>(
+      `api/v1/services/${encodeURIComponent(id)}`,
+      data
+    );
+  }
+
+  /**
+   * Soft-delete услуги (DELETE /api/v1/services/{id})
+   */
+  static async deleteService(id: string): Promise<void> {
+    return apiClient.delete<void>(`api/v1/services/${encodeURIComponent(id)}`);
   }
 }

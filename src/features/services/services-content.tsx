@@ -1,186 +1,121 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { usePointServices } from "@/src/shared/hooks/use-services";
-import { useNetworkPoints } from "@/src/shared/hooks/use-network-points";
-import { useCurrentUser } from "@/src/shared/hooks/use-users";
-import { EUserRole } from "@/src/shared/types/user";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Skeleton,
-  Button,
-} from "@/src/entities";
+import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
+
+import { Button } from "@/src/entities";
+import {
+  useLocationServices,
+  useServiceCategories,
+} from "@/src/shared/hooks/use-services";
+import { useLocation } from "@/src/shared/hooks/use-network-locations";
+import { useCurrentUser } from "@/src/shared/hooks/use-users";
+import { useServiceStaffMap } from "@/src/shared/hooks/user-staff";
+import { useCalendarStore } from "@/src/features/calendar/calendar-context/store";
+import { EUserRole, TUserRole } from "@/src/shared/types/user";
+
 import { ErrorMessage } from "./components/error-message";
-import { ServicesTableHeader } from "./components/services-table-header";
-import { ServicesTableRow } from "./components/services-table-row";
-import { PointSelect } from "./components/point-select";
 import { AddServiceDialog } from "./components/add-service-dialog";
+import { ServiceList } from "./components/service-list";
+import { useIsMobile } from "@/src/shared";
 
 /**
- * Компонент таблицы услуг точки обслуживания
+ * Компонент страницы услуг — оркестратор.
+ * locationId берётся из глобального calendar store (переключатель в сайдбаре).
  */
 export function ServicesContent() {
   const t = useTranslations("Services");
+  const isMobile = useIsMobile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { data: currentUser } = useCurrentUser();
 
-  // Определяем, нужно ли загружать точки сети
-  const shouldLoadPoints =
-    currentUser &&
-    (currentUser.role === EUserRole.SELF_OWNER ||
-      currentUser.role === EUserRole.NET_MANAGER ||
-      currentUser.role === EUserRole.ADMIN);
+  // locationId из глобального стора (устанавливается в сайдбаре)
+  const locationId = useCalendarStore(s => s.locationId);
+  const setLocationId = useCalendarStore(s => s.setLocationId);
 
-  // Загружаем точки сети для self_owner/net_manager
-  // Для ADMIN используем usePointsPage если нужно, но пока используем useNetworkPoints
-  const { data: networkPointsData } = useNetworkPoints(
-    currentUser?.network_code
+  // Для MANAGER: fallback на currentUser.location_id
+  useEffect(() => {
+    if (
+      currentUser?.role === EUserRole.MANAGER &&
+      currentUser.location_id &&
+      !locationId
+    ) {
+      setLocationId(currentUser.location_id);
+    }
+  }, [currentUser, locationId, setLocationId]);
+
+  // Данные услуг
+  const { data, isLoading, error } = useLocationServices(locationId);
+
+  // Категории услуг (нужны для группировки)
+  const { data: locationData } = useLocation(locationId);
+  const { data: categoriesData } = useServiceCategories(
+    locationData?.category_id
   );
 
-  // Вычисляем selectedPointCode
-  const selectedPointCode = useMemo(() => {
-    // Для MANAGER используем point_code из currentUser
-    if (currentUser?.role === EUserRole.MANAGER) {
-      return currentUser.point_code;
-    }
+  const isStaff = currentUser?.role === EUserRole.STAFF;
 
-    // Для SELF_OWNER/NET_MANAGER используем первую точку из сети
-    if (
-      shouldLoadPoints &&
-      networkPointsData &&
-      networkPointsData.points.length > 0
-    ) {
-      return networkPointsData.points[0].code;
-    }
+  const staffMapRoles: TUserRole[] = isStaff
+    ? [EUserRole.STAFF]
+    : [EUserRole.STAFF, EUserRole.MANAGER, EUserRole.OWNER];
 
-    // Для ADMIN пока возвращаем undefined (можно расширить логику позже)
-    return undefined;
-  }, [currentUser, networkPointsData, shouldLoadPoints]);
+  // Карта serviceId → сотрудники (для аватарок в таблице и drawer)
+  const { staffMap } = useServiceStaffMap(locationId, staffMapRoles);
 
-  // Локальное состояние для выбранной точки (для селектора)
-  const [localSelectedPointCode, setLocalSelectedPointCode] = useState<
-    string | undefined
-  >(selectedPointCode);
+  if (error) return <ErrorMessage error={error} />;
 
-  // Синхронизируем локальное состояние с вычисленным значением
-  useEffect(() => {
-    if (selectedPointCode) {
-      setLocalSelectedPointCode(selectedPointCode);
-    }
-  }, [selectedPointCode]);
-
-  // Используем локальное состояние для запросов (если есть селектор) или вычисленное значение
-  const pointCodeForQuery =
-    shouldLoadPoints && localSelectedPointCode
-      ? localSelectedPointCode
-      : selectedPointCode;
-
-  // Получение данных услуг
-  const { data, isLoading, error } = usePointServices(pointCodeForQuery);
-
-  // Определение колонок таблицы
-  const tableColumns = [
-    { field: "name", labelKey: "table.name", sortable: false },
-    { field: "description", labelKey: "table.description", sortable: false },
-    { field: "duration", labelKey: "table.duration", sortable: false },
-    { field: "color", labelKey: "table.color", sortable: false },
-    { field: "price", labelKey: "table.price", sortable: false },
-    //{ field: "status", labelKey: "table.status", sortable: false },
-    { field: "masters", labelKey: "table.masters", sortable: false },
-  ];
+  const services = data?.services || [];
+  const categories = categoriesData?.categories || [];
 
   return (
-    <div className="flex flex-col md:p-4">
-      {/* Селектор точки (только для self_owner/net_manager/admin) */}
-      {shouldLoadPoints && (
-        <div className="p-4">
-          <PointSelect
-            value={localSelectedPointCode}
-            onValueChange={setLocalSelectedPointCode}
-            networkCode={currentUser?.network_code}
-          />
-        </div>
-      )}
-
-      {/* Таблица */}
-      <Card className="border-none bg-background">
-        <CardHeader className="flex flex-row justify-between items-center px-6 py-2">
-          <CardTitle>{t("tableTitle")}</CardTitle>
-          <Button
-            onClick={() => setIsDialogOpen(true)}
-            size="sm"
-            className="flex items-center gap-2"
-            disabled={!pointCodeForQuery}
-          >
-            <Plus className="h-4 w-4" />
-            {t("addService")}
-          </Button>
-        </CardHeader>
-        <CardContent>
-          {/* Состояние загрузки */}
-          {error ? (
-            /* Ошибка загрузки */
-            <ErrorMessage error={error} />
-          ) : (
-            <>
-              {/* Таблица */}
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <ServicesTableHeader columns={tableColumns} />
-                  </TableHeader>
-                  <TableBody>
-                    {isLoading ? (
-                      <TableRow>
-                        {Array.from({ length: tableColumns.length }).map(
-                          (_, i) => (
-                            <TableCell key={i} className="h-12 w-full">
-                              <Skeleton className="h-12 w-full" />
-                            </TableCell>
-                          )
-                        )}
-                      </TableRow>
-                    ) : !data?.services || data.services.length === 0 ? (
-                      <TableRow>
-                        <TableCell
-                          colSpan={tableColumns.length}
-                          className="text-center py-8 text-muted-foreground"
-                        >
-                          {t("noData")}
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      data.services.map(service => (
-                        <ServicesTableRow
-                          key={service.id}
-                          service={service}
-                          pointCode={pointCodeForQuery}
-                        />
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </>
+    <div className="flex flex-col gap-4 p-4">
+      {/* Заголовок: кол-во + кнопка */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-end gap-3">
+          {!isLoading && services.length > 0 && (
+            <span className="text-xs text-muted-foreground pb-3">
+              {t("serviceCount", { count: services.length })}
+            </span>
           )}
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Диалог добавления услуги */}
+        {/* Кнопка добавления скрыта для staff */}
+        {!isStaff &&
+          (isMobile ? (
+            <Button
+              size="icon"
+              onClick={() => setIsDialogOpen(true)}
+              disabled={!locationId}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              onClick={() => setIsDialogOpen(true)}
+              disabled={!locationId}
+            >
+              <Plus className="mr-1 h-4 w-4" />
+              {t("addService")}
+            </Button>
+          ))}
+      </div>
+
+      {/* Список услуг */}
+      <ServiceList
+        services={services}
+        categories={categories}
+        locationId={locationId || ""}
+        isLoading={isLoading}
+        staffMap={staffMap}
+      />
+
+      {/* Диалог добавления */}
       <AddServiceDialog
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
-        pointCode={pointCodeForQuery}
+        locationId={locationId}
       />
     </div>
   );

@@ -1,6 +1,13 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { isSameDay } from "date-fns";
+import {
+  isSameDay,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  format,
+} from "date-fns";
 
 import type {
   IEvent,
@@ -8,19 +15,10 @@ import type {
   TVisibleHours,
   TWorkingHours,
 } from "@/src/shared/types/calendar";
-import { IUserDto } from "@/src/shared/types/user";
-import { PointService } from "@/src/shared/services/point-service";
+import { IEmployeeDto } from "@/src/shared/types/user";
+import { ScheduleService } from "@/src/shared/services/schedule-service";
+import type { ScheduleSlotDto } from "@/src/shared/types/schedule";
 import { parseScheduleTime } from "@/src/shared/utils/datetime";
-
-const WORKING_HOURS: TWorkingHours = {
-  0: { from: 8, to: 17 },
-  1: { from: 8, to: 17 },
-  2: { from: 8, to: 17 },
-  3: { from: 8, to: 17 },
-  4: { from: 8, to: 17 },
-  5: { from: 8, to: 17 },
-  6: { from: 0, to: 0 },
-};
 
 const VISIBLE_HOURS: TVisibleHours = { from: 7, to: 18 };
 
@@ -28,53 +26,41 @@ function clampHour(hour: number) {
   return Math.min(24, Math.max(0, hour));
 }
 
-function emptyWorkingHours(): TWorkingHours {
-  // JS Date.getDay(): 0..6 (вс..сб)
-  return {
-    0: { from: 0, to: 0 },
-    1: { from: 0, to: 0 },
-    2: { from: 0, to: 0 },
-    3: { from: 0, to: 0 },
-    4: { from: 0, to: 0 },
-    5: { from: 0, to: 0 },
-    6: { from: 0, to: 0 },
-  };
-}
+/** Маппинг ScheduleSlotDto[] → TWorkingHours (work-слоты по дате, перерывы между ними закрашиваются) */
+export function mapScheduleSlotsToWorkingHours(
+  slots: ScheduleSlotDto[]
+): TWorkingHours | null {
+  const result: TWorkingHours = {};
+  let hasWork = false;
 
-/** Маппинг ISchedule[] (open/close) в TWorkingHours. Экспорт для calendar-settings. */
-export function mapPointScheduleToWorkingHours(
-  schedule: Array<{
-    all_day: boolean;
-    open: string;
-    close: string;
-    week_day: number;
-  }>
-): TWorkingHours {
-  // API: week_day 0..6 (вс..сб). JS: 0..6 (вс..сб)
-  // 0 = воскресенье всегда
-  const result = emptyWorkingHours();
+  for (const slot of slots) {
+    if (slot.type !== "work") continue;
+    hasWork = true;
 
-  for (const day of schedule ?? []) {
-    const jsDay = Number(day.week_day);
-    if (day.all_day) {
-      result[jsDay] = { from: 0, to: 24 };
-      continue;
-    }
-    const from = parseScheduleTime(day.open).hour;
-    const to = parseScheduleTime(day.close).hour;
-    result[jsDay] = { from, to };
+    const dateKey = slot.date; // "YYYY-MM-DD"
+    const from = parseScheduleTime(slot.start_time).hour;
+    let to = parseScheduleTime(slot.end_time).hour;
+    // "00:00" в end_time → конец дня (24:00)
+    if (to === 0 && from > 0) to = 24;
+
+    if (!result[dateKey]) result[dateKey] = [];
+    result[dateKey].push({ from, to });
   }
 
-  return result;
+  // Сортируем интервалы по времени начала
+  for (const key of Object.keys(result)) {
+    result[key].sort((a, b) => a.from - b.from);
+  }
+
+  return hasWork ? result : null;
 }
 
 function deriveVisibleHoursFromWorkingHours(
   workingHours: TWorkingHours
 ): TVisibleHours | null {
-  // Если рабочие часы не заданы — не трогаем visibleHours
-  const active = Object.values(workingHours ?? {}).filter(
-    v => v && v.to > v.from
-  );
+  // Собираем все рабочие интервалы из всех дней
+  const allRanges = Object.values(workingHours ?? {}).flat();
+  const active = allRanges.filter(v => v && v.to > v.from);
   if (!active.length) return null;
 
   const minFrom = Math.min(...active.map(v => v.from));
@@ -87,31 +73,38 @@ function deriveVisibleHoursFromWorkingHours(
 export type CalendarState = {
   selectedDate: Date;
   setSelectedDate: (date: Date | undefined) => void;
-  selectedMasterPhone: IUserDto["phone"] | "all";
-  setSelectedMasterPhone: (masterPhone: IUserDto["phone"] | "all") => void;
+  selectedEmployeeId: IEmployeeDto["id"] | "all";
+  setSelectedEmployeeId: (employeeId: IEmployeeDto["id"] | "all") => void;
   badgeVariant: TBadgeVariant;
   setBadgeVariant: (variant: TBadgeVariant) => void;
-  masters: IUserDto[];
-  setMasters: (masters: IUserDto[]) => void;
+  masters: IEmployeeDto[];
+  setMasters: (masters: IEmployeeDto[]) => void;
   workingHours: TWorkingHours;
   setWorkingHours: (
     updater: TWorkingHours | ((prev: TWorkingHours) => TWorkingHours)
   ) => void;
-  loadWorkingHours: (pointCode: string | undefined) => Promise<void>;
+  /** Загруженный диапазон дат расписания */
+  loadedScheduleRange: { from: string; to: string } | null;
+  loadWorkingHours: (locationId: string | undefined) => Promise<void>;
+  /** Загрузить расписание конкретного сотрудника (или вернуть расписание локации если "all") */
+  loadSchedule: (
+    locationId: string | undefined,
+    employeeId: string | "all"
+  ) => Promise<void>;
   visibleHours: TVisibleHours;
   setVisibleHours: (
     updater: TVisibleHours | ((prev: TVisibleHours) => TVisibleHours)
   ) => void;
   /**
    * Если true — visibleHours ещё не задавались пользователем,
-   * и их можно автоподстроить под workingHours точки.
+   * и их можно автоподстроить под workingHours локации.
    */
   isVisibleHoursAuto: boolean;
   events: IEvent[];
   setLocalEvents: (updater: IEvent[] | ((prev: IEvent[]) => IEvent[])) => void;
-  /** Код точки: selectedPointCode || currentUser.point_code. Для выборов услуги в форме записи. */
-  pointCode: string | undefined;
-  setPointCode: (v: string | undefined) => void;
+  /** UUID локации: selectedLocationId || currentUser.location_id. Для выбора услуги в форме записи. */
+  locationId: string | undefined;
+  setLocationId: (v: string | undefined) => void;
 };
 
 export const useCalendarStore = create<CalendarState>()(
@@ -124,15 +117,16 @@ export const useCalendarStore = create<CalendarState>()(
         if (isSameDay(current, date)) return;
         set({ selectedDate: date });
       },
-      selectedMasterPhone: "all",
-      setSelectedMasterPhone: (masterPhone: IUserDto["phone"] | "all") =>
-        set({ selectedMasterPhone: masterPhone }),
+      selectedEmployeeId: "all",
+      setSelectedEmployeeId: (employeeId: IEmployeeDto["id"] | "all") =>
+        set({ selectedEmployeeId: employeeId }),
       badgeVariant: "colored",
       setBadgeVariant: (variant: TBadgeVariant) =>
         set({ badgeVariant: variant }),
       masters: [],
-      setMasters: (masters: IUserDto[]) => set({ masters }),
-      workingHours: WORKING_HOURS,
+      setMasters: (masters: IEmployeeDto[]) => set({ masters }),
+      workingHours: {},
+      loadedScheduleRange: null,
       setWorkingHours: (
         updater: TWorkingHours | ((prev: TWorkingHours) => TWorkingHours)
       ) =>
@@ -144,19 +138,58 @@ export const useCalendarStore = create<CalendarState>()(
                 )
               : updater,
         })),
-      loadWorkingHours: async (pointCode: string | undefined) => {
-        if (!pointCode) return;
-        const point = await PointService.getPoint(pointCode);
-        const workingHours = mapPointScheduleToWorkingHours(point.schedule);
-        const nextVisibleHours =
-          deriveVisibleHoursFromWorkingHours(workingHours);
+      loadWorkingHours: async (locationId: string | undefined) => {
+        // Делегируем в loadSchedule с "all" (расписание локации)
+        await get().loadSchedule(locationId, "all");
+      },
+      loadSchedule: async (
+        locationId: string | undefined,
+        employeeId: string | "all"
+      ) => {
+        if (!locationId) return;
+        try {
+          // Запрашиваем месяц selectedDate + overflow дни для недельного вида
+          const selectedDate = get().selectedDate;
+          const rangeFrom = format(
+            startOfWeek(startOfMonth(selectedDate), { weekStartsOn: 1 }),
+            "yyyy-MM-dd"
+          );
+          const rangeTo = format(
+            endOfWeek(endOfMonth(selectedDate), { weekStartsOn: 1 }),
+            "yyyy-MM-dd"
+          );
 
-        set(state => ({
-          workingHours,
-          ...(state.isVisibleHoursAuto && nextVisibleHours
-            ? { visibleHours: nextVisibleHours }
-            : {}),
-        }));
+          // "all" → расписание локации, конкретный сотрудник → его расписание
+          const { slots } =
+            employeeId === "all"
+              ? await ScheduleService.getLocationSchedule(
+                  locationId,
+                  rangeFrom,
+                  rangeTo
+                )
+              : await ScheduleService.getEmployeeSchedule(
+                  employeeId,
+                  rangeFrom,
+                  rangeTo
+                );
+
+          const newHours = mapScheduleSlotsToWorkingHours(slots);
+          if (!newHours) return; // Нет данных — оставляем текущие
+
+          // Мерджим с существующими данными чтобы не терять соседние месяцы
+          const merged = { ...get().workingHours, ...newHours };
+          set({
+            workingHours: merged,
+            loadedScheduleRange: { from: rangeFrom, to: rangeTo },
+          });
+
+          if (get().isVisibleHoursAuto) {
+            const vis = deriveVisibleHoursFromWorkingHours(merged);
+            if (vis) set({ visibleHours: vis });
+          }
+        } catch {
+          // При ошибке оставляем текущие рабочие часы
+        }
       },
       visibleHours: VISIBLE_HOURS,
       setVisibleHours: (
@@ -180,13 +213,14 @@ export const useCalendarStore = create<CalendarState>()(
               ? (updater as (prev: IEvent[]) => IEvent[])(state.events)
               : updater,
         })),
-      pointCode: undefined,
-      setPointCode: (v: string | undefined) => set({ pointCode: v }),
+      locationId: undefined,
+      setLocationId: (v: string | undefined) => set({ locationId: v }),
     }),
     {
       name: "calendar-store",
       partialize: state => ({
         badgeVariant: state.badgeVariant,
+        locationId: state.locationId,
       }),
       storage: createJSONStorage(() => localStorage),
     }

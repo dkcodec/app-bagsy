@@ -1,16 +1,25 @@
 {
   "LocaleLayout": { "title": "Bagsy — управление записями" },
+  "Offline": {
+    "title": "Нет подключения",
+    "description": "Проверьте интернет-соединение. Страница откроется автоматически, когда связь восстановится.",
+    "retry": "Повторить попытку"
+  },
   "Sidebar": {
     "sidebar": "Боковое меню",
     "sidebarDescription": "Отображает боковое меню.",
     "Main": {
       "calendar": "Календарь",
+      "schedule": "Расписание",
       "clients": "Клиенты",
       "services": "Услуги",
       "staff": "Сотрудники",
-      "points": "Точки",
+      "locations": "Локации",
       "analytics": "Аналитика",
       "settings": "Настройки"
+    },
+    "LocationSelect": {
+      "label": "Локация"
     },
     "User": {
       "name": "Имя",
@@ -19,13 +28,20 @@
       "logout": "Выйти"
     }
   },
+  "PwaInstallPrompt": {
+    "add-to-home-screen": "Добавить на главный экран",
+    "share": "Поделиться",
+    "to-home-screen": "На экран \"Домой\"",
+    "install-app": "Установить приложение",
+    "install": "Установить"
+  },
   "Dashboard": {
     "content": { "calendar": "Календарь" },
     "title": {
       "welcome": "Добро пожаловать!",
       "calendar": "Календарь"
     },
-    "emptyPoints": {
+    "emptyLocations": {
       "title": "Нет точек обслуживания",
       "description": "У вас пока нет точек обслуживания. Добавьте первую точку, чтобы начать работу с календарем.",
       "addPointButton": "Добавить точку"
@@ -103,14 +119,35 @@
         "comment": "Комментарий",
         "commentDescription": "Дополнительная информация",
         "add": "Добавить запись",
-        "cancel": "Отмена"
+        "notLinkedService": "Не привязана",
+        "notLinkedMaster": "Не привязан",
+        "cancel": "Отмена",
+        "errors": {
+          "firstNameRequired": "Введите имя",
+          "lastNameRequired": "Введите фамилию",
+          "phoneRequired": "Введите телефон",
+          "serviceRequired": "Выберите услугу",
+          "startDateRequired": "Выберите дату начала",
+          "selectStaff": "Выберите работника",
+          "selectLocation": "Выберите точку",
+          "selectLocationFirst": "Сначала выберите точку"
+        }
       },
       "EventDetailsDialog": {
         "edit": "Редактировать",
+        "cancel": "Отменить запись",
+        "cancelConfirm": "Вы уверены, что хотите отменить эту запись?",
+        "cancelReason": "Причина отмены",
+        "cancelReasonPlaceholder": "Укажите причину (необязательно)",
+        "cancelSuccess": "Запись отменена",
+        "cancelError": "Не удалось отменить запись",
+        "cancelling": "Отмена...",
         "responsible": "Ответственный",
         "startDate": "Дата и время начала",
         "endDate": "Дата и время окончания",
-        "comment": "Комментарий"
+        "comment": "Комментарий",
+        "client": "Клиент",
+        "status": "Статус"
       },
       "DayCell": {
         "more": "ещё"
@@ -202,8 +239,8 @@
       "active": "Активен",
       "role": "Роль",
       "inactive": "Неактивен",
-      "pointCode": "Код точки",
-      "networkCode": "Код сети",
+      "locationId": "Локация",
+      "networkCode": "Организация",
       "createdAt": "Дата создания",
       "updatedAt": "Последнее обновление",
       "editProfile": "Редактировать профиль",
@@ -224,13 +261,156 @@
       "errorRemovingAvatar": "Ошибка при удалении аватара"
     }
   },
+  "Account": {
+    "title": "Аккаунт",
+    "tabs": {
+      "profile": "Профиль",
+      "subscription": "Подписка",
+      "security": "Безопасность",
+      "appearance": "Внешний вид"
+    },
+    "Profile": {
+      "changePhoto": "Изменить фото",
+      "removePhoto": "Удалить фото",
+      "personalInfo": "Личная информация",
+      "fullName": "Полное имя",
+      "firstName": "Имя",
+      "lastName": "Фамилия",
+      "phone": "Телефон",
+      "email": "Email",
+      "notSet": "Не указан",
+      "role": "Роль",
+      "edit": "Изменить",
+      "add": "Добавить",
+      "save": "Сохранить",
+      "cancel": "Отмена",
+      "business": "Бизнес",
+      "businessName": "Название бизнеса",
+      "location": "Локация",
+      "organizationId": "Организация",
+      "copy": "Скопировать",
+      "сopied": "Скопировано",
+      "account": "Аккаунт",
+      "createdAt": "Создан",
+      "updatedAt": "Обновлён",
+      "deleteAccount": "Удалить аккаунт",
+      "deleteAccountDescription": "Это действие необратимо. Все данные будут удалены.",
+      "nameMinError": "Имя должно содержать минимум 2 символа",
+      "surnameMinError": "Фамилия должна содержать минимум 2 символа",
+      "profileUpdatedSuccessfully": "Профиль успешно обновлён",
+      "errorUpdatingProfile": "Ошибка при обновлении профиля",
+      "uploadError": "Ошибка загрузки фото",
+      "avatarRemovedSuccess": "Аватар удалён",
+      "errorRemovingAvatar": "Ошибка при удалении аватара"
+    },
+    "Subscription": {
+      "currentPlan": "Текущий план",
+      "active": "Активен",
+      "trial": "Пробный",
+      "expired": "Истёк",
+      "cancelled": "Отменён",
+      "nextPayment": "Следующий платёж",
+      "usedOfMax": "{used} из {max}",
+      "amount": "Сумма",
+      "bookings": "Записи",
+      "staffSlots": "Мастера",
+      "locations": "Точки",
+      "unlimited": "∞",
+      "upgradePlan": "Улучшить план",
+      "comparePlans": "Сравнить планы",
+      "manualPaymentWarning": "Оплата пока производится вручную. Для продления свяжитесь с нами через",
+      "whatsApp": "WhatsApp",
+      "paymentHistory": "История платежей",
+      "date": "Дата",
+      "description": "Описание",
+      "status": "Статус",
+      "paid": "Оплачен",
+      "noPayments": "Платежей пока нет",
+      "paymentMethod": "Способ оплаты",
+      "noPaymentMethod": "Способ оплаты не привязан",
+      "addCard": "Привязать карту",
+      "perMonth": "/ мес",
+      "popular": "Популярный",
+      "trialMonths": "Первые {count} мес. бесплатно",
+      "trialMonth": "Первый месяц бесплатно",
+      "plans": {
+        "solo": {
+          "name": "Solo",
+          "description": "Для самозанятых мастеров",
+          "locations": "1 локация",
+          "staff": "1 мастер"
+        },
+        "point": {
+          "name": "Point",
+          "description": "Для небольших салонов",
+          "locations": "1 локация",
+          "staff": "до 10 мастеров"
+        },
+        "network": {
+          "name": "Network",
+          "description": "Для сетей салонов",
+          "locations": "Неограниченно точек",
+          "staff": "Неограниченно мастеров"
+        }
+      },
+      "features": {
+        "unlimitedBookings": "Неограниченные записи",
+        "basicCrm": "CRM базовая",
+        "notifications": "Уведомления (SMS / WhatsApp / Email)",
+        "onlineBooking": "Онлайн-запись без рекламы",
+        "reminders": "Напоминания о записях",
+        "allFromSolo": "Всё из Solo",
+        "advancedCrm": "Расширенная CRM",
+        "analytics": "Аналитика и отчёты",
+        "finance": "Финансовый учёт",
+        "inventory": "Складской учёт",
+        "allFromPoint": "Всё из Point",
+        "multiBranch": "Мультифилиальность",
+        "consolidatedAnalytics": "Сводная аналитика по всем локациям",
+        "apiAccess": "API доступ",
+        "inDevelopment": "в разработке",
+        "planned": "в планах"
+      }
+    },
+    "Security": {
+      "password": "Пароль",
+      "lastChanged": "Последнее изменение",
+      "never": "никогда",
+      "changePassword": "Сменить пароль",
+      "activeSessions": "Активные сессии",
+      "currentSession": "текущая сессия",
+      "revoke": "Отозвать",
+      "logoutAll": "Выйти со всех устройств",
+      "daysAgo": "{count} дн. назад"
+    },
+    "Appearance": {
+      "theme": "Тема",
+      "light": "Светлая",
+      "dark": "Тёмная",
+      "system": "Системная",
+      "language": "Язык",
+      "russian": "Русский",
+      "kazakh": "Қазақша",
+      "notifications": "Уведомления",
+      "smsReminders": "SMS-напоминания клиентам",
+      "smsRemindersDescription": "Отправлять за 2ч до записи",
+      "dailyDigest": "Дайджест на email",
+      "dailyDigestDescription": "Сводка записей на завтра",
+      "notSupported": "Ваш браузер не поддерживает уведомления",
+      "blocked": "Уведомления заблокированы. Разрешите их в настройках браузера",
+      "pushNotifications": "Push-уведомления",
+      "pushDescription": "Получать уведомления о новых записях",
+      "calendar": "Календарь"
+    }
+  },
   "Staff": {
     "title": "Сотрудники",
     "tableTitle": "Сотрудники",
+    "permissionsUpdated": "Права сотрудника обновлены",
     "addStaff": "Добавить сотрудника",
     "searchPlaceholder": "Поиск по имени, телефону, роли...",
     "networkCode": "Код сети",
-    "pointCode": "Код точки",
+    "locationId": "Локация",
     "role": "Роль",
     "name": "Имя",
     "surname": "Фамилия",
@@ -248,26 +428,78 @@
     "accessDeniedDescription": "У вас нет прав для просмотра списка сотрудников",
     "errorLoadingData": "Ошибка загрузки данных",
     "unknownError": "Неизвестная ошибка",
+    "invite": "Пригласить",
+    "employeesCount": "сотрудников",
+    "staffLimit": "лимит сотрудников",
     "filters": {
-      "pointCode": "Код точки",
-      "pointCodePlaceholder": "Введите код точки",
-      "networkCode": "Код сети",
+      "searchByNameOrPhone": "Поиск по имени или телефону...",
+      "allRoles": "Все роли",
+      "allStatuses": "Все статусы",
+      "allLocations": "Все точки",
+      "active": "Активные",
+      "inactive": "Неактивные",
+      "locationId": "Локация",
+      "locationIdPlaceholder": "Введите UUID локации",
+      "networkCode": "Организация",
       "networkCodePlaceholder": "Введите код сети",
       "role": "Роль",
       "rolePlaceholder": "Выберите роль",
-      "allRoles": "Все роли",
-      "phone": "Телефон",
-      "phonePlaceholder": "Введите телефон",
+      "search": "Поиск",
+      "searchPlaceholder": "Введите тел. или фио",
       "clear": "Очистить",
       "phones": "Телефоны"
     },
+    "drawer": {
+      "profile": "Профиль",
+      "services": "Услуги",
+      "portfolio": "Портфолио",
+      "info": "Информация",
+      "phone": "Телефон",
+      "location": "Локация",
+      "status": "Статус",
+      "joined": "Дата входа",
+      "permissions": "Права доступа",
+      "canProvideServices": "Оказывает услуги",
+      "canProvideServicesDesc": "Может принимать клиентов",
+      "canManageSchedule": "Управление расписанием",
+      "canManageScheduleDesc": "Редактирование рабочих часов точки",
+      "quickStats": "Статистика",
+      "servicesCount": "услуг",
+      "thisWeek": "за неделю",
+      "rating": "рейтинг",
+      "actions": "Действия",
+      "changeRole": "Изменить роль",
+      "transfer": "Перевести на точку",
+      "deactivate": "Не активен",
+      "activate": "Активен",
+      "totalServices": "Всего услуг",
+      "priceRange": "Диапазон цен",
+      "min": "мин",
+      "noServices": "Нет привязанных услуг",
+      "portfolioPlaceholder": "Портфолио будет доступно в ближайшее время",
+      "viewProfile": "Посмотреть профиль",
+      "changeRoleTitle": "Изменить роль",
+      "changeRoleDesc": "Выберите новую роль для сотрудника",
+      "transferTitle": "Перевод на другую точку",
+      "transferDesc": "Выберите локацию для перевода",
+      "selectRole": "Выберите роль",
+      "selectLocation": "Выберите локацию",
+      "save": "Сохранить",
+      "cancel": "Отмена",
+      "deactivateTitle": "Деактивация сотрудника",
+      "deactivateDesc": "Вы уверены что хотите деактивировать сотрудника? К нему не смогут записаться.",
+      "activateTitle": "Активация сотрудника",
+      "activateDesc": "Вы уверены что хотите активировать сотрудника? К нему смогут записаться.",
+      "confirm": "Подтвердить",
+      "cannotDeactivateSelf": "Нельзя деактивировать себя",
+      "detach": "Отвязать от точки",
+      "detachTitle": "Отвязка от точки",
+      "detachDesc": "{name} будет отвязан от текущей локации. Все записи к этому сотруднику будут отменены."
+    },
     "roles": {
-      "staff": "Сотрудник",
+      "owner": "Владелец",
       "manager": "Менеджер",
-      "net_manager": "Сетевой менеджер",
-      "self_owner": "Владелец",
-      "admin": "Администратор",
-      "worker": "Работник"
+      "staff": "Сотрудник"
     },
     "pagination": {
       "showing": "Показано",
@@ -287,16 +519,15 @@
       "phonePlaceholder": "Введите номер телефона",
       "role": "Роль",
       "rolePlaceholder": "Выберите роль",
-      "pointCode": "Код точки",
-      "pointCodePlaceholder": "Введите код точки",
+      "locationId": "Локация",
+      "locationIdPlaceholder": "Выберите локацию",
       "submit": "Добавить сотрудника",
       "submitting": "Добавление...",
       "cancel": "Отмена",
       "success": "Сотрудник успешно добавлен. Ссылка для завершения регистрации отправлена.",
       "roles": {
         "staff": "Сотрудник",
-        "manager": "Менеджер",
-        "net_manager": "Сетевой менеджер"
+        "manager": "Менеджер"
       },
       "errors": {
         "nameMin": "Имя должно содержать минимум 2 символа",
@@ -306,15 +537,14 @@
         "phoneRequired": "Введите номер телефона",
         "phoneInvalid": "Некорректный номер телефона",
         "roleRequired": "Выберите роль",
-        "pointCodeRequired": "Введите код точки",
-        "pointCodeMax": "Код точки не должен превышать 50 символов",
+        "pointCodeRequired": "Выберите локацию",
         "submitError": "Ошибка при добавлении сотрудника"
       }
     }
   },
-  "Points": {
-    "title": "Точки обслуживания",
-    "tableTitle": "Точки обслуживания",
+  "Locations": {
+    "title": "Локации",
+    "tableTitle": "Локации",
     "code": "Код",
     "name": "Название",
     "address": "Адрес",
@@ -327,6 +557,63 @@
     "accessDenied": "Доступ запрещен",
     "accessDeniedDescription": "У вас нет прав для просмотра списка точек",
     "addPoint": "Добавить точку",
+    "detail": {
+      "edit": "Редактировать",
+      "phone": "Телефон",
+      "scheduleType": "Тип расписания",
+      "slotDuration": "Длительность слота",
+      "minutesShort": "мин",
+      "workingHours": "Часы работы",
+      "closed": "Закрыто",
+      "staffCount": "Сотрудники",
+      "servicesCount": "Услуги",
+      "bookingLink": "Ссылка для записи",
+      "bookingLinkHint": "Поделитесь этой ссылкой с клиентами",
+      "copyLink": "Копировать",
+      "linkCopied": "Ссылка скопирована",
+      "qrCode": "QR",
+      "technicalId": "ID",
+      "createdAt": "Создано",
+      "backToAll": "Все локации",
+      "noSchedule": "Расписание не настроено",
+      "scheduleTypes": {
+        "fixed": "Фиксированное",
+        "mixed": "Смешанное"
+      },
+      "delete": "Удалить",
+      "deleteTitle": "Удалить локацию",
+      "deleteDescription": "Вы уверены, что хотите удалить локацию \"{name}\"? Это действие нельзя отменить.",
+      "deleteConfirm": "Да, удалить",
+      "deleteCancel": "Отмена",
+      "deleteSuccess": "Локация удалена",
+      "deleteError": "Ошибка при удалении локации"
+    },
+    "editDialog": {
+      "title": "Редактировать локацию",
+      "description": "Измените информацию о локации",
+      "save": "Сохранить",
+      "saving": "Сохранение...",
+      "success": "Локация обновлена",
+      "error": "Ошибка при обновлении локации"
+    },
+    "network": {
+      "locationCount": "{count} локаций",
+      "addLocation": "Добавить локацию",
+      "staff": "сотр.",
+      "services": "услуг"
+    },
+    "toggleActive": {
+      "deactivateTitle": "Деактивировать локацию",
+      "deactivateDescription": "Вы уверены, что хотите деактивировать \"{name}\"? Клиенты не смогут записываться в эту точку.",
+      "deactivateConfirm": "Деактивировать",
+      "deactivateSuccess": "Локация деактивирована",
+      "activateTitle": "Активировать локацию",
+      "activateDescription": "Активировать \"{name}\"? Локация снова станет доступна для записи.",
+      "activateConfirm": "Активировать",
+      "activateSuccess": "Локация активирована",
+      "cancel": "Отмена",
+      "error": "Ошибка при обновлении статуса"
+    },
     "schedule": {
       "title": "Расписание",
       "allDay": "Весь день",
@@ -341,8 +628,28 @@
     "addPointForm": {
       "name": "Название",
       "description": "Описание",
+      "phone": "Контактный номер",
       "categoryId": "Категория",
       "categoryIdPlaceholder": "Выберите категорию",
+      "scheduleType": "Тип расписания",
+      "scheduleTypePlaceholder": "Выберите тип",
+      "scheduleTypes": {
+        "mixed": {
+          "label": "Смешанное",
+          "description": "У локации своё расписание, у мастеров — своё",
+          "hint": "Каждый мастер сможет настроить свой график работы отдельно от расписания локации"
+        },
+        "fixed": {
+          "label": "Фиксированное",
+          "description": "Все мастера работают по расписанию локации",
+          "hint": "Мастера не смогут менять свой график — он будет совпадать с расписанием локации"
+        }
+      },
+      "soloScheduleNote": "ваше расписание и расписание локации синхронизируются автоматически",
+      "slotDuration": "Длительность слота",
+      "slotDurationPlaceholder": "Выберите длительность",
+      "slotDurationHint": "Промежутки, в которые будет доступна запись. Например, каждые 30 минут или каждые 5 минут",
+      "minutes": "мин",
       "address": {
         "title": "Адрес",
         "autocomplete": "Город и улица заполнятся автоматически при выборе адреса из поиска, но вы можете их изменить вручную",
@@ -355,35 +662,49 @@
         "mapNoLocation": "Выберите адрес для отображения на карте",
         "city": "Город",
         "street": "Улица",
-        "latitude": "Широта",
-        "longitude": "Долгота"
-      },
-      "schedule": {
-        "title": "Расписание",
-        "allDay": "Весь день",
-        "comment": "Комментарий"
+        "building": "Здание / корпус",
+        "buildingPlaceholder": "Номер дома, корпус",
+        "details": "Доп. информация",
+        "detailsPlaceholder": "Этаж, офис, вход и т.д."
       },
       "submit": "Создать",
       "submitting": "Создание...",
       "cancel": "Отмена",
-      "success": "Точка успешно создана",
+      "success": "Локация успешно создана",
       "errors": {
         "nameMin": "Название должно содержать минимум 2 символа",
         "nameMax": "Название не должно превышать 100 символов",
         "descriptionMax": "Описание не должно превышать 500 символов",
+        "phoneRequired": "Укажите телефон",
         "categoryIdRequired": "Необходимо выбрать категорию",
+        "scheduleTypeRequired": "Выберите тип расписания",
+        "slotDurationMin": "Минимум 5 минут",
+        "slotDurationMax": "Максимум 480 минут",
         "cityMin": "Название города должно содержать минимум 2 символа",
         "cityMax": "Название города не должно превышать 100 символов",
         "streetMin": "Название улицы должно содержать минимум 2 символа",
         "streetMax": "Название улицы не должно превышать 200 символов",
-        "latitudeMin": "Широта должна быть не менее -90",
-        "latitudeMax": "Широта должна быть не более 90",
-        "longitudeMin": "Долгота должна быть не менее -180",
-        "longitudeMax": "Долгота должна быть не более 180",
         "addressRequired": "Необходимо выбрать адрес из поиска",
-        "scheduleMin": "Необходимо указать расписание хотя бы для одного дня",
         "networkCodeRequired": "Не удалось определить код сети",
-        "submitError": "Ошибка при создании точки"
+        "submitError": "Ошибка при создании локации"
+      }
+    },
+    "organizationProfile": {
+      "title": "Объединить в сеть?",
+      "description": "У вас несколько точек — вы можете объединить их в сеть. Это необязательно, но поможет управлять всеми локациями под одним брендом.",
+      "name": "Название сети",
+      "namePlaceholder": "Например: Beauty Network",
+      "orgDescription": "Описание",
+      "orgDescriptionPlaceholder": "Краткое описание вашей сети",
+      "skip": "Пропустить",
+      "submit": "Создать сеть",
+      "submitting": "Создание...",
+      "success": "Сеть успешно создана",
+      "errors": {
+        "nameMin": "Название должно содержать минимум 2 символа",
+        "nameMax": "Название не должно превышать 100 символов",
+        "descriptionMax": "Описание не должно превышать 500 символов",
+        "submitError": "Ошибка при создании сети"
       }
     }
   },
@@ -406,9 +727,9 @@
       "status": "Статус",
       "masters": "Мастера"
     },
-    "pointSelect": {
-      "label": "Точка обслуживания",
-      "placeholder": "Выберите точку"
+    "locationSelect": {
+      "label": "Локация",
+      "placeholder": "Выберите локацию"
     },
     "addServiceDialog": {
       "title": "Добавить услугу",
@@ -454,9 +775,57 @@
         "durationMustBePositive": "Длительность должна быть положительным числом",
         "colorRequired": "Выберите цвет",
         "colorMax": "Цвет не должен превышать 50 символов",
-        "pointCodeRequired": "Не удалось определить код точки",
+        "pointCodeRequired": "Не удалось определить локацию",
         "submitError": "Ошибка при создании услуги"
       }
+    },
+    "serviceCount": "{count} услуг",
+    "drawer": {
+      "detailsTab": "Детали",
+      "staffTab": "Сотрудники",
+      "save": "Сохранить",
+      "saving": "Сохранение...",
+      "saveSuccess": "Услуга обновлена",
+      "saveError": "Ошибка обновления",
+      "deleteBtn": "Удалить",
+      "sortOrder": "Порядок сортировки"
+    },
+    "actions": {
+      "edit": "Редактировать",
+      "manageStaff": "Управление сотрудниками",
+      "duplicate": "Дублировать",
+      "delete": "Удалить",
+      "duplicateSuccess": "Услуга дублирована",
+      "duplicateError": "Ошибка дублирования"
+    },
+    "deleteDialog": {
+      "title": "Удалить услугу",
+      "description": "Вы уверены, что хотите удалить услугу \"{name}\"? Это действие необратимо.",
+      "cancel": "Отмена",
+      "confirm": "Удалить",
+      "success": "Услуга удалена",
+      "error": "Ошибка удаления"
+    },
+    "staffTab": {
+      "assigned": "Назначенные",
+      "available": "Доступные сотрудники",
+      "remove": "Отвязать",
+      "add": "Добавить",
+      "assign": "Назначить",
+      "priceRange": "Диапазон цен",
+      "duration": "Длительность",
+      "noStaff": "Нет доступных сотрудников",
+      "notSet": "Не указано",
+      "pricePlaceholder": "Цена",
+      "addSuccess": "Сотрудник привязан к услуге",
+      "addError": "Ошибка привязки сотрудника",
+      "unlinkTitle": "Подтвердите отвязку",
+      "unlinkDescription": "К {name} не смогут больше записаться на «{service}»",
+      "unlinkConfirm": "Отвязать",
+      "unlinkCancel": "Отмена",
+      "unlinkSuccess": "Сотрудник отвязан от услуги",
+      "unlinkError": "Ошибка отвязки",
+      "permissionsUpdated": "Разрешения обновлены"
     },
     "attachMaster": {
       "dialogTitle": "Привязать мастера к услуге",
@@ -479,6 +848,212 @@
       "priceMin": "Цена должна быть не менее 1",
       "serviceIdRequired": "ID услуги обязателен",
       "masterPhoneRequired": "Выберите мастера"
+    }
+  },
+  "Schedule": {
+    "title": "График",
+    "description": "Настройка графика работы по дням месяца",
+    "noAccess": "Нет доступа к настройке графика",
+    "mySchedule": "Мой график",
+    "pointSchedule": "График точки",
+    "monthGridTitle": "Дни месяца",
+    "editorTitle": "График выбранных дней",
+    "selectedCount": "Выбрано: {count}",
+    "selectedDay": "Выбрано: 1 день — {day}",
+    "selectedDays": "Выбрано: {count} дн.",
+    "clearSelection": "Сбросить",
+    "shiftHint": "Удерживайте Shift для выбора диапазона",
+    "saveCount": "Сохранить {count} дн.",
+    "dayOff": "Выходной",
+    "customBadge": "Своё",
+    "fixedScheduleInfo": "Ваша локация использует фиксированный график — все работают по одному расписанию",
+    "Weekdays": {
+      "mon": "Пн",
+      "tue": "Вт",
+      "wed": "Ср",
+      "thu": "Чт",
+      "fri": "Пт",
+      "sat": "Сб",
+      "sun": "Вс"
+    },
+    "MonthNav": {
+      "prev": "Предыдущий месяц",
+      "next": "Следующий месяц",
+      "today": "Сегодня"
+    },
+    "Header": {
+      "title": "График",
+      "mySchedule": "Мой график",
+      "pointSchedule": "График точки",
+      "fixedBadge": "Фиксированный",
+      "mixedBadge": "Смешанный",
+      "scheduleTypeFixedHint": "График точки фиксированный, вы не можете его менять",
+      "scheduleTypeMixedHint": "График точки смешанный — мастер настраивает свой график на каждый месяц",
+      "selectLocation": "Выберите точку"
+    },
+    "save": "Сохранить",
+    "Editor": {
+      "selectDaysHint": "Выберите дни в календаре, чтобы задать график",
+      "dayIsClosed": "День отмечен как выходной",
+      "makeOpen": "Сделать рабочим",
+      "makeClosed": "Сделать выходным",
+      "open": "Открыто",
+      "closed": "Закрыто",
+      "workHours": "Рабочие часы",
+      "breaks": "Перерывы",
+      "noBreaks": "Нет перерывов",
+      "from": "С",
+      "to": "До",
+      "addBreak": "Добавить перерыв",
+      "addWorkRange": "Добавить интервал",
+      "mixedTimesWarning": "У выбранных дней разное время. Изменения будут применены ко всем выбранным дням.",
+      "endBeforeStart": "Время окончания должно быть позже начала",
+      "overlappingRanges": "Рабочие интервалы не должны пересекаться",
+      "breakOutsideWork": "Перерыв должен быть внутри рабочих часов",
+      "overlappingBreaks": "Перерывы не должны пересекаться"
+    },
+    "savedSuccess": "Расписание сохранено",
+    "savedError": "Ошибка сохранения расписания",
+    "dayOffSuccess": "Выходной сохранён",
+    "Presets": {
+      "allWeekdays": "Все будни",
+      "weekdays": "5/2",
+      "evenDays": "Чётные",
+      "oddDays": "Нечётные",
+      "clear": "Очистить"
+    }
+  },
+  "apiErrors": {
+    "permission_denied": "Нет прав для выполнения этого действия",
+    "not_found": "Запись не найдена",
+    "conflict": "Конфликт данных, попробуйте ещё раз",
+    "validation_error": "Ошибка валидации данных",
+    "unauthorized": "Сессия истекла, войдите заново",
+    "rate_limit": "Слишком много запросов, подождите",
+    "internal_error": "Внутренняя ошибка сервера",
+    "unknown": "Произошла ошибка, попробуйте позже",
+    "slot_already_occupied": "Это время уже занято — выберите другой слот",
+    "slot_not_available": "Этот слот недоступен для записи",
+    "appointment_is_final": "Запись уже завершена или отменена — её нельзя изменить",
+    "invalid_status_transition": "Недопустимое изменение статуса записи",
+    "cannot_schedule_in_past": "Нельзя записаться на прошедшее время",
+    "cannot_book_self": "Нельзя записать самого себя",
+    "calendar_range_too_large": "Слишком большой период — выберите интервал до 35 дней",
+    "invalid_time_range": "Некорректный временной интервал",
+    "location_not_found": "Локация не найдена",
+    "location_inactive": "Локация деактивирована",
+    "service_not_found": "Услуга не найдена",
+    "service_inactive": "Услуга деактивирована",
+    "employee_not_found": "Сотрудник не найден",
+    "employee_inactive": "Сотрудник деактивирован",
+    "employee_cannot_serve": "Этот мастер не оказывает выбранную услугу",
+    "employee_service_not_found": "Услуга мастера не найдена",
+    "organization_suspended": "Подписка организации приостановлена — обновите тариф для продолжения"
+  },
+  "Analytics": {
+    "title": "Аналитика",
+    "empty": "Нет данных за выбранный период",
+    "prevPeriod": "Прошлый",
+    "exportCsv": "Экспорт CSV",
+    "accessDenied": "У вас нет доступа к этому разделу",
+    "accessDeniedDescription": "Раздел доступен владельцам и менеджерам. Обратитесь к администратору, если считаете это ошибкой.",
+    "staffNotice": "Вы видите только свою личную аналитику",
+    "tabs": {
+      "overview": "Обзор",
+      "me": "Моя аналитика",
+      "staff": "Мастера",
+      "locations": "Локации",
+      "finance": "Финансы",
+      "clients": "Клиенты"
+    },
+    "period": {
+      "today": "Сегодня",
+      "week": "7 дней",
+      "month": "Месяц",
+      "quarter": "Квартал",
+      "custom": "Период",
+      "apply": "Применить",
+      "cancel": "Отмена"
+    },
+    "kpi": {
+      "revenue": "Выручка",
+      "bookings": "Записи",
+      "clients": "Клиенты",
+      "avgCheck": "Средний чек",
+      "load": "Загрузка",
+      "cancellations": "Отмены"
+    },
+    "charts": {
+      "revenueByDay": "Выручка по дням",
+      "topEmployees": "Топ мастеров",
+      "topServices": "Топ услуг",
+      "funnel": "Воронка записей",
+      "heatmap": "Загрузка по дням и часам",
+      "segments": "Распределение по сегментам",
+      "retention": "Возвращаемость (Retention)"
+    },
+    "funnel": {
+      "created": "Создано",
+      "confirmed": "Подтверждено",
+      "completed": "Состоялось"
+    },
+    "segments": {
+      "new": "Новые",
+      "growing": "Развивающиеся",
+      "regular": "Постоянные",
+      "vip": "VIP",
+      "sleeping": "Спящие",
+      "lost": "Потерянные"
+    },
+    "insights": {
+      "saturdayLoad": "Суббота загружена на {percent}% — рассмотрите найм ещё одного мастера, чтобы не терять клиентов в пиковые часы.",
+      "revenueDrop": "Выручка снизилась на {percent}% vs предыдущий период. Проверьте отмены и расписание мастеров.",
+      "topServiceShare": "«{name}» приносит {percent}% всей выручки. Продвигайте эту услугу активнее.",
+      "retentionFirst": "Критично удержать клиента после первого визита. Рассмотрите скидку 10% на повторный визит."
+    },
+    "staff": {
+      "weekdayLoad": "Загрузка мастеров по дням недели",
+      "hourlyLoad": "Загрузка по часам",
+      "columns": {
+        "name": "Мастер",
+        "revenue": "Выручка",
+        "bookings": "Записей",
+        "avgCheck": "Ср. чек",
+        "load": "Загрузка",
+        "cancellations": "Отмены",
+        "rating": "Рейтинг"
+      }
+    },
+    "finance": {
+      "title": "Финансовый отчёт",
+      "metric": "Показатель",
+      "amount": "Сумма",
+      "revenue": "Выручка",
+      "services": "Услуги",
+      "products": "Продажа товаров",
+      "revenueTotal": "Итого выручка",
+      "payroll": "Зарплаты",
+      "payrollTotal": "Итого зарплаты",
+      "ofServices": "от услуг",
+      "gross": "Валовая прибыль",
+      "margin": "Маржа",
+      "comingSoon": "скоро",
+      "print": "Печать"
+    },
+    "clients": {
+      "beta": "Beta",
+      "totalInBase": "Всего в базе",
+      "new": "Новых",
+      "returning": "Вернувшихся",
+      "lost": "Потеряно",
+      "breakdownTitle": "Новые vs повторные",
+      "retentionAfter": "После {n}-го визита вернулись",
+      "cohorts": "Когорты новых клиентов",
+      "active": "активны",
+      "newCount": "новых"
+    },
+    "locations": {
+      "title": "Локация {id}"
     }
   }
 }

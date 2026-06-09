@@ -10,177 +10,166 @@ import {
   SelectValue,
   Button,
 } from "@/src/entities";
-import { GetStaffParams } from "@/src/shared/services/staff-service";
-import { EUserRole } from "@/src/shared/types/user";
+import type { GetEmployeesParams } from "@/src/shared/services/employee-service";
+import type { ISubscriptionLimit, TUserRole } from "@/src/shared/types/user";
 import { useCurrentUser } from "@/src/shared/hooks/use-users";
+import { useLocations } from "@/src/shared/hooks/use-network-locations";
 import { useDebounceCallback } from "@/src/shared/hooks/use-debounce";
 import { useTranslations } from "next-intl";
-import { DEFAULT_STAFF_FILTERS } from "./constants";
+import { useRouter } from "next/navigation";
+import { Plus, Search } from "lucide-react";
 
-/**
- * Интерфейс для фильтров сотрудников
- */
 export interface StaffFiltersProps {
-  filters: GetStaffParams;
-  onFiltersChange: (filters: GetStaffParams) => void;
+  filters: GetEmployeesParams;
+  onFiltersChange: (filters: GetEmployeesParams) => void;
+  onInviteClick: () => void;
+  /** Лимиты подписки на сотрудников */
+  employeeLimits?: ISubscriptionLimit;
 }
 
 /**
- * Компонент фильтров для таблицы сотрудников
+ * Панель фильтров: поиск, [точка (network)], роль, статус, кнопка приглашения
  */
-export function StaffFilters({ filters, onFiltersChange }: StaffFiltersProps) {
-  const t = useTranslations("Staff.filters");
+export function StaffFilters({
+  filters,
+  onFiltersChange,
+  onInviteClick,
+  employeeLimits,
+}: StaffFiltersProps) {
+  const t = useTranslations("Staff");
+  const tFilters = useTranslations("Staff.filters");
   const tRoles = useTranslations("Staff.roles");
-  const { data: user } = useCurrentUser();
+  const router = useRouter();
 
-  const [localPointCode, setLocalPointCode] = useState(
-    filters.point_code || ""
-  );
-  const [localNetworkCode, setLocalNetworkCode] = useState(
-    filters.network_code || ""
-  );
-  const [localPhone, setLocalPhone] = useState(filters.phone || "");
+  const { data: currentUser } = useCurrentUser();
+  const isNetwork = currentUser?.organization?.subscription?.plan === "network";
 
-  // Проверка наличия активных фильтров
-  const hasActiveFilters = Boolean(
-    filters.point_code ||
-      filters.network_code ||
-      (filters.role && filters.role.length > 0) ||
-      (filters.phone && filters.phone.trim())
-  );
+  // Достигнут лимит сотрудников (max: null = безлимит)
+  const isLimitReached =
+    employeeLimits?.max != null
+      ? employeeLimits.used >= employeeLimits.max
+      : false;
 
-  // Обработка изменения фильтров
-  const handleFilterChange = (key: keyof GetStaffParams, value: any) => {
-    onFiltersChange({
-      ...filters,
-      [key]: value,
-      offset: 0, // Сбрасываем пагинацию при изменении фильтров
-    });
+  // Список локаций (только owner + network)
+  const { data: locationsData } = useLocations();
+  const locations = locationsData?.locations || [];
+
+  const [localSearch, setLocalSearch] = useState(filters.search || "");
+
+  // Обновление фильтра с сбросом пагинации
+  const updateFilter = <K extends keyof GetEmployeesParams>(
+    key: K,
+    value: GetEmployeesParams[K]
+  ) => {
+    onFiltersChange({ ...filters, [key]: value, offset: 0 });
   };
 
-  // Очистка всех фильтров
-  const handleClearFilters = () => {
-    onFiltersChange({
-      ...DEFAULT_STAFF_FILTERS,
-      point_code: undefined,
-      network_code: undefined,
-      role: undefined,
-      phone: undefined,
-    });
-    setLocalPointCode("");
-    setLocalNetworkCode("");
-    setLocalPhone("");
-  };
-
-  // Debounce для кода точки (применяется через 500мс после остановки ввода)
+  // Debounce поиска (500мс)
   useDebounceCallback(
-    localPointCode,
-    debouncedPointCode => {
-      const pointCodeValue = debouncedPointCode.trim();
-      handleFilterChange("point_code", pointCodeValue || undefined);
-    },
-    500
-  );
-
-  // Debounce для телефона (применяется через 500мс после остановки ввода)
-  useDebounceCallback(
-    localPhone,
-    debouncedPhone => {
-      const phoneValue = debouncedPhone.trim();
-      handleFilterChange("phone", phoneValue || undefined);
-    },
-    500
-  );
-
-  // Debounce для кода сети (применяется через 500мс после остановки ввода)
-  useDebounceCallback(
-    localNetworkCode,
-    debouncedNetworkCode => {
-      const networkCodeValue = debouncedNetworkCode.trim();
-      handleFilterChange("network_code", networkCodeValue || undefined);
-    },
+    localSearch,
+    val => updateFilter("search", val.trim() || undefined),
     500
   );
 
   return (
-    <div className="flex flex-col gap-4 p-4">
-      <div className="flex flex-wrap items-end gap-4">
-        {/* Фильтр по коду точки */}
-        <div className="flex-1 min-w-[150px]">
-          <label className="text-sm font-medium mb-1 block">
-            {t("pointCode")}
-          </label>
-          <Input
-            placeholder={t("pointCodePlaceholder")}
-            value={localPointCode}
-            onChange={e => setLocalPointCode(e.target.value)}
-          />
-        </div>
-
-        {/* Фильтр по коду сети */}
-        {user?.role === EUserRole.ADMIN && (
-          <div className="flex-1 min-w-[150px]">
-            <label className="text-sm font-medium mb-1 block">
-              {t("networkCode")}
-            </label>
-            <Input
-              placeholder={t("networkCodePlaceholder")}
-              value={localNetworkCode}
-              onChange={e => setLocalNetworkCode(e.target.value)}
-            />
-          </div>
-        )}
-
-        {/* Фильтр по ролям */}
-        <div className="flex-1 min-w-[150px]">
-          <label className="text-sm font-medium mb-1 block">{t("role")}</label>
-          <Select
-            value={filters.role?.[0] || "all"}
-            onValueChange={value => {
-              // Если выбрано "all" или пустое значение - убираем фильтр по роли
-              handleFilterChange(
-                "role",
-                value && value !== "all" ? [value] : undefined
-              );
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={t("rolePlaceholder")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t("allRoles")}</SelectItem>
-              <SelectItem value="staff">{tRoles("staff")}</SelectItem>
-              <SelectItem value="manager">{tRoles("manager")}</SelectItem>
-              <SelectItem value="net_manager">
-                {tRoles("net_manager")}
-              </SelectItem>
-              <SelectItem value="self_owner">{tRoles("self_owner")}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Фильтр по телефону */}
-        <div className="flex-1 min-w-[150px]">
-          <label className="text-sm font-medium mb-1 block">{t("phone")}</label>
-          <Input
-            placeholder={t("phonePlaceholder")}
-            value={localPhone}
-            onChange={e => setLocalPhone(e.target.value)}
-          />
-        </div>
-
-        {/* Кнопка очистки фильтров */}
-        {hasActiveFilters && (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleClearFilters}
-            className="mb-0"
-          >
-            {t("clear")}
-          </Button>
-        )}
+    <div className="flex flex-wrap items-center gap-2 px-3 py-2 md:gap-3 md:px-4 md:py-3">
+      {/* Поиск — на мобилке полная ширина */}
+      <div className="relative w-full md:flex-1 md:min-w-[200px] md:w-auto">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+        <Input
+          placeholder={tFilters("searchByNameOrPhone")}
+          value={localSearch}
+          onChange={e => setLocalSearch(e.target.value)}
+          className="pl-9 h-9 text-sm"
+        />
       </div>
+
+      {/* Фильтр по точке — только network план */}
+      {isNetwork && locations.length > 0 && (
+        <Select
+          value={filters.location_id || "all"}
+          onValueChange={value =>
+            updateFilter(
+              "location_id",
+              value && value !== "all" ? value : undefined
+            )
+          }
+        >
+          <SelectTrigger className="flex-1 md:flex-none md:w-[160px] h-9 text-sm">
+            <SelectValue placeholder={tFilters("allLocations")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{tFilters("allLocations")}</SelectItem>
+            {locations.map(loc => (
+              <SelectItem key={loc.id} value={loc.id}>
+                {loc.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+
+      {/* Фильтр по роли */}
+      <Select
+        value={filters.role?.[0] || "all"}
+        onValueChange={value =>
+          updateFilter(
+            "role",
+            value && value !== "all" ? [value as TUserRole] : undefined
+          )
+        }
+      >
+        <SelectTrigger className="flex-1 md:flex-none md:w-[140px] h-9 text-sm">
+          <SelectValue placeholder={tFilters("allRoles")} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">{tFilters("allRoles")}</SelectItem>
+          <SelectItem value="owner">{tRoles("owner")}</SelectItem>
+          <SelectItem value="manager">{tRoles("manager")}</SelectItem>
+          <SelectItem value="staff">{tRoles("staff")}</SelectItem>
+        </SelectContent>
+      </Select>
+
+      {/* Фильтр по статусу */}
+      <Select
+        value={
+          filters.active === true
+            ? "active"
+            : filters.active === false
+              ? "inactive"
+              : "all"
+        }
+        onValueChange={value =>
+          updateFilter(
+            "active",
+            value === "active" ? true : value === "inactive" ? false : undefined
+          )
+        }
+      >
+        <SelectTrigger className="flex-1 md:flex-none md:w-[140px] h-9 text-sm">
+          <SelectValue placeholder={tFilters("allStatuses")} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">{tFilters("allStatuses")}</SelectItem>
+          <SelectItem value="active">{tFilters("active")}</SelectItem>
+          <SelectItem value="inactive">{tFilters("inactive")}</SelectItem>
+        </SelectContent>
+      </Select>
+
+      {/* Кнопка приглашения — при лимите → на страницу подписки */}
+      <Button
+        onClick={
+          isLimitReached
+            ? () => router.push("/account?tab=subscription")
+            : onInviteClick
+        }
+        size="sm"
+        variant={isLimitReached ? "outline" : "default"}
+        className="shrink-0"
+      >
+        <Plus className="size-4" />
+        <span className="hidden md:inline">{t("invite")}</span>
+      </Button>
     </div>
   );
 }

@@ -1,28 +1,25 @@
 "use client";
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { parseISO, isValid, format } from "date-fns";
 import { CalendarProvider } from "@/src/features/calendar";
 import { DashboardHeader, DashboardContent } from "@/src/features";
 import { Loader } from "lucide-react";
 import { useCalendar as useCalendarApi } from "@/src/shared/hooks/use-calendar";
 import { useCurrentUser } from "@/src/shared/hooks/use-users";
-import { useNetworkPoints } from "@/src/shared/hooks/use-network-points";
+import { useLocations } from "@/src/shared/hooks/use-network-locations";
+import { useCalendarStore } from "@/src/features/calendar/calendar-context/store";
 import { EUserRole } from "@/src/shared/types/user";
-import { EmptyPointsState } from "@/src/features/dashboard/empty-points-state";
+import { EmptyLocationsState } from "@/src/features/dashboard/empty-locations-state";
 import { toast } from "sonner";
-import EmptyPointsHeader from "./empty-points-header";
+import EmptyLocationsHeader from "./empty-locations-header";
+
+type View = "day" | "week" | "month" | "agenda";
+const VIEWS = new Set<string>(["day", "week", "month", "agenda"]);
+const isView = (v: string): v is View => VIEWS.has(v);
 
 export function DashboardPage() {
   const searchParams = useSearchParams();
-  const router = useRouter();
-
-  type View = "day" | "week" | "month" | "agenda";
-  const isView = useCallback(
-    (v: string): v is View =>
-      ["day", "week", "month", "agenda"].includes(v as View),
-    []
-  );
 
   const getInitialView = (): View => {
     const viewParam = searchParams.get("view");
@@ -35,13 +32,7 @@ export function DashboardPage() {
   const handleViewChange = (view: View) => {
     if (view === calendarView) return;
     setCalendarView(view);
-
-    const current = searchParams.get("view");
-    if (current === view) return;
-
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("view", view);
-    router.replace(`?${params.toString()}`, { scroll: false });
+    setUrlParam("view", view);
   };
 
   // Получаем дату из URL или используем текущую дату
@@ -58,13 +49,7 @@ export function DashboardPage() {
 
   // Обновляем URL при изменении даты
   const handleDateChange = (date: Date) => {
-    const next = format(date, "yyyy-MM-dd");
-    const current = searchParams.get("date");
-    if (current === next) return;
-
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("date", next);
-    router.replace(`?${params.toString()}`, { scroll: false });
+    setUrlParam("date", format(date, "yyyy-MM-dd"));
   };
 
   // Синхронизируем состояние с URL при изменении параметров
@@ -73,7 +58,7 @@ export function DashboardPage() {
     if (viewParam && isView(viewParam) && viewParam !== calendarView) {
       setCalendarView(viewParam);
     }
-  }, [searchParams, calendarView, isView]);
+  }, [searchParams, calendarView]);
 
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => setIsMounted(true), []);
@@ -81,55 +66,68 @@ export function DashboardPage() {
   // Получаем текущего пользователя
   const { data: currentUser } = useCurrentUser();
 
-  // Определяем, нужно ли загружать точки (только для net_manager и self_owner)
-  const shouldLoadPoints = useMemo(() => {
-    return (
-      currentUser &&
-      (currentUser.role === EUserRole.NET_MANAGER ||
-        currentUser.role === EUserRole.SELF_OWNER)
-    );
-  }, [currentUser]);
+  // Определяем, нужно ли загружать локации (только для Owner)
+  const shouldLoadLocations = currentUser?.role === EUserRole.OWNER;
 
-  // Загружаем точки сети для net_manager и self_owner
+  // Загружаем локации организации для Owner
   const {
-    data: networkPointsData,
-    isLoading: isLoadingPoints,
-    isError: isPointsError,
-    error: pointsError,
-  } = useNetworkPoints(currentUser?.network_code);
+    data: locationsData,
+    isLoading: isLoadingLocations,
+    isError: isLocationsError,
+    error: locationsError,
+  } = useLocations();
 
-  // Автоматически выбираем первую точку из списка при загрузке
-  const selectedPointCode = useMemo(() => {
-    // Для ролей с выбором точки - используем первую из списка
-    if (shouldLoadPoints && networkPointsData) {
-      const points = networkPointsData.points;
-      if (points && points.length > 0) {
-        return points[0].code;
-      }
+  // Хелпер: обновить query-параметр в URL без навигации Next.js
+  // (window.history.replaceState не триггерит Suspense, в отличие от router.replace)
+  const setUrlParam = useCallback((key: string, value: string | undefined) => {
+    const params = new URLSearchParams(window.location.search);
+    if (value) {
+      if (params.get(key) === value) return;
+      params.set(key, value);
+    } else {
+      if (!params.has(key)) return;
+      params.delete(key);
     }
-    // Для других ролей - используем point_code из currentUser
-    return currentUser?.point_code;
-  }, [shouldLoadPoints, networkPointsData, currentUser?.point_code]);
+    window.history.replaceState(null, "", `?${params.toString()}`);
+  }, []);
+
+  // Выбранная локация из calendar store (устанавливается в сайдбаре)
+  const selectedLocationId = useCalendarStore(s => s.locationId);
+
+  // Для не-Owner: инициализируем locationId из currentUser.location_id
+  const setLocationId = useCalendarStore(s => s.setLocationId);
+  useEffect(() => {
+    if (
+      !shouldLoadLocations &&
+      currentUser?.location_id &&
+      !selectedLocationId
+    ) {
+      setLocationId(currentUser.location_id);
+    }
+  }, [
+    shouldLoadLocations,
+    currentUser?.location_id,
+    selectedLocationId,
+    setLocationId,
+  ]);
 
   // Получаем начальную дату
   const [selectedDate, setSelectedDate] = useState<Date>(() =>
     getInitialDate()
   );
 
-  // Состояние для masterPhone (будет обновляться через CalendarProvider при изменении selectedMasterPhone)
-  const [masterPhone, setMasterPhone] = useState<string | undefined>(undefined);
+  // Состояние для employeeId: из URL или undefined ("all")
+  const [employeeId, setEmployeeId] = useState<string | undefined>(
+    () => searchParams.get("employee") ?? undefined
+  );
 
-  // Обертка для setMasterPhone, которая обновляет состояние только если значение изменилось
-  const handleMasterPhoneChange = React.useCallback(
-    (newMasterPhone: string | undefined) => {
-      setMasterPhone(prev => {
-        if (prev !== newMasterPhone) {
-          return newMasterPhone;
-        }
-        return prev;
-      });
+  // Обёртка: обновляет state + URL при смене сотрудника
+  const handleEmployeeIdChange = useCallback(
+    (newEmployeeId: string | undefined) => {
+      setEmployeeId(newEmployeeId);
+      setUrlParam("employee", newEmployeeId);
     },
-    []
+    [setUrlParam]
   );
 
   // Обновляем selectedDate при изменении даты в URL (только если дата действительно изменилась)
@@ -159,49 +157,41 @@ export function DashboardPage() {
   }, [searchParams]);
 
   // Загружаем данные календаря через API
-  // Передаем selectedPointCode для net_manager и self_owner
+  // Передаем selectedLocationId для net_manager и self_owner
   const { events, masters, isError, error } = useCalendarApi({
     selectedDate,
     view: calendarView,
-    pointCode: selectedPointCode,
-    masterPhone,
+    locationId: selectedLocationId,
+    employeeId,
   });
 
   // Обработка ошибок загрузки
+  // Обработка ошибок загрузки (календарь + точки)
   useEffect(() => {
-    if (isError && error) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Ошибка загрузки данных календаря";
-      toast.error(errorMessage);
+    const errors = [
+      [isError, error, "Ошибка загрузки данных календаря"],
+      [isLocationsError, locationsError, "Ошибка загрузки точек сети"],
+    ] as const;
+    for (const [flag, err, fallback] of errors) {
+      if (flag && err) {
+        toast.error(err instanceof Error ? err.message : fallback);
+      }
     }
-  }, [isError, error]);
+  }, [isError, error, isLocationsError, locationsError]);
 
-  // Обработка ошибок загрузки точек
-  useEffect(() => {
-    if (isPointsError && pointsError) {
-      const errorMessage =
-        pointsError instanceof Error
-          ? pointsError.message
-          : "Ошибка загрузки точек сети";
-      toast.error(errorMessage);
-    }
-  }, [isPointsError, pointsError]);
+  // Если точек нет (пустой массив) - показываем EmptyLocationsState
+  const hasNoLocations =
+    shouldLoadLocations &&
+    !isLoadingLocations &&
+    locationsData &&
+    locationsData.locations.length === 0;
 
-  // Если точек нет (пустой массив) - показываем EmptyPointsState
-  const hasNoPoints =
-    shouldLoadPoints &&
-    !isLoadingPoints &&
-    networkPointsData &&
-    networkPointsData.points.length === 0;
-
-  // Для NET_MANAGER и SELF_OWNER точка обязательна - не показываем календарь без точки
+  // Для NET_MANAGER и SELF_OWNER точка обязательна - не показываем календарь без локации
   const shouldShowCalendar =
-    !shouldLoadPoints || (shouldLoadPoints && selectedPointCode);
+    !shouldLoadLocations || (shouldLoadLocations && selectedLocationId);
 
-  // Показываем загрузку пока монтируется компонент или загружаются точки
-  if (!isMounted || (shouldLoadPoints && isLoadingPoints)) {
+  // Показываем загрузку пока монтируется компонент или загружаются локации
+  if (!isMounted || (shouldLoadLocations && isLoadingLocations)) {
     return (
       <div className="flex items-center justify-center h-full">
         <Loader className="h-6 w-6 animate-spin" />
@@ -209,12 +199,12 @@ export function DashboardPage() {
     );
   }
 
-  // Если точек нет - показываем EmptyPointsState
-  if (hasNoPoints) {
+  // Если точек нет - показываем EmptyLocationsState
+  if (hasNoLocations) {
     return (
       <>
-        <EmptyPointsHeader />
-        <EmptyPointsState />
+        <EmptyLocationsHeader />
+        <EmptyLocationsState />
       </>
     );
   }
@@ -233,7 +223,8 @@ export function DashboardPage() {
       events={events}
       masters={masters}
       initialDate={selectedDate}
-      selectedPointCode={selectedPointCode}
+      initialEmployeeId={employeeId}
+      selectedLocationId={selectedLocationId}
       onDateChange={date => {
         // Проверяем, изменилась ли дата перед обновлением
         if (format(date, "yyyy-MM-dd") !== format(selectedDate, "yyyy-MM-dd")) {
@@ -241,7 +232,7 @@ export function DashboardPage() {
           setSelectedDate(date);
         }
       }}
-      onMasterPhoneChange={handleMasterPhoneChange}
+      onEmployeeIdChange={handleEmployeeIdChange}
     >
       <DashboardHeader />
 

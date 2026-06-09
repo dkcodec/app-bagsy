@@ -2,16 +2,25 @@
  * Типы для загрузки медиа (presigned URL + S3)
  */
 
-/** Запрос на получение presigned URL для загрузки */
+/** Допустимые назначения медиафайлов */
+export type MediaPurpose =
+  | "avatars"
+  | "organizations"
+  | "locations"
+  | "services"
+  | "service-categories";
+
+/** Запрос на получение presigned URL для загрузки (POST /api/v1/media/upload) */
 export interface MediaUploadRequest {
-  content_type: string;
+  purpose: MediaPurpose;
   filename: string;
-  purpose: string;
+  mime_type: string;
+  size_bytes: number;
 }
 
 /** Ответ POST /api/v1/media/upload */
 export interface MediaUploadResponse {
-  expires_at: string;
-  media_id: string;
-  url: string;
+  asset_id: string;
+  upload_url: string;
+  upload_fields: Record<string, string>;
 }

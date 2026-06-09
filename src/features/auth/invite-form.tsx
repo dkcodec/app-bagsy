@@ -62,18 +62,19 @@ export default function InviteForm({
     }
     setErrors({});
 
-    if (purpose === "register") {
+    if (purpose === "staff_invitation") {
+      // ConfirmInviteRequest: { token, password } — phone не нужен
       registerConfirmMutation.mutateAsync({
-        phone,
-        password: data.password,
         token,
+        password: data.password,
       });
       return;
     }
 
+    // PasswordResetConfirmRequestDto: { token, new_password }
     passwordChangeMutation.mutateAsync({
-      password: data.password,
       token,
+      new_password: data.password,
     });
   };
 

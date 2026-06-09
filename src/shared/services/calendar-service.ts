@@ -8,7 +8,8 @@ import type { GetCalendarParams, CalendarApiResponse } from "../types/calendar";
 const MAX_DATE_RANGE_DAYS = 35;
 
 /**
- * Сервис календаря. Инкапсулирует эндпоинты и валидацию данных
+ * Сервис календаря. Инкапсулирует эндпоинты и валидацию данных.
+ * Эндпоинт: GET /api/v1/appointments/calendar
  */
 export class CalendarService {
   /**
@@ -39,15 +40,19 @@ export class CalendarService {
       to: params.to,
     };
 
-    if (params.point_code) {
-      queryParams.point_code = params.point_code;
+    if (params.location_id) {
+      queryParams.location_id = params.location_id;
     }
 
-    if (params.master_phone) {
-      queryParams.master_phone = params.master_phone;
+    if (params.employee_id) {
+      queryParams.employee_id = params.employee_id;
     }
 
-    return apiClient.get<CalendarApiResponse>("v1/calendar", {
+    if (params.include_cancelled) {
+      queryParams.include_cancelled = "true";
+    }
+
+    return apiClient.get<CalendarApiResponse>("api/v1/appointments/calendar", {
       query: queryParams,
     });
   }

@@ -1,6 +1,6 @@
 import { apiClient } from "@/src/shared/api";
 import type {
-  UpdateProfileRequest,
+  UpdateAccountRequest,
   UpdateScheduleRequest,
   IUserDto,
 } from "@/src/shared/types/user";
@@ -19,7 +19,7 @@ export class UserService {
   /**
    * Обновление профиля пользователя
    */
-  static async updateMe(data: UpdateProfileRequest): Promise<IUserDto> {
+  static async updateMe(data: UpdateAccountRequest): Promise<IUserDto> {
     return apiClient.put<IUserDto>("v1/users/me", data);
   }
 

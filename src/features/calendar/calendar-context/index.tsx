@@ -15,24 +15,24 @@ import type {
   TVisibleHours,
   TWorkingHours,
 } from "@/src/shared/types/calendar";
-import { IUserDto } from "@/src/shared/types/user";
+import { IEmployeeDto } from "@/src/shared/types/user";
 
 interface ICalendarContext {
   selectedDate: Date;
   setSelectedDate: (date: Date | undefined) => void;
-  selectedMasterPhone: IUserDto["phone"] | "all";
-  setSelectedMasterPhone: (masterPhone: IUserDto["phone"] | "all") => void;
+  selectedEmployeeId: IEmployeeDto["id"] | "all";
+  setSelectedEmployeeId: (employeeId: IEmployeeDto["id"] | "all") => void;
   badgeVariant: TBadgeVariant;
   setBadgeVariant: (variant: TBadgeVariant) => void;
-  masters: IUserDto[];
+  masters: IEmployeeDto[];
   workingHours: TWorkingHours;
   setWorkingHours: Dispatch<SetStateAction<TWorkingHours>>;
   visibleHours: TVisibleHours;
   setVisibleHours: Dispatch<SetStateAction<TVisibleHours>>;
   events: IEvent[];
   setLocalEvents: Dispatch<SetStateAction<IEvent[]>>;
-  /** Код точки (selectedPointCode || currentUser.point_code). Для выборов услуги в форме записи. */
-  pointCode: string | undefined;
+  /** UUID локации (selectedLocationId || currentUser.location_id). */
+  locationId: string | undefined;
 }
 
 export function CalendarProvider({
@@ -40,26 +40,30 @@ export function CalendarProvider({
   masters,
   events,
   initialDate,
+  initialEmployeeId,
   onDateChange,
-  onMasterPhoneChange,
-  selectedPointCode,
+  onEmployeeIdChange,
+  selectedLocationId,
 }: {
   children: React.ReactNode;
-  masters: IUserDto[];
+  masters: IEmployeeDto[];
   events: IEvent[];
   initialDate?: Date;
+  /** UUID сотрудника из URL (для восстановления при перезагрузке) */
+  initialEmployeeId?: string;
   onDateChange?: (date: Date) => void;
-  onMasterPhoneChange?: (masterPhone: string | undefined) => void;
-  /** Выбранный код точки для net_manager и self_owner (приоритет над currentUser.point_code) */
-  selectedPointCode?: string;
+  onEmployeeIdChange?: (employeeId: string | undefined) => void;
+  /** Выбранный UUID локации для owner (приоритет над currentUser.location_id) */
+  selectedLocationId?: string;
 }) {
   const { data: currentUser } = useCurrentUser();
   const setMasters = useCalendarStore((s: CalendarState) => s.setMasters);
   const setLocalEvents = useCalendarStore(
     (s: CalendarState) => s.setLocalEvents
   );
-  const loadWorkingHours = useCalendarStore(
-    (s: CalendarState) => s.loadWorkingHours
+  const loadSchedule = useCalendarStore((s: CalendarState) => s.loadSchedule);
+  const loadedScheduleRange = useCalendarStore(
+    (s: CalendarState) => s.loadedScheduleRange
   );
   const setSelectedDate = useCalendarStore(
     (s: CalendarState) => s.setSelectedDate
@@ -67,92 +71,79 @@ export function CalendarProvider({
   const selectedDateValue = useCalendarStore(
     (s: CalendarState) => s.selectedDate
   );
-  const selectedMasterPhone = useCalendarStore(
-    (s: CalendarState) => s.selectedMasterPhone
+  const selectedEmployeeId = useCalendarStore(
+    (s: CalendarState) => s.selectedEmployeeId
   );
-  const setPointCode = useCalendarStore((s: CalendarState) => s.setPointCode);
+  const setSelectedEmployeeId = useCalendarStore(
+    (s: CalendarState) => s.setSelectedEmployeeId
+  );
+  const setLocationId = useCalendarStore((s: CalendarState) => s.setLocationId);
 
   const onDateChangeRef = useRef(onDateChange);
   useEffect(() => {
     onDateChangeRef.current = onDateChange;
   }, [onDateChange]);
 
-  const onMasterPhoneChangeRef = useRef(onMasterPhoneChange);
+  const onEmployeeIdChangeRef = useRef(onEmployeeIdChange);
   useEffect(() => {
-    onMasterPhoneChangeRef.current = onMasterPhoneChange;
-  }, [onMasterPhoneChange]);
+    onEmployeeIdChangeRef.current = onEmployeeIdChange;
+  }, [onEmployeeIdChange]);
 
-  // Сохраняем предыдущие значения для сравнения мастеров и событий
-  const prevMastersLengthRef = useRef<number>(masters.length);
-  const prevEventsLengthRef = useRef<number>(events.length);
-  const prevMastersPhonesRef = useRef<string>(
-    masters.map(master => master.phone).join(",")
-  );
-  const prevEventsIdsRef = useRef<string>(events.map(e => e.id).join(","));
+  // Синхронизируем мастеров и события по id (пропускаем если не изменились)
+  const prevMastersIdsRef = useRef(masters.map(m => m.id).join(","));
+  const prevEventsIdsRef = useRef(events.map(e => e.id).join(","));
 
   useEffect(() => {
-    // Обновляем masters только если массив действительно изменился
-    const currentMastersPhones = masters.map(master => master.phone).join(",");
-    if (
-      prevMastersLengthRef.current !== masters.length ||
-      prevMastersPhonesRef.current !== currentMastersPhones
-    ) {
+    const mastersIds = masters.map(m => m.id).join(",");
+    if (prevMastersIdsRef.current !== mastersIds) {
       setMasters(masters);
-      prevMastersLengthRef.current = masters.length;
-      prevMastersPhonesRef.current = currentMastersPhones;
+      prevMastersIdsRef.current = mastersIds;
     }
 
-    // Обновляем events только если массив действительно изменился
-    const currentEventsIds = events.map(e => e.id).join(",");
-    if (
-      prevEventsLengthRef.current !== events.length ||
-      prevEventsIdsRef.current !== currentEventsIds
-    ) {
+    const eventsIds = events.map(e => e.id).join(",");
+    if (prevEventsIdsRef.current !== eventsIds) {
       setLocalEvents(events);
-      prevEventsLengthRef.current = events.length;
-      prevEventsIdsRef.current = currentEventsIds;
+      prevEventsIdsRef.current = eventsIds;
     }
 
     if (initialDate) setSelectedDate(initialDate);
   }, [masters, events, initialDate]);
 
-  // Загружаем рабочие часы точки при изменении point_code
-  // Используем selectedPointCode если он передан (для net_manager/self_owner),
-  // иначе используем currentUser.point_code (для других ролей)
-  const pointCodeToUse = selectedPointCode || currentUser?.point_code;
-  const prevPointCodeRef = useRef<string | undefined>(pointCodeToUse);
+  // Восстанавливаем выбранного сотрудника из URL при маунте
+  const didInitEmployeeRef = useRef(false);
   useEffect(() => {
-    setPointCode(pointCodeToUse ?? undefined);
-  }, [pointCodeToUse, setPointCode]);
-  useEffect(() => {
-    if (pointCodeToUse && prevPointCodeRef.current !== pointCodeToUse) {
-      loadWorkingHours(pointCodeToUse);
-      prevPointCodeRef.current = pointCodeToUse;
+    if (!didInitEmployeeRef.current && initialEmployeeId) {
+      setSelectedEmployeeId(initialEmployeeId);
+      didInitEmployeeRef.current = true;
     }
-  }, [pointCodeToUse, loadWorkingHours]);
+  }, [initialEmployeeId, setSelectedEmployeeId]);
 
-  // Отслеживаем изменения selectedMasterPhone и вызываем колбэк (только если значение изменилось)
-  const prevSelectedMasterPhoneRef = useRef<IUserDto["phone"] | "all">(
-    selectedMasterPhone
-  );
-  const prevMasterPhoneRef = useRef<string | undefined>(
-    selectedMasterPhone !== "all" ? selectedMasterPhone : undefined
-  );
+  // Загружаем расписание при маунте и изменении location_id
+  const locationIdToUse = selectedLocationId || currentUser?.location_id;
+  const prevLocationIdRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    setLocationId(locationIdToUse ?? undefined);
+    // При смене локации загружаем расписание с учётом выбранного сотрудника
+    if (locationIdToUse && prevLocationIdRef.current !== locationIdToUse) {
+      loadSchedule(locationIdToUse, selectedEmployeeId);
+      prevLocationIdRef.current = locationIdToUse;
+    }
+  }, [locationIdToUse, setLocationId, loadSchedule, selectedEmployeeId]);
+
+  // Отслеживаем изменения selectedEmployeeId: колбэк + перезагрузка расписания
+  const prevSelectedEmployeeIdRef = useRef(selectedEmployeeId);
 
   useEffect(() => {
-    if (prevSelectedMasterPhoneRef.current !== selectedMasterPhone) {
-      const masterPhone =
-        selectedMasterPhone !== "all" ? selectedMasterPhone : undefined;
-
-      // Вызываем колбэк только если masterPhone действительно изменился
-      if (prevMasterPhoneRef.current !== masterPhone) {
-        onMasterPhoneChangeRef.current?.(masterPhone);
-        prevMasterPhoneRef.current = masterPhone;
-      }
-
-      prevSelectedMasterPhoneRef.current = selectedMasterPhone;
+    if (prevSelectedEmployeeIdRef.current !== selectedEmployeeId) {
+      // Колбэк наверх (undefined если "all")
+      onEmployeeIdChangeRef.current?.(
+        selectedEmployeeId !== "all" ? selectedEmployeeId : undefined
+      );
+      // Перезагружаем расписание: "all" → локации, конкретный → сотрудника
+      loadSchedule(locationIdToUse, selectedEmployeeId);
+      prevSelectedEmployeeIdRef.current = selectedEmployeeId;
     }
-  }, [selectedMasterPhone]);
+  }, [selectedEmployeeId, locationIdToUse, loadSchedule]);
 
   const didInitRef = useRef(false);
   const prevSelectedDateRef = useRef<Date | null>(null);
@@ -164,7 +155,6 @@ export function CalendarProvider({
       return;
     }
 
-    // Вызываем onDateChange только если дата действительно изменилась
     if (
       selectedDateValue &&
       (!prevSelectedDateRef.current ||
@@ -174,6 +164,25 @@ export function CalendarProvider({
       prevSelectedDateRef.current = selectedDateValue;
     }
   }, [selectedDateValue]);
+
+  // Перезагружаем расписание когда selectedDate выходит за загруженный диапазон
+  useEffect(() => {
+    if (!locationIdToUse || !selectedDateValue) return;
+    if (!loadedScheduleRange) return; // Ещё не загружали — первый loadSchedule сработает по locationId
+    const dateStr = selectedDateValue.toISOString().slice(0, 10);
+    if (
+      dateStr < loadedScheduleRange.from ||
+      dateStr > loadedScheduleRange.to
+    ) {
+      loadSchedule(locationIdToUse, selectedEmployeeId);
+    }
+  }, [
+    selectedDateValue,
+    loadedScheduleRange,
+    locationIdToUse,
+    selectedEmployeeId,
+    loadSchedule,
+  ]);
 
   return <>{children}</>;
 }

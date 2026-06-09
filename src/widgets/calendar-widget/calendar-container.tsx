@@ -7,6 +7,7 @@ import { useCalendar } from "@/src/features/calendar";
 
 import { DndProviderWrapper } from "./dnd";
 import { CalendarHeader } from "./header";
+import { CalendarColorLegend } from "./color-legend";
 import { CalendarMonthView } from "./month-view";
 import { CalendarAgendaView } from "./agenda-view";
 import { CalendarDayView, CalendarWeekView } from "./week-and-day-view";
@@ -22,7 +23,7 @@ export const CalendarContainer = memo(function CalendarContainer({
   view,
   onViewChange,
 }: IProps) {
-  const { selectedDate, selectedMasterPhone, events } = useCalendar();
+  const { selectedDate, selectedEmployeeId, events } = useCalendar();
 
   const filteredEvents = useMemo(() => {
     return events.filter(event => {
@@ -47,8 +48,8 @@ export const CalendarContainer = memo(function CalendarContainer({
         const isInSelectedMonth =
           eventStartDate <= monthEnd && eventEndDate >= monthStart;
         const isMasterMatch =
-          selectedMasterPhone === "all" ||
-          event.masterPhone === selectedMasterPhone;
+          selectedEmployeeId === "all" ||
+          event.employeeId === selectedEmployeeId;
         return isInSelectedMonth && isMasterMatch;
       }
 
@@ -59,8 +60,8 @@ export const CalendarContainer = memo(function CalendarContainer({
         const isInSelectedWeek =
           eventStartDate <= weekEnd && eventEndDate >= weekStart;
         const isMasterMatch =
-          selectedMasterPhone === "all" ||
-          event.masterPhone === selectedMasterPhone;
+          selectedEmployeeId === "all" ||
+          event.employeeId === selectedEmployeeId;
         return isInSelectedWeek && isMasterMatch;
       }
 
@@ -84,12 +85,12 @@ export const CalendarContainer = memo(function CalendarContainer({
         const isInSelectedDay =
           eventStartDate <= dayEnd && eventEndDate >= dayStart;
         const isMasterMatch =
-          selectedMasterPhone === "all" ||
-          event.masterPhone === selectedMasterPhone;
+          selectedEmployeeId === "all" ||
+          event.employeeId === selectedEmployeeId;
         return isInSelectedDay && isMasterMatch;
       }
     });
-  }, [selectedDate, selectedMasterPhone, events, view]);
+  }, [selectedDate, selectedEmployeeId, events, view]);
 
   // Мемоизируем singleDayEvents и multiDayEvents для предотвращения ререндеров
   const singleDayEvents = useMemo(() => {
@@ -142,6 +143,8 @@ export const CalendarContainer = memo(function CalendarContainer({
           />
         )}
       </DndProviderWrapper>
+
+      <CalendarColorLegend />
     </div>
   );
 });

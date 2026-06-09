@@ -6,11 +6,9 @@ import { TUserRole } from "@/src/shared/types/user";
  */
 export function getRoleKey(role: TUserRole): string {
   const roleMap: Record<TUserRole, string> = {
-    staff: "staff",
+    owner: "owner",
     manager: "manager",
-    net_manager: "net_manager",
-    self_owner: "self_owner",
-    admin: "admin",
+    staff: "staff",
   };
   return roleMap[role] || role;
 }

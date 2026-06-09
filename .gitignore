@@ -36,6 +36,18 @@ yarn-error.log*
 # vercel
 .vercel
 
+# Serwist (PWA)
+/public/sw.js
+/public/sw.js.map
+/public/swe-worker-*.js
+/public/swe-worker-*.js.map
+/public/workbox-*.js
+/public/workbox-*.js.map
+/public/serialized-*.js
+/public/serialized-*.js.map
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+certificates

@@ -23,14 +23,23 @@ export * from "./use-media-upload";
 // Хуки для календаря
 export * from "./use-calendar";
 
-// Хуки для записей (bagsies)
-export * from "./use-bagsies";
+// Хуки для записей (appointments)
+export * from "./use-appointments";
 
 // Хуки для точек сети
-export * from "./use-network-points";
+export * from "./use-network-locations";
 
 // Хуки для услуг
 export * from "./use-services";
 
 // Хуки для debounce
 export * from "./use-debounce";
+
+// Права на редактирование графика (точка/мастер)
+export * from "./use-schedule-permissions";
+
+// Аналитика
+export * from "./use-analytics";
+
+// Анимация чисел (для KPI)
+export * from "./use-count-up";

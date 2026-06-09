@@ -11,28 +11,70 @@ export type TEventColor =
   | "purple"
   | "orange"
   | "gray";
+
+/** Все возможные цвета событий */
+export const EVENT_COLORS: TEventColor[] = [
+  "blue",
+  "green",
+  "red",
+  "yellow",
+  "purple",
+  "orange",
+  "gray",
+];
+
+/** Маппинг TEventColor → Tailwind bg-класс */
+export const EVENT_COLOR_BG: Record<TEventColor, string> = {
+  blue: "bg-blue-600",
+  green: "bg-green-600",
+  red: "bg-red-600",
+  yellow: "bg-yellow-600",
+  purple: "bg-purple-600",
+  orange: "bg-orange-600",
+  gray: "bg-gray-600",
+};
+
 export type TBadgeVariant = "dot" | "colored" | "mixed";
-export type TWorkingHours = { [key: number]: { from: number; to: number } };
+/** Ключ — "YYYY-MM-DD", значение — массив рабочих интервалов (перерывы между ними закрашиваются) */
+export type TWorkingHours = Record<string, { from: number; to: number }[]>;
 export type TVisibleHours = { from: number; to: number };
 
+/** Событие календаря (внутренний формат фронта) */
 export interface IEvent {
-  id: number;
-  clientPhone: string;
+  /** UUID записи */
+  id: string;
+  /** Телефон клиента */
+  customerPhone: string;
+  /** Имя клиента */
+  customerName: string;
+  /** UUID клиента */
+  customerId: string;
+  /** UUID сотрудника */
+  employeeId: string;
+  /** Имя сотрудника */
+  employeeName: string;
+  /** UUID локации */
+  locationId: string;
+  /** Название локации */
+  locationName: string;
   /** С бэка всегда ISO 8601 с таймзоной; на бэк — с offset. */
   startDate: string;
   /** С бэка всегда ISO 8601 с таймзоной; на бэк — с offset. */
   endDate: string;
+  /** Длительность в минутах */
+  durationMinutes: number;
+  /** Название услуги */
   title: string;
-  masterPhone: string;
-  pointCode: string;
+  /** UUID услуги */
+  serviceId: string;
   price: number;
-  /** С бэка всегда ISO 8601 с таймзоной. */
-  createdAt: string;
-  /** С бэка всегда ISO 8601 с таймзоной. */
-  updatedAt: string;
   status: string;
   color: TEventColor;
   comment: string;
+  /** @deprecated используй customerPhone */
+  clientPhone?: string;
+  /** @deprecated используй employeeId */
+  masterPhone?: string;
 }
 
 export interface ICalendarCell {
@@ -42,70 +84,55 @@ export interface ICalendarCell {
 }
 
 /**
- * Типы для API календаря
+ * Типы для API календаря (/api/v1/appointments/calendar)
  */
 
-/**
- * Параметры запроса календаря
- */
+/** Параметры запроса календаря */
 export interface GetCalendarParams {
   /** Дата начала в формате YYYY-MM-DD */
   from: string;
   /** Дата окончания в формате YYYY-MM-DD */
   to: string;
-  /** Код точки для фильтрации (только для SelfOwner/NetManager) */
-  point_code?: string;
-  /** Телефон мастера для фильтрации (только для Manager и выше) */
-  master_phone?: string;
+  /** UUID локации для фильтрации */
+  location_id?: string;
+  /** UUID сотрудника для фильтрации */
+  employee_id?: string;
+  /** Включать отменённые записи */
+  include_cancelled?: boolean;
 }
 
-/**
- * Информация о записи из API
- */
-export interface CalendarBagsyInfo {
-  id: string;
-  client_phone: string;
-  comment: string;
-  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
-  created_at: string;
-  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
-  end_at: string;
-  master_phone: string;
-  point_code: string;
-  price: number;
-  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
-  start_at: string;
+/** Элемент календаря из API (плоская структура) */
+export interface CalendarEntryResponse {
+  appointment_id: string;
   status: string;
-  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
-  updated_at: string;
-}
-
-/**
- * Информация об услуге из API
- */
-export interface CalendarServiceInfo {
-  color: string;
-  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
-  created_at: string;
-  description: string;
+  /** ISO 8601 с таймзоной */
+  start_at: string;
+  /** ISO 8601 с таймзоной */
+  end_at: string;
   duration_minutes: number;
-  id: string;
-  name: string;
-  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
-  updated_at: string;
+  price: number;
+  service_id: string;
+  service_name: string;
+  service_color: string;
+  employee_id: string;
+  employee_name: string;
+  location_id: string;
+  location_name: string;
+  customer_id: string;
+  customer_name: string;
+  customer_phone: string;
+  customer_comment: string;
 }
 
-/**
- * Элемент календаря из API
- */
-export interface CalendarApiItem {
-  bagsy_info: CalendarBagsyInfo;
-  service_info: CalendarServiceInfo;
-}
-
-/**
- * Ответ API календаря
- */
+/** Ответ API календаря */
 export interface CalendarApiResponse {
-  calendar: CalendarApiItem[];
+  calendar: CalendarEntryResponse[];
 }
+
+/**
+ * @deprecated Старые типы — оставлены для обратной совместимости.
+ * Используй CalendarEntryResponse вместо CalendarApiItem.
+ */
+export type CalendarApiItem = CalendarEntryResponse;
+export type CalendarBagsyInfo = never;
+export type CalendarServiceInfo = never;

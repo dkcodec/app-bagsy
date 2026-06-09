@@ -1,51 +1,142 @@
+/**
+ * Роли пользователей.
+ * Дополнительные права определяются атрибутами ABAC через permissions.
+ */
 export enum EUserRole {
-  ADMIN = "admin",
-  NET_MANAGER = "net_manager",
-  SELF_OWNER = "self_owner",
+  OWNER = "owner",
   MANAGER = "manager",
   STAFF = "staff",
 }
 
-export interface UserResponse {
-  message?: string;
-  code?: number;
-}
-
 export type TUserRole = (typeof EUserRole)[keyof typeof EUserRole];
 
+/** Права сотрудника (ABAC) */
+export interface IEmployeePermissions {
+  can_provide_services: boolean;
+  can_manage_location_schedule: boolean;
+}
+
+/** Лимит ресурса подписки */
+export interface ISubscriptionLimit {
+  used: number;
+  /** null = безлимит */
+  max: number | null;
+}
+
+/** Фичи подписки */
+export interface ISubscriptionFeatures {
+  multi_location: boolean;
+  custom_branding: boolean;
+  api_access: boolean;
+  sms_notifications: boolean;
+}
+
+export type TSubscriptionPlan = "solo" | "point" | "network";
+export enum ESubscriptionPlan {
+  SOLO = "solo",
+  POINT = "point",
+  NETWORK = "network",
+}
+
+/** Подписка организации */
+export interface ISubscription {
+  plan: "solo" | "point" | "network";
+  status: "trial" | "active" | "expired" | "cancelled";
+  /** ISO 8601 — конец текущего периода */
+  current_period_end: string;
+  limits: {
+    locations: ISubscriptionLimit;
+    employees: ISubscriptionLimit;
+    bookings_monthly: ISubscriptionLimit;
+  };
+  features: ISubscriptionFeatures;
+}
+
+/** Организация (вложена в ответ /employees/me) */
+export interface IOrganization {
+  id: string;
+  name: string;
+  description?: string;
+  subscription: ISubscription;
+}
+
+/**
+ * Сотрудник организации (ответ GET /api/v1/employees/me и GET /api/v1/employees)
+ */
+export interface IEmployeeDto {
+  id: string;
+  phone: string;
+  first_name: string;
+  last_name: string;
+  avatar_url: string;
+  role: TUserRole;
+  /** UUID текущей локации */
+  location_id: string;
+  active: boolean;
+  /** ISO 8601 с таймзоной */
+  created_at: string;
+  /** ISO 8601 с таймзоной */
+  updated_at: string;
+  /** Права доступа (ABAC) */
+  permissions: IEmployeePermissions;
+  /** Организация с подпиской (приходит из /employees/me) */
+  organization: IOrganization;
+}
+
+/** Запрос обновления профиля (PUT /api/v1/employees/me) */
+export interface UpdateEmployeeAccountRequest {
+  first_name: string;
+  last_name: string;
+  avatar_id?: string;
+}
+
+/**
+ * @deprecated Старый тип пользователя — используй IEmployeeDto.
+ * Оставлен для сервисов которые ещё не мигрировали (schedule, getUserByPhone).
+ */
 export interface IUserDto {
+  id?: string;
   active: boolean;
   avatar_url?: string;
-  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
   created_at: string;
-  name: string;
-  network_code: string;
+  first_name: string;
+  last_name?: string;
   phone: string;
-  point_code: string;
   role: TUserRole;
+  organization_id?: string;
+  location_id?: string;
+  can_provide_services?: boolean;
+  can_manage_location_schedule?: boolean;
   schedule: ISchedule[];
-  surname: string;
-  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm). */
   updated_at: string;
+  /** @deprecated используй first_name */
+  name: string;
+  /** @deprecated используй last_name */
+  surname: string;
+  /** @deprecated используй organization_id */
+  network_code?: string;
+  /** @deprecated используй location_id */
+  point_code?: string;
 }
 
 export interface ISchedule {
   all_day: boolean;
-  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm); на бэк шлём с offset. */
+  /** ISO 8601 с таймзоной */
   close: string;
   comment: string;
-  /** С бэка всегда ISO 8601 с таймзоной (Z или ±HH:mm); на бэк шлём с offset. */
+  /** ISO 8601 с таймзоной */
   open: string;
   week_day: number;
 }
 
-export interface UpdateProfileRequest {
+/** @deprecated Используй UpdateEmployeeAccountRequest */
+export interface UpdateAccountRequest {
   avatar_id?: string;
   name: string;
   surname: string;
 }
 
-/** Элемент расписания для PUT /api/v1/users/me/schedule (from/to вместо open/close). */
+/** Элемент расписания для PUT /api/v1/users/me/schedule */
 export interface UpdateScheduleItemRequest {
   week_day: number;
   /** ISO 8601 с offset таймзоны (время суток, опорная дата 1970-01-01). */
@@ -58,6 +149,11 @@ export interface UpdateScheduleItemRequest {
 
 export interface UpdateScheduleRequest {
   schedule: UpdateScheduleItemRequest[];
+}
+
+export interface UserResponse {
+  message?: string;
+  code?: number;
 }
 
 export interface UsersListResponseDto extends UserResponse {

@@ -6,10 +6,10 @@ import { CalendarService } from "../services/calendar-service";
 import { mapCalendarApiResponseToEvents } from "../utils/calendar-api-mapper";
 import { getCalendarDateRange } from "../utils/calendar-date-range";
 import { useCurrentUser } from "./use-users";
-import { useGetStaff } from "./user-staff";
+import { useGetEmployees } from "./user-staff";
 import { EUserRole } from "../types/user";
-import type { IUserDto, TUserRole } from "../types/user";
-import type { GetStaffParams } from "../services/staff-service";
+import type { IEmployeeDto, TUserRole } from "../types/user";
+import type { GetEmployeesParams } from "../services/employee-service";
 import type {
   GetCalendarParams,
   IEvent,
@@ -24,10 +24,10 @@ export interface UseCalendarParams {
   selectedDate: Date;
   /** Вид календаря */
   view: TCalendarView;
-  /** Код точки для фильтрации (для SelfOwner/NetManager) */
-  pointCode?: string;
-  /** Телефон мастера для фильтрации (для Manager и выше) */
-  masterPhone?: string;
+  /** UUID локации для фильтрации (для Owner) */
+  locationId?: string;
+  /** UUID сотрудника для фильтрации (для Manager и выше) */
+  employeeId?: string;
 }
 
 /**
@@ -37,8 +37,8 @@ export interface UseCalendarParams {
 export function useCalendar({
   selectedDate,
   view,
-  pointCode,
-  masterPhone,
+  locationId,
+  employeeId,
 }: UseCalendarParams) {
   // Получаем текущего пользователя для определения роли
   const { data: currentUser } = useCurrentUser();
@@ -53,12 +53,8 @@ export function useCalendar({
   const calendarParams = useMemo<GetCalendarParams | null>(() => {
     if (!currentUser) return null;
 
-    // Для SelfOwner и NetManager точка обязательна - не запрашиваем календарь без точки
-    if (
-      (currentUser.role === EUserRole.SELF_OWNER ||
-        currentUser.role === EUserRole.NET_MANAGER) &&
-      !pointCode
-    ) {
+    // Для Owner точка обязательна
+    if (currentUser.role === EUserRole.OWNER && !locationId) {
       return null;
     }
 
@@ -67,28 +63,29 @@ export function useCalendar({
       to: dateRange.to,
     };
 
-    // Для SelfOwner и NetManager доступен фильтр по точке
-    if (
-      (currentUser.role === EUserRole.SELF_OWNER ||
-        currentUser.role === EUserRole.NET_MANAGER) &&
-      pointCode
-    ) {
-      params.point_code = pointCode;
+    // Для Owner доступен фильтр по точке
+    if (currentUser.role === EUserRole.OWNER && locationId) {
+      params.location_id = locationId;
     }
 
-    // Для Manager и выше доступен фильтр по мастеру
+    // Для Manager — фильтр по точке из профиля
+    if (currentUser.role === EUserRole.MANAGER) {
+      if (currentUser.location_id) {
+        params.location_id = currentUser.location_id;
+      }
+    }
+
+    // Для Manager и Owner доступен фильтр по сотруднику
     if (
       (currentUser.role === EUserRole.MANAGER ||
-        currentUser.role === EUserRole.SELF_OWNER ||
-        currentUser.role === EUserRole.NET_MANAGER ||
-        currentUser.role === EUserRole.ADMIN) &&
-      masterPhone
+        currentUser.role === EUserRole.OWNER) &&
+      employeeId
     ) {
-      params.master_phone = masterPhone;
+      params.employee_id = employeeId;
     }
 
     return params;
-  }, [currentUser, dateRange, pointCode, masterPhone]);
+  }, [currentUser, dateRange, locationId, employeeId]);
 
   // Загружаем данные календаря
   const calendarQuery = useQuery({
@@ -103,70 +100,64 @@ export function useCalendar({
     staleTime: 30 * 1000, // 30 секунд
   });
 
-  // Загружаем список мастеров для обогащения событий
-  // Для Staff - только текущий пользователь, для остальных - все мастера точки/сети
-  const staffParams = useMemo<GetStaffParams | undefined>(() => {
+  // Загружаем список сотрудников для обогащения событий
+  const employeesParams = useMemo<GetEmployeesParams | undefined>(() => {
     if (!currentUser) return undefined;
 
-    // Для Staff - только свои записи, мастера не нужны
+    // Для Staff - только свои записи, сотрудники не нужны
     if (currentUser.role === EUserRole.STAFF) {
       return undefined;
     }
 
-    // Для Manager - мастера точки
+    // Для Manager - сотрудники локации
     if (currentUser.role === EUserRole.MANAGER) {
       return {
-        point_code: currentUser.point_code,
+        location_id: currentUser.location_id,
         role: [EUserRole.STAFF, EUserRole.MANAGER] as TUserRole[],
       };
     }
 
-    // Для SelfOwner/NetManager - мастера выбранной точки или всех точек
-    if (
-      currentUser.role === EUserRole.SELF_OWNER ||
-      currentUser.role === EUserRole.NET_MANAGER
-    ) {
+    // Для Owner - сотрудники выбранной локации или все
+    if (currentUser.role === EUserRole.OWNER) {
       return {
-        ...(pointCode && { point_code: pointCode }),
+        ...(locationId && { location_id: locationId }),
         role: [
           EUserRole.STAFF,
-          EUserRole.SELF_OWNER,
+          EUserRole.OWNER,
           EUserRole.MANAGER,
         ] as TUserRole[],
       };
     }
 
     return undefined;
-  }, [currentUser, pointCode]);
+  }, [currentUser, locationId]);
 
-  // Загружаем список мастеров только для Manager и выше
-  // Для Staff запрос не нужен, так как они видят только свои записи
-  // useGetStaff автоматически отключит запрос, если staffParams === undefined
-  const staffQuery = useGetStaff(staffParams);
+  // Загружаем список сотрудников только для Manager и выше
+  const employeesQuery = useGetEmployees(employeesParams);
 
   // Маппим данные из API в IEvent[]
   const events = useMemo<IEvent[]>(() => {
     if (!calendarQuery.data) return [];
 
     return mapCalendarApiResponseToEvents(calendarQuery.data);
-  }, [calendarQuery.data, staffQuery.data]);
+  }, [calendarQuery.data, employeesQuery.data]);
 
-  // Список мастеров для UI: берём из staff ручки, а для Staff мастер = текущий пользователь
-  const masters = useMemo<IUserDto[]>(() => {
+  // Список мастеров для UI
+  const masters = useMemo<IEmployeeDto[]>(() => {
     if (!currentUser) return [];
     if (currentUser.role === EUserRole.STAFF) return [currentUser];
-    return staffQuery.data?.users ?? [];
-  }, [currentUser, staffQuery.data?.users]);
+    return employeesQuery.data?.employees ?? [];
+  }, [currentUser, employeesQuery.data?.employees]);
 
   return {
     events,
     masters,
-    isLoading: calendarQuery.isLoading || staffQuery.isLoading,
-    isError: calendarQuery.isError || staffQuery.isError,
-    error: calendarQuery.error || staffQuery.error,
+    isLoading: calendarQuery.isLoading || employeesQuery.isLoading,
+    isError: calendarQuery.isError || employeesQuery.isError,
+    error: calendarQuery.error || employeesQuery.error,
     refetch: () => {
       calendarQuery.refetch();
-      staffQuery.refetch();
+      employeesQuery.refetch();
     },
   };
 }

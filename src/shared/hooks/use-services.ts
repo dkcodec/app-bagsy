@@ -4,41 +4,42 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ServiceService,
   type CreateServiceRequestDto,
+  type UpdateServiceRequestDto,
   type IServiceDto,
 } from "../services/service-service";
 
 /**
- * Хук для загрузки списка услуг точки
+ * Хук для загрузки списка услуг локации
  */
-export function usePointServices(pointCode: string | undefined) {
+export function useLocationServices(locationId: string | undefined) {
   return useQuery({
-    queryKey: ["services", "point", pointCode],
+    queryKey: ["services", "location", locationId],
     queryFn: () => {
-      if (!pointCode) {
-        throw new Error("Point code is required");
+      if (!locationId) {
+        throw new Error("Location ID is required");
       }
-      return ServiceService.getPointServices(pointCode);
+      return ServiceService.getLocationServices(locationId);
     },
-    enabled: !!pointCode,
+    enabled: !!locationId,
     staleTime: 2 * 60 * 1000, // 2 минуты - услуги могут меняться чаще
   });
 }
 
 /**
- * Хук для загрузки списка категорий услуг и их подкатегорий
- * Категории кэшируются на 20 минут, так как меняются редко
+ * Хук для загрузки дерева категорий услуг по типу бизнеса
+ * @param locationCategoryId — UUID категории локации
  */
-export function useServiceCategories(pointCode: string | undefined) {
+export function useServiceCategories(locationCategoryId: string | undefined) {
   return useQuery({
-    queryKey: ["serviceCategories", pointCode],
+    queryKey: ["serviceCategories", locationCategoryId],
     queryFn: () => {
-      if (!pointCode) {
-        throw new Error("Point code is required");
+      if (!locationCategoryId) {
+        throw new Error("Location category ID is required");
       }
-      return ServiceService.getServiceCategories(pointCode);
+      return ServiceService.getServiceCategories(locationCategoryId);
     },
-    enabled: !!pointCode,
-    staleTime: 20 * 60 * 1000, // 20 минут - категории меняются редко
+    enabled: !!locationCategoryId,
+    staleTime: 20 * 60 * 1000, // 20 минут — категории меняются редко
   });
 }
 
@@ -54,12 +55,44 @@ export function useCreateService() {
     mutationFn: (data: CreateServiceRequestDto) =>
       ServiceService.createService(data),
     onSuccess: (_, variables) => {
-      // Инвалидируем кэш списка услуг для обновления данных
       queryClient.invalidateQueries({
-        queryKey: ["services", "point", variables.point_code],
+        queryKey: ["services", "location", variables.location_id],
       });
-      // Также инвалидируем все запросы услуг точки (на случай если есть другие запросы)
-      queryClient.invalidateQueries({ queryKey: ["services", "point"] });
+      queryClient.invalidateQueries({ queryKey: ["services", "location"] });
+    },
+  });
+}
+
+/**
+ * Хук для обновления услуги (PUT /api/v1/services/{id})
+ */
+export function useUpdateService() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    void,
+    unknown,
+    { id: string; data: UpdateServiceRequestDto }
+  >({
+    mutationKey: ["services", "update"],
+    mutationFn: ({ id, data }) => ServiceService.updateService(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["services", "location"] });
+    },
+  });
+}
+
+/**
+ * Хук для удаления услуги (DELETE /api/v1/services/{id})
+ */
+export function useDeleteService() {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, unknown, string>({
+    mutationKey: ["services", "delete"],
+    mutationFn: id => ServiceService.deleteService(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["services", "location"] });
     },
   });
 }

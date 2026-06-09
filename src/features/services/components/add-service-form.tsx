@@ -29,22 +29,17 @@ import {
   useServiceCategories,
   useCreateService,
 } from "@/src/shared/hooks/use-services";
+import { useLocation } from "@/src/shared/hooks/use-network-locations";
 import { useEffect, useMemo } from "react";
-import { TEventColor } from "@/src/shared/types/calendar";
-
-// Массив цветов из типа TEventColor для использования в валидации и UI
-const EVENT_COLORS: TEventColor[] = [
-  "blue",
-  "green",
-  "red",
-  "yellow",
-  "purple",
-  "orange",
-  "gray",
-];
+import {
+  EVENT_COLORS,
+  EVENT_COLOR_BG,
+  type TEventColor,
+} from "@/src/shared/types/calendar";
 
 /**
  * Схема валидации для создания услуги
+ * category_id и subcategory_id теперь string (UUID)
  */
 const createAddServiceSchema = (t: (key: string) => string) =>
   z.object({
@@ -54,16 +49,9 @@ const createAddServiceSchema = (t: (key: string) => string) =>
       .max(500, t("errors.descriptionMax"))
       .optional()
       .or(z.literal("")),
-    category_id: z
-      .number(t("errors.categoryIdRequired"))
-      .positive(t("errors.categoryIdRequired"))
-      .int(t("errors.categoryIdRequired")),
+    category_id: z.string().min(1, t("errors.categoryIdRequired")),
     // optional: сбрасывается в undefined при смене категории
-    subcategory_id: z
-      .number(t("errors.subcategoryIdRequired"))
-      .positive(t("errors.subcategoryIdRequired"))
-      .int(t("errors.subcategoryIdRequired"))
-      .optional(),
+    subcategory_id: z.string().optional(),
     duration_minutes: z
       .number(t("errors.durationRequired"))
       .int(t("errors.durationMustBeInteger"))
@@ -78,24 +66,30 @@ type AddServiceFormData = z.infer<ReturnType<typeof createAddServiceSchema>>;
 interface AddServiceFormProps {
   onSuccess?: () => void;
   onCancel?: () => void;
-  pointCode: string | undefined;
+  /** UUID локации — используется для получения category_id локации */
+  locationId: string | undefined;
 }
 
 /**
  * Форма для добавления новой услуги
- * Включает валидацию через zod и компонент выбора категории/подкатегории
+ * Категории услуг загружаются по category_id локации (тип бизнеса)
  */
 export function AddServiceForm({
   onSuccess,
   onCancel,
-  pointCode,
+  locationId,
 }: AddServiceFormProps) {
   const t = useTranslations("Services.addServiceForm");
+
+  // Получаем локацию чтобы узнать category_id (тип бизнеса)
+  const { data: location } = useLocation(locationId);
+  const locationCategoryId = location?.category_id;
+
+  // Категории услуг зависят от типа бизнеса локации
   const { data: categoriesData, isLoading: isLoadingCategories } =
-    useServiceCategories(pointCode);
+    useServiceCategories(locationCategoryId);
   const createServiceMutation = useCreateService();
 
-  // Создаем схему валидации
   const schema = createAddServiceSchema(t);
 
   const form = useForm<AddServiceFormData>({
@@ -103,26 +97,23 @@ export function AddServiceForm({
     defaultValues: {
       name: "",
       description: "",
-      category_id: undefined,
+      category_id: "",
       subcategory_id: undefined,
       duration_minutes: 30,
-      // Дефолтный цвет из типа TEventColor
       color: EVENT_COLORS[0],
     },
   });
 
-  // Отслеживаем выбранную категорию для фильтрации подкатегорий
+  // Отслеживаем выбранную категорию для фильтрации подкатегорий (children)
   const selectedCategoryId = form.watch("category_id");
 
-  // Получаем подкатегории для выбранной категории
+  // Получаем подкатегории (children) для выбранной категории
   const availableSubcategories = useMemo(() => {
-    if (!selectedCategoryId || !categoriesData) {
-      return [];
-    }
+    if (!selectedCategoryId || !categoriesData) return [];
     const category = categoriesData.categories.find(
       c => c.id === selectedCategoryId
     );
-    return category?.subcategories || [];
+    return category?.children || [];
   }, [selectedCategoryId, categoriesData]);
 
   // Сбрасываем подкатегорию при изменении категории
@@ -133,15 +124,8 @@ export function AddServiceForm({
   }, [selectedCategoryId, form]);
 
   const onSubmit = async (data: AddServiceFormData) => {
-    if (!pointCode) {
+    if (!locationId) {
       toast.error(t("errors.pointCodeRequired"));
-      return;
-    }
-    // API требует number; при сбросе категории subcategory_id может быть undefined
-    if (data.subcategory_id == null) {
-      form.setError("subcategory_id", {
-        message: t("errors.subcategoryIdRequired"),
-      });
       return;
     }
 
@@ -149,7 +133,7 @@ export function AddServiceForm({
       await createServiceMutation.mutateAsync({
         name: data.name,
         description: data.description || "",
-        point_code: pointCode,
+        location_id: locationId,
         category_id: data.category_id,
         subcategory_id: data.subcategory_id,
         duration_minutes: data.duration_minutes,
@@ -165,21 +149,11 @@ export function AddServiceForm({
     }
   };
 
-  // Маппинг цветов для UI (только из типа TEventColor)
-  const colorMap: Record<TEventColor, { label: string; bgColor: string }> = {
-    blue: { label: t("colors.blue"), bgColor: "bg-blue-600" },
-    green: { label: t("colors.green"), bgColor: "bg-green-600" },
-    red: { label: t("colors.red"), bgColor: "bg-red-600" },
-    yellow: { label: t("colors.yellow"), bgColor: "bg-yellow-600" },
-    purple: { label: t("colors.purple"), bgColor: "bg-purple-600" },
-    orange: { label: t("colors.orange"), bgColor: "bg-orange-600" },
-    gray: { label: t("colors.gray"), bgColor: "bg-gray-600" },
-  };
-
-  // Цвета для выбора (только из типа TEventColor)
+  // Маппинг цветов для UI — bgColor из EVENT_COLOR_BG, label из i18n
   const colors = EVENT_COLORS.map(color => ({
     value: color,
-    ...colorMap[color],
+    label: t(`colors.${color}`),
+    bgColor: EVENT_COLOR_BG[color],
   }));
 
   return (
@@ -221,7 +195,7 @@ export function AddServiceForm({
                     {...field}
                     onChange={e => {
                       const value = parseInt(e.target.value, 10);
-                      field.onChange(isNaN(value) ? undefined : value);
+                      field.onChange(isNaN(value) ? 0 : value);
                     }}
                     value={field.value || ""}
                   />
@@ -254,7 +228,7 @@ export function AddServiceForm({
 
         {/* Категория и подкатегория */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Категория */}
+          {/* Категория услуги */}
           <FormField
             control={form.control}
             name="category_id"
@@ -266,10 +240,8 @@ export function AddServiceForm({
                     <Skeleton className="h-9 w-full" />
                   ) : (
                     <Select
-                      onValueChange={value =>
-                        field.onChange(parseInt(value, 10))
-                      }
-                      value={field.value?.toString()}
+                      onValueChange={field.onChange}
+                      value={field.value}
                       disabled={createServiceMutation.isPending}
                     >
                       <SelectTrigger>
@@ -277,10 +249,7 @@ export function AddServiceForm({
                       </SelectTrigger>
                       <SelectContent>
                         {categoriesData?.categories.map(category => (
-                          <SelectItem
-                            key={category.id}
-                            value={category.id.toString()}
-                          >
+                          <SelectItem key={category.id} value={category.id}>
                             {category.name}
                           </SelectItem>
                         ))}
@@ -293,7 +262,7 @@ export function AddServiceForm({
             )}
           />
 
-          {/* Подкатегория */}
+          {/* Подкатегория (children) */}
           <FormField
             control={form.control}
             name="subcategory_id"
@@ -305,10 +274,8 @@ export function AddServiceForm({
                     <Skeleton className="h-9 w-full" />
                   ) : (
                     <Select
-                      onValueChange={value =>
-                        field.onChange(parseInt(value, 10))
-                      }
-                      value={field.value?.toString()}
+                      onValueChange={field.onChange}
+                      value={field.value}
                       disabled={
                         createServiceMutation.isPending ||
                         !selectedCategoryId ||
@@ -327,12 +294,9 @@ export function AddServiceForm({
                         />
                       </SelectTrigger>
                       <SelectContent>
-                        {availableSubcategories.map(subcategory => (
-                          <SelectItem
-                            key={subcategory.id}
-                            value={subcategory.id.toString()}
-                          >
-                            {subcategory.name}
+                        {availableSubcategories.map(sub => (
+                          <SelectItem key={sub.id} value={sub.id}>
+                            {sub.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
