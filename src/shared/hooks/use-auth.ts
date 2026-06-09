@@ -16,7 +16,10 @@ import {
 } from "../services/employee-service";
 import { setAuthTokens, clearAuthTokens } from "../utils/cookies";
 import { useCalendarStore } from "@/src/features/calendar/calendar-context/store";
-import { useRouter } from "next/navigation";
+// Локализованный router из next-intl — автоматически добавляет префикс
+// локали в `push("/login")` и т.п. Без него редирект уходил на /login
+// без локали и middleware зацикливался на /login/login.
+import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 

@@ -17,6 +17,7 @@ import {
 } from "@/src/shared/hooks/user-staff";
 import { useCalendar } from "@/src/features/calendar/calendar-context";
 import { toTimestampWithTz } from "@/src/shared/utils/formater";
+import { getApiErrorKey } from "@/src/shared/utils/api-error";
 import { EUserRole, type TUserRole } from "@/src/shared/types/user";
 import {
   createAddAppointmentSchema,
@@ -85,6 +86,8 @@ export function AddEventDrawer({
   const { data: servicesData, isLoading: isLoadingServices } =
     useLocationServices(locationId);
   const t = useTranslations("Dashboard.Calendar.AddEventDialog");
+  // Root-перевод для apiErrors.* (бэк отдаёт стабильные ключи в body.error)
+  const tRoot = useTranslations();
   const createAppointment = useCreateAppointment();
   const isMobile = useIsMobile();
 
@@ -174,8 +177,13 @@ export function AddEventDrawer({
       });
       onOpenChange(false);
       form.reset();
-    } catch {
-      toast.error(t("errorCreating"));
+    } catch (err) {
+      // Расшифровываем backend-ключ (slot_already_occupied, employee_cannot_serve и т.д.)
+      // через apiErrors.*; fallback на общий "errorCreating" если ключа нет
+      const key = getApiErrorKey(err);
+      const msg =
+        key !== "unknown" ? tRoot(`apiErrors.${key}`) : t("errorCreating");
+      toast.error(msg);
     }
   };
 

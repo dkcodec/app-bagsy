@@ -9,8 +9,16 @@ export default function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const segments = pathname.split("/").filter(Boolean);
 
-  const locale = segments[0] || routing.defaultLocale;
-  const second = segments[1] ?? "";
+  // Валидируем локаль: первый сегмент должен быть из списка routing.locales.
+  // Иначе путь без префикса ("/login") интерпретировался как locale="login",
+  // second=undefined → редирект уходил на "/login/login".
+  const firstSeg = segments[0];
+  const isKnownLocale =
+    !!firstSeg && (routing.locales as readonly string[]).includes(firstSeg);
+  const locale = isKnownLocale ? firstSeg : routing.defaultLocale;
+  // Сегменты пути без локали (для определения раздела)
+  const pathSegments = isKnownLocale ? segments.slice(1) : segments;
+  const second = pathSegments[0] ?? "";
   const isLoginPath = second === "login";
   const isInvitePath = second === "invite";
 

@@ -86,7 +86,7 @@ export function LocationDetailView({
     return [street, building, city].filter(Boolean).join(", ");
   }, [location.address]);
 
-  const bookingUrl = `bagsy.kz/appointment/${location.slug}`;
+  const bookingUrl = `${process.env.NEXT_PUBLIC_DOMAIN?.includes("dev") ? "dev." : ""}bagsy.kz/appointment/${location.slug}`;
   const bookingFullUrl = `${process.env.NEXT_PUBLIC_DOMAIN}appointment/${location.slug}`;
 
   // Копирование ссылки

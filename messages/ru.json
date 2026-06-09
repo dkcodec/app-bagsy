@@ -406,6 +406,7 @@
   "Staff": {
     "title": "Сотрудники",
     "tableTitle": "Сотрудники",
+    "permissionsUpdated": "Права сотрудника обновлены",
     "addStaff": "Добавить сотрудника",
     "searchPlaceholder": "Поиск по имени, телефону, роли...",
     "networkCode": "Код сети",
@@ -930,6 +931,129 @@
     "unauthorized": "Сессия истекла, войдите заново",
     "rate_limit": "Слишком много запросов, подождите",
     "internal_error": "Внутренняя ошибка сервера",
-    "unknown": "Произошла ошибка, попробуйте позже"
+    "unknown": "Произошла ошибка, попробуйте позже",
+    "slot_already_occupied": "Это время уже занято — выберите другой слот",
+    "slot_not_available": "Этот слот недоступен для записи",
+    "appointment_is_final": "Запись уже завершена или отменена — её нельзя изменить",
+    "invalid_status_transition": "Недопустимое изменение статуса записи",
+    "cannot_schedule_in_past": "Нельзя записаться на прошедшее время",
+    "cannot_book_self": "Нельзя записать самого себя",
+    "calendar_range_too_large": "Слишком большой период — выберите интервал до 35 дней",
+    "invalid_time_range": "Некорректный временной интервал",
+    "location_not_found": "Локация не найдена",
+    "location_inactive": "Локация деактивирована",
+    "service_not_found": "Услуга не найдена",
+    "service_inactive": "Услуга деактивирована",
+    "employee_not_found": "Сотрудник не найден",
+    "employee_inactive": "Сотрудник деактивирован",
+    "employee_cannot_serve": "Этот мастер не оказывает выбранную услугу",
+    "employee_service_not_found": "Услуга мастера не найдена",
+    "organization_suspended": "Подписка организации приостановлена — обновите тариф для продолжения"
+  },
+  "Analytics": {
+    "title": "Аналитика",
+    "empty": "Нет данных за выбранный период",
+    "prevPeriod": "Прошлый",
+    "exportCsv": "Экспорт CSV",
+    "accessDenied": "У вас нет доступа к этому разделу",
+    "accessDeniedDescription": "Раздел доступен владельцам и менеджерам. Обратитесь к администратору, если считаете это ошибкой.",
+    "staffNotice": "Вы видите только свою личную аналитику",
+    "tabs": {
+      "overview": "Обзор",
+      "me": "Моя аналитика",
+      "staff": "Мастера",
+      "locations": "Локации",
+      "finance": "Финансы",
+      "clients": "Клиенты"
+    },
+    "period": {
+      "today": "Сегодня",
+      "week": "7 дней",
+      "month": "Месяц",
+      "quarter": "Квартал",
+      "custom": "Период",
+      "apply": "Применить",
+      "cancel": "Отмена"
+    },
+    "kpi": {
+      "revenue": "Выручка",
+      "bookings": "Записи",
+      "clients": "Клиенты",
+      "avgCheck": "Средний чек",
+      "load": "Загрузка",
+      "cancellations": "Отмены"
+    },
+    "charts": {
+      "revenueByDay": "Выручка по дням",
+      "topEmployees": "Топ мастеров",
+      "topServices": "Топ услуг",
+      "funnel": "Воронка записей",
+      "heatmap": "Загрузка по дням и часам",
+      "segments": "Распределение по сегментам",
+      "retention": "Возвращаемость (Retention)"
+    },
+    "funnel": {
+      "created": "Создано",
+      "confirmed": "Подтверждено",
+      "completed": "Состоялось"
+    },
+    "segments": {
+      "new": "Новые",
+      "growing": "Развивающиеся",
+      "regular": "Постоянные",
+      "vip": "VIP",
+      "sleeping": "Спящие",
+      "lost": "Потерянные"
+    },
+    "insights": {
+      "saturdayLoad": "Суббота загружена на {percent}% — рассмотрите найм ещё одного мастера, чтобы не терять клиентов в пиковые часы.",
+      "revenueDrop": "Выручка снизилась на {percent}% vs предыдущий период. Проверьте отмены и расписание мастеров.",
+      "topServiceShare": "«{name}» приносит {percent}% всей выручки. Продвигайте эту услугу активнее.",
+      "retentionFirst": "Критично удержать клиента после первого визита. Рассмотрите скидку 10% на повторный визит."
+    },
+    "staff": {
+      "weekdayLoad": "Загрузка мастеров по дням недели",
+      "hourlyLoad": "Загрузка по часам",
+      "columns": {
+        "name": "Мастер",
+        "revenue": "Выручка",
+        "bookings": "Записей",
+        "avgCheck": "Ср. чек",
+        "load": "Загрузка",
+        "cancellations": "Отмены",
+        "rating": "Рейтинг"
+      }
+    },
+    "finance": {
+      "title": "Финансовый отчёт",
+      "metric": "Показатель",
+      "amount": "Сумма",
+      "revenue": "Выручка",
+      "services": "Услуги",
+      "products": "Продажа товаров",
+      "revenueTotal": "Итого выручка",
+      "payroll": "Зарплаты",
+      "payrollTotal": "Итого зарплаты",
+      "ofServices": "от услуг",
+      "gross": "Валовая прибыль",
+      "margin": "Маржа",
+      "comingSoon": "скоро",
+      "print": "Печать"
+    },
+    "clients": {
+      "beta": "Beta",
+      "totalInBase": "Всего в базе",
+      "new": "Новых",
+      "returning": "Вернувшихся",
+      "lost": "Потеряно",
+      "breakdownTitle": "Новые vs повторные",
+      "retentionAfter": "После {n}-го визита вернулись",
+      "cohorts": "Когорты новых клиентов",
+      "active": "активны",
+      "newCount": "новых"
+    },
+    "locations": {
+      "title": "Локация {id}"
+    }
   }
 }

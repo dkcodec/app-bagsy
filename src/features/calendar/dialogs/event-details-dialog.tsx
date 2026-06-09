@@ -9,6 +9,7 @@ import { Button } from "@/src/entities/button";
 import { Input } from "@/src/entities/input";
 import { useCalendar } from "@/src/features/calendar";
 import { useCancelAppointment } from "@/src/shared/hooks/use-appointments";
+import { getApiErrorKey } from "@/src/shared/utils/api-error";
 import {
   Dialog,
   DialogContent,
@@ -32,6 +33,8 @@ export function EventDetailsDialog({ event, children }: IProps) {
   const endDate = parseISO(event.endDate);
   const master = masters.find(m => m.id === event.employeeId) ?? null;
   const t = useTranslations("Dashboard.Calendar.EventDetailsDialog");
+  // Root-перевод для apiErrors.* (бэк отдаёт стабильные ключи в body.error)
+  const tRoot = useTranslations();
 
   // Состояние для отмены записи
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
@@ -47,8 +50,13 @@ export function EventDetailsDialog({ event, children }: IProps) {
           setShowCancelConfirm(false);
           setCancelReason("");
         },
-        onError: () => {
-          toast.error(t("cancelError"));
+        onError: err => {
+          // Расшифровываем backend-ключ (appointment_is_final, permission_denied,
+          // invalid_status_transition и т.д.); fallback — общий "cancelError"
+          const key = getApiErrorKey(err);
+          const msg =
+            key !== "unknown" ? tRoot(`apiErrors.${key}`) : t("cancelError");
+          toast.error(msg);
         },
       }
     );

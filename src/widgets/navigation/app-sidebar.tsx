@@ -71,11 +71,13 @@ const navData: { navMain: NavItem[] } = {
       icon: BriefcaseBusiness,
       allowedRoles: [EUserRole.OWNER, EUserRole.MANAGER],
     },
-    // {
-    //   name: "analytics",
-    //   url: "/analytics",
-    //   icon: ChartSpline,
-    // },
+    {
+      name: "analytics",
+      url: "/analytics",
+      icon: ChartSpline,
+      // Доступ внутри определяется ролью+планом (см. getAnalyticsAccess).
+      // Staff и Solo Owner редиректятся на /analytics/me автоматически.
+    },
   ],
 };
 
