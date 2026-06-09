@@ -34,11 +34,11 @@
 
 Бэк **сам** вычисляет предыдущий период по `from/to`:
 
-| Длительность текущего периода         | Сравнение с                                  |
-| ------------------------------------- | -------------------------------------------- |
-| 1 день (`from == to`)                 | Вчера (`from - 1 day`)                       |
+| Длительность текущего периода         | Сравнение с                                     |
+| ------------------------------------- | ----------------------------------------------- |
+| 1 день (`from == to`)                 | Вчера (`from - 1 day`)                          |
 | Месяц с 1-го числа по сегодня (MTD)\* | MTD прошлого месяца (1-е прошлого — та же дата) |
-| Любая другая длительность N           | Equal-length: N дней до `from`               |
+| Любая другая длительность N           | Equal-length: N дней до `from`                  |
 
 \* Определяется так: `from` = 1-е число месяца И (`to` — последний день того же месяца ИЛИ `to` — сегодня).
 
@@ -60,17 +60,17 @@ type KpiValue = {
 
 // Точка временного ряда (день)
 type DailyPoint = {
-  date: string;     // YYYY-MM-DD
-  value: number;    // текущий период
+  date: string; // YYYY-MM-DD
+  value: number; // текущий период
   prev_value: number; // тот же индекс в прошлом периоде
 };
 
 // Топ-N сущности (мастер / услуга)
 type TopItem = {
-  id: string;       // UUID
+  id: string; // UUID
   name: string;
-  revenue: number;  // выручка за период
-  share: number;    // доля 0..1 от общей выручки
+  revenue: number; // выручка за период
+  share: number; // доля 0..1 от общей выручки
 };
 
 // Этап воронки записей
@@ -82,14 +82,14 @@ type FunnelStage = {
 
 // Ячейка heatmap (день недели × час)
 type HeatmapCell = {
-  weekday: number;  // 0..6, Пн = 0
-  hour: number;     // 0..23
-  value: number;    // 0..1 — нагрузка
+  weekday: number; // 0..6, Пн = 0
+  hour: number; // 0..23
+  value: number; // 0..1 — нагрузка
 };
 
 // Авто-инсайт (стабильный ключ + параметры для i18n)
 type Insight = {
-  key: string;      // напр. "saturdayLoad", "revenueDrop"
+  key: string; // напр. "saturdayLoad", "revenueDrop"
   level: "info" | "warning" | "success";
   params?: Record<string, string | number>;
 };
@@ -97,12 +97,12 @@ type Insight = {
 
 Стабильные ключи инсайтов (фронт мапит на переводы):
 
-| Key                | Уровень   | Параметры          | Условие                                                |
-| ------------------ | --------- | ------------------ | ------------------------------------------------------ |
-| `saturdayLoad`     | `info`    | `{ percent }`      | Загрузка субботы > 90% от max                          |
-| `revenueDrop`      | `warning` | `{ percent }`      | Падение выручки vs пред. период > 5%                   |
-| `topServiceShare`  | `success` | `{ name, percent }`| Доля топ-услуги в выручке > 25%                        |
-| `retentionFirst`   | `info`    | —                  | Retention после 1-го визита < 70% (на странице clients)|
+| Key               | Уровень   | Параметры           | Условие                                                 |
+| ----------------- | --------- | ------------------- | ------------------------------------------------------- |
+| `saturdayLoad`    | `info`    | `{ percent }`       | Загрузка субботы > 90% от max                           |
+| `revenueDrop`     | `warning` | `{ percent }`       | Падение выручки vs пред. период > 5%                    |
+| `topServiceShare` | `success` | `{ name, percent }` | Доля топ-услуги в выручке > 25%                         |
+| `retentionFirst`  | `info`    | —                   | Retention после 1-го визита < 70% (на странице clients) |
 
 > Бэк может вернуть пустой массив инсайтов. Фронт умеет это обрабатывать.
 
@@ -412,19 +412,19 @@ from, to, location_id?
 ```ts
 {
   revenue: {
-    services: number;  // выручка от услуг
-    products: number;  // выручка от товаров (пока 0, до релиза модуля)
-    total: number;     // services + products
-  };
+    services: number; // выручка от услуг
+    products: number; // выручка от товаров (пока 0, до релиза модуля)
+    total: number; // services + products
+  }
   payroll: Array<{
     employee_id: string;
     full_name: string;
-    commission_percent: number;  // 0..100
-    amount: number;              // сумма к выплате
+    commission_percent: number; // 0..100
+    amount: number; // сумма к выплате
   }>;
   payroll_total: number;
-  gross_profit: number;          // total - payroll_total
-  margin_percent: number;        // gross_profit / total * 100
+  gross_profit: number; // total - payroll_total
+  margin_percent: number; // gross_profit / total * 100
 }
 ```
 
@@ -492,14 +492,14 @@ from, to, location_id?
 
 ### Определение сегментов (можно тюнить)
 
-| Сегмент    | Условие                                                     |
-| ---------- | ----------------------------------------------------------- |
-| `new`      | Первый визит когда-либо в последние 30 дней                  |
-| `growing`  | 2-3 визита всего, последний < 60 дней назад                 |
-| `regular`  | 4+ визитов, последний < 60 дней назад                       |
-| `vip`      | 4+ визитов И средний чек выше 75-й перцентили организации   |
-| `sleeping` | Последний визит 60..180 дней назад                          |
-| `lost`     | Последний визит > 180 дней назад                            |
+| Сегмент    | Условие                                                   |
+| ---------- | --------------------------------------------------------- |
+| `new`      | Первый визит когда-либо в последние 30 дней               |
+| `growing`  | 2-3 визита всего, последний < 60 дней назад               |
+| `regular`  | 4+ визитов, последний < 60 дней назад                     |
+| `vip`      | 4+ визитов И средний чек выше 75-й перцентили организации |
+| `sleeping` | Последний визит 60..180 дней назад                        |
+| `lost`     | Последний визит > 180 дней назад                          |
 
 Точные пороги обсудим — можем хранить их как настройки организации.
 

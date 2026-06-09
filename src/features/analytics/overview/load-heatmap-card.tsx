@@ -18,26 +18,28 @@ import { cn } from "@/src/shared/utils/styles";
 const WEEKDAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 
 /**
- * Heatmap нагрузки 7×N часов.
+ * Фиксированная сетка рабочих часов 9..21 (13 ячеек). Бэк отдаёт только часы
+ * с активностью — отсутствующие ячейки дорисовываются как пустые (value=0),
+ * чтобы у пользователя всегда был полный обзор дня и стабильный layout.
+ */
+const WORKING_HOURS = Array.from({ length: 13 }, (_, i) => 9 + i);
+
+/**
+ * Heatmap нагрузки 7 дней × 13 часов (9..21).
  * Интенсивность цвета по value (0..1) через brand accent с прозрачностью.
  */
 export function LoadHeatmapCard({ cells }: { cells: IHeatmapCell[] }) {
   const t = useTranslations("Analytics");
   const tDays = useTranslations("Dashboard.Settings"); // переиспользуем mon/tue/.../sun
 
-  // Группируем ячейки в матрицу [weekday][hour]
-  const { hours, byKey } = useMemo(() => {
-    const hSet = new Set<number>();
+  // Карта (weekday-hour → value). Отсутствующие ключи возвращают 0 при доступе.
+  const byKey = useMemo(() => {
     const map = new Map<string, number>();
-    cells.forEach(c => {
-      hSet.add(c.hour);
-      map.set(`${c.weekday}-${c.hour}`, c.value);
-    });
-    return {
-      hours: [...hSet].sort((a, b) => a - b),
-      byKey: map,
-    };
+    cells.forEach(c => map.set(`${c.weekday}-${c.hour}`, c.value));
+    return map;
   }, [cells]);
+
+  const hours = WORKING_HOURS;
 
   return (
     <Card>
@@ -52,6 +54,8 @@ export function LoadHeatmapCard({ cells }: { cells: IHeatmapCell[] }) {
           <div
             className="grid gap-1"
             style={{
+              // Фикс 13 часов: колонки равномерно делят ширину карточки,
+              // никаких разрастаний от 2-3 пришедших часов.
               gridTemplateColumns: `auto repeat(${hours.length}, minmax(0, 1fr))`,
             }}
           >
@@ -106,9 +110,11 @@ function FragmentRow({
         return (
           <Tooltip key={h}>
             <TooltipTrigger asChild>
+              {/* Фиксированная высота h-6 — без aspect-square, чтобы при узких
+                  колонках на мобиле ячейки не схлопывались по высоте. */}
               <div
                 className={cn(
-                  "aspect-square rounded-sm motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-50"
+                  "h-6 w-full rounded-sm motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-50"
                 )}
                 style={{
                   backgroundColor: `hsl(var(--accent) / ${opacity})`,

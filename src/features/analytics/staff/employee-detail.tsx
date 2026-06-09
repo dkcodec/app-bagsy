@@ -71,13 +71,22 @@ export function EmployeeDetail({ employeeId }: { employeeId: string }) {
   );
 }
 
-/** Простой бар-чарт нагрузки по часам — без recharts ради скорости. */
+/** Рабочие часы: фикс 9..21, отсутствующие у мастера часы дорисовываются пустыми. */
+const HOURLY_LOAD_HOURS = Array.from({ length: 13 }, (_, i) => 9 + i);
+
+/**
+ * Бар-чарт нагрузки по часам — без recharts ради скорости.
+ * Бэк отдаёт только часы записей мастера; недостающие дорисовываем как пустые
+ * столбики, чтобы у пользователя был полный обзор рабочего дня.
+ */
 function HourlyLoadCard({
   hours,
 }: {
   hours: Array<{ hour: number; value: number }>;
 }) {
   const t = useTranslations("Analytics.staff");
+  // Map (hour → value) для быстрого доступа; отсутствующие → 0
+  const byHour = new Map(hours.map(h => [h.hour, h.value]));
   return (
     <Card>
       <CardHeader>
@@ -85,26 +94,31 @@ function HourlyLoadCard({
       </CardHeader>
       <CardContent>
         <div className="flex items-end gap-1 h-32">
-          {hours.map((h, i) => (
-            <div
-              key={h.hour}
-              className="flex-1 flex flex-col items-center gap-1"
-            >
-              <div className="flex-1 w-full flex items-end">
-                <div
-                  className="w-full rounded-sm motion-safe:transition-[height] motion-safe:duration-700"
-                  style={{
-                    height: `${h.value * 100}%`,
-                    backgroundColor: `hsl(var(--accent) / ${0.4 + h.value * 0.6})`,
-                    transitionDelay: `${i * 30}ms`,
-                  }}
-                />
+          {HOURLY_LOAD_HOURS.map((hour, i) => {
+            const value = byHour.get(hour) ?? 0;
+            return (
+              <div
+                key={hour}
+                className="flex-1 flex flex-col items-center gap-1"
+              >
+                <div className="flex-1 w-full flex items-end">
+                  <div
+                    className="w-full rounded-sm motion-safe:transition-[height] motion-safe:duration-700"
+                    style={{
+                      // min-height чтобы пустые часы тоже было видно (тонкая
+                      // полоска — "слот существует, но нагрузки нет")
+                      height: `${Math.max(value * 100, 4)}%`,
+                      backgroundColor: `hsl(var(--accent) / ${0.15 + value * 0.7})`,
+                      transitionDelay: `${i * 30}ms`,
+                    }}
+                  />
+                </div>
+                <span className="text-[10px] text-muted-foreground">
+                  {hour}
+                </span>
               </div>
-              <span className="text-[10px] text-muted-foreground">
-                {h.hour}
-              </span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </CardContent>
     </Card>

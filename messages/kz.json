@@ -403,6 +403,7 @@
     }
   },
   "Staff": {
+    "permissionsUpdated": "Қызметкердің құқықтары жаңартылды",
     "title": "Жұмысшылар",
     "tableTitle": "Жұмысшылар",
     "addStaff": "Жұмысшы қосу",
@@ -930,7 +931,24 @@
     "unauthorized": "Сессия аяқталды, қайта кіріңіз",
     "rate_limit": "Сұраныстар тым көп, күте тұрыңыз",
     "internal_error": "Сервердің ішкі қатесі",
-    "unknown": "Қате орын алды, кейінірек қайталаңыз"
+    "unknown": "Қате орын алды, кейінірек қайталаңыз",
+    "slot_already_occupied": "Бұл уақыт бос емес — басқа слотты таңдаңыз",
+    "slot_not_available": "Бұл слот жазылуға қолжетімсіз",
+    "appointment_is_final": "Жазба аяқталған немесе бас тартылған — оны өзгерту мүмкін емес",
+    "invalid_status_transition": "Жазба мәртебесін мұндай өзгертуге болмайды",
+    "cannot_schedule_in_past": "Өткен уақытқа жазылу мүмкін емес",
+    "cannot_book_self": "Өзіңізді жаза алмайсыз",
+    "calendar_range_too_large": "Кезең тым үлкен — 35 күнге дейінгі аралықты таңдаңыз",
+    "invalid_time_range": "Уақыт аралығы дұрыс емес",
+    "location_not_found": "Локация табылмады",
+    "location_inactive": "Локация белсенді емес",
+    "service_not_found": "Қызмет табылмады",
+    "service_inactive": "Қызмет белсенді емес",
+    "employee_not_found": "Қызметкер табылмады",
+    "employee_inactive": "Қызметкер белсенді емес",
+    "employee_cannot_serve": "Бұл шебер таңдалған қызметті көрсетпейді",
+    "employee_service_not_found": "Шебердің қызметі табылмады",
+    "organization_suspended": "Ұйымның жазылымы тоқтатылған — жалғастыру үшін тарифті жаңартыңыз"
   },
   "Analytics": {
     "title": "Аналитика",

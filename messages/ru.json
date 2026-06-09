@@ -406,6 +406,7 @@
   "Staff": {
     "title": "Сотрудники",
     "tableTitle": "Сотрудники",
+    "permissionsUpdated": "Права сотрудника обновлены",
     "addStaff": "Добавить сотрудника",
     "searchPlaceholder": "Поиск по имени, телефону, роли...",
     "networkCode": "Код сети",
@@ -930,7 +931,24 @@
     "unauthorized": "Сессия истекла, войдите заново",
     "rate_limit": "Слишком много запросов, подождите",
     "internal_error": "Внутренняя ошибка сервера",
-    "unknown": "Произошла ошибка, попробуйте позже"
+    "unknown": "Произошла ошибка, попробуйте позже",
+    "slot_already_occupied": "Это время уже занято — выберите другой слот",
+    "slot_not_available": "Этот слот недоступен для записи",
+    "appointment_is_final": "Запись уже завершена или отменена — её нельзя изменить",
+    "invalid_status_transition": "Недопустимое изменение статуса записи",
+    "cannot_schedule_in_past": "Нельзя записаться на прошедшее время",
+    "cannot_book_self": "Нельзя записать самого себя",
+    "calendar_range_too_large": "Слишком большой период — выберите интервал до 35 дней",
+    "invalid_time_range": "Некорректный временной интервал",
+    "location_not_found": "Локация не найдена",
+    "location_inactive": "Локация деактивирована",
+    "service_not_found": "Услуга не найдена",
+    "service_inactive": "Услуга деактивирована",
+    "employee_not_found": "Сотрудник не найден",
+    "employee_inactive": "Сотрудник деактивирован",
+    "employee_cannot_serve": "Этот мастер не оказывает выбранную услугу",
+    "employee_service_not_found": "Услуга мастера не найдена",
+    "organization_suspended": "Подписка организации приостановлена — обновите тариф для продолжения"
   },
   "Analytics": {
     "title": "Аналитика",

@@ -7,6 +7,7 @@
 ## Зачем
 
 Владельцы салонов уходят к YCLIENTS без аналитики. Им нужно видеть:
+
 - Сколько заработали за период
 - Кто лучший мастер, какая услуга прибыльнее
 - Тренды (растём или падаем)
@@ -14,17 +15,18 @@
 
 ## Доступ — матрица «роль × план»
 
-| План      | Роль       | Доступно                                                                                |
-| --------- | ---------- | --------------------------------------------------------------------------------------- |
-| `solo`    | Owner      | Только `/analytics/me` — он же и мастер, и владелец. Топ-мастеров скрыт.                |
-| `point`   | Staff      | Только `/analytics/me`. Никакого доступа к чужой аналитике, финансам, клиентам.         |
-| `point`   | Manager    | Все табы по своей локации: overview, staff, finance, clients + drill-down любого мастера. |
-| `point`   | Owner      | То же, что Point Manager.                                                               |
-| `network` | Staff      | Только `/analytics/me`.                                                                 |
-| `network` | Manager    | Все табы по своей локации (как Point Manager).                                          |
-| `network` | Owner      | Всё, что Manager + сводка по всем точкам + drill-down `/analytics/locations/[id]` + таб «Локации». |
+| План      | Роль    | Доступно                                                                                           |
+| --------- | ------- | -------------------------------------------------------------------------------------------------- |
+| `solo`    | Owner   | Только `/analytics/me` — он же и мастер, и владелец. Топ-мастеров скрыт.                           |
+| `point`   | Staff   | Только `/analytics/me`. Никакого доступа к чужой аналитике, финансам, клиентам.                    |
+| `point`   | Manager | Все табы по своей локации: overview, staff, finance, clients + drill-down любого мастера.          |
+| `point`   | Owner   | То же, что Point Manager.                                                                          |
+| `network` | Staff   | Только `/analytics/me`.                                                                            |
+| `network` | Manager | Все табы по своей локации (как Point Manager).                                                     |
+| `network` | Owner   | Всё, что Manager + сводка по всем точкам + drill-down `/analytics/locations/[id]` + таб «Локации». |
 
 Реализовано чистой функцией `getAnalyticsAccess(user)` в `src/features/analytics/utils/access.ts`. Это единственный источник правды для:
+
 - табов в шапке (`AnalyticsHeader.allowedTabs`)
 - smart-redirect с `/analytics` на `/analytics/me` для Staff/Solo Owner
 - гарда `<AnalyticsGuard requires="..." />` на каждой странице
@@ -162,6 +164,7 @@ KPI мастера, revenue по дням, топ его услуг, нагру�
 Период сравнения (для delta KPI) в URL **не хранится** — бэк сам вычисляет по правилам пресета (см. `ANALYTICS_API_SPEC.md`).
 
 Пресеты:
+
 - Сегодня
 - 7 дней (последние 7 включая сегодня)
 - Месяц (MTD: с 1-го по сегодня)
@@ -169,6 +172,7 @@ KPI мастера, revenue по дням, топ его услуг, нагру�
 - Период (custom через popover-календарь)
 
 PeriodPicker (`components/period-picker.tsx`):
+
 - На мобиле — 1 месяц в календаре + `align="start"` + `collisionPadding`
 - На десктопе — 2 месяца рядом + `align="end"`
 - Кнопка «Применить» (изменения не уходят наверх до клика) и «Отмена»
@@ -184,6 +188,7 @@ PeriodPicker (`components/period-picker.tsx`):
 ### Палитра (только токены темы — никаких хардкодов)
 
 CSS-переменные из `src/styles/shadcn.css`:
+
 - `--accent` (35.65 100% 62%, оранжевый бренд) — основная линия графиков
 - `--color-accent-50..950` — градиент для прогресс-баров топ-листов
 - `--chart-1..5` — серии чартов
@@ -210,6 +215,7 @@ CSS-переменные из `src/styles/shadcn.css`:
 ## i18n
 
 Все строки в `messages/{ru,kz}.json` под ключом `Analytics.*`:
+
 - `tabs.*`, `period.*`, `kpi.*`, `charts.*`, `funnel.*`, `segments.*`
 - `insights.*` — поддержка ICU-подстановок (`{name}`, `{percent}`, `{n}`)
 - `staff.columns.*`, `finance.*`, `clients.*`
@@ -242,12 +248,14 @@ CSS-переменные из `src/styles/shadcn.css`:
 ## Тестирование (TODO когда появится бэк)
 
 Юнит-тесты на:
+
 - `getAnalyticsAccess` для всех 9 комбинаций (role × plan)
 - `getPresetRange` и `ymdFromDate` (граничные случаи: TZ +5, 31-е число → февраль)
 - `parsePeriodFromSearch` (валидация YYYY-MM-DD, fallback)
 - `useCountUp` с `prefers-reduced-motion`
 
 E2E-сценарий:
+
 1. Войти под `staff` → проверить редирект `/analytics` → `/analytics/me`
 2. Прямой URL `/analytics/staff` под `staff` → `AccessDenied`
 3. Смена периода через picker → обновление URL и данных
